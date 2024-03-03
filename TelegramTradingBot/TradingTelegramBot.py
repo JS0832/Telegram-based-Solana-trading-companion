@@ -128,9 +128,6 @@ async def activate_bot(message):
         await bot.send_message(user_id, "Sorry,You dont have a active subscription,please use our subscription bot to"
                                         "activate a subscription plan")
 
-        # elif if response_value[0] == "trigger_buy":
-        # elif if response_value[0] == "trigger_sell":
-
 
 @bot.callback_query_handler(func=lambda query: query.data == "info")
 async def info(callback_query: types.CallbackQuery):
@@ -215,7 +212,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
 
 
 # trading settings clone (till i figure out how to not delete the buy notification
-@bot.callback_query_handler(func=lambda query: query.data == "trading_settings2")
+@bot.callback_query_handler(func=lambda query: query.data == "trading_settings2") #here i need to add wallet balance check ,current wallet adress and spl token balances too
 async def help_func_callback(callback_query: types.CallbackQuery):
     await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
     # here display current settings:
@@ -233,12 +230,17 @@ async def help_func_callback(callback_query: types.CallbackQuery):
     ping_tokens_to_lp = str(temp[2])
     ping_risk_level = str(temp[3])
     lch = str(temp[4])
+
+    #wallet stuff:
+    wallet_address = str(user_settings[1])
+    sol_balance =
+    spl_balance_list = #[[spl_name,ui_amount]]......
     help_markup2 = types.InlineKeyboardMarkup(row_width=6)
     auto_buy = types.InlineKeyboardButton("Auto Buy", callback_data="AB_SETTINGS")
     auto_sell = types.InlineKeyboardButton("Auto Sell", callback_data="AS_SETTINGS")
     sell_w_dev_settings = types.InlineKeyboardButton("sell with dev", callback_data="SWD_SETTINGS")
     customise_pings = types.InlineKeyboardButton("customise pings", callback_data="PING_SETTINGS")
-    reset_default = types.InlineKeyboardButton("Reset to defaults", callback_data="default_config")  # giving problmes
+    reset_default = types.InlineKeyboardButton("Reset to defaults", callback_data="default_config")  # giving problems
     funds = types.InlineKeyboardButton("Configure Funding", callback_data="funds_config")
     hide_trading_settings = types.InlineKeyboardButton("Hide Settings", callback_data="hide")
     help_markup2.add(funds, auto_buy, auto_sell, sell_w_dev_settings, customise_pings, reset_default,
@@ -249,7 +251,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                                user_settings[5])}*\n\n__Ping Settings:__\n\n🎉 Initial "
                            f"Liquidity : {ping_inital_liquidty}\n🔥 Liquidity Burned : {ping_liquidty_burned}\n🌊"
                            f"Tokens sent to LP : {ping_tokens_to_lp}\n🩸 Risk Level : {ping_risk_level}\n🐋 Largest "
-                           f"Cumulative holder : < {lch}"
+                           f"Cumulative holder : < {lch}\n👝 Wallet Information : \n📍 Address : *{wallet_address}*"
                            f"\n\n__Select the setting you wish to"
                            f" modify:__", reply_markup=help_markup2, parse_mode='MarkdownV2')
 
@@ -954,9 +956,11 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             # check user trading settings
             all_settings = trading_db.return_all_settings(user_id)
             sol_amount = float(str(all_settings[3]))
-            slippage = 1  # for now
+            slippage = float(str(all_settings[12]))
             result = str(await buy_jupiter.buy_token(token_ca, sol_amount, slippage))
             await bot.send_message(chat_id=callback_query.from_user.id, text=f"Token Purchased tx:\n{result}")
+        elif response_value.split()[0] == "trigger_sell":
+            pass
 
 
 def subscription():
