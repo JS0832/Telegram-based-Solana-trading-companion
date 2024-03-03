@@ -1,0 +1,1 @@
+userid, referred user id,referred wallet,.....repeated each time the person referred gets 5% discount and the referrer gets 5% comission so 0.4 = 0.36(for us) + 0.02 less pay for eprosn referred and 0.02 comission

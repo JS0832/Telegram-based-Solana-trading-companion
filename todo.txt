@@ -1,0 +1,22 @@
+add  lp check
+fix telegram messages - completed
+fix buy bot using jupiter api -completed
+create a hash of the json file to quickly check if it's been updates which will speed up polling
+place candidates in a buffer and add more if the website is added and matches the confluence -competed
+check how often the jupiter file is updated as it may take some time for the token to appear on jupiter (important)
+tokens seem to be updates in baths every 20-30 min on jupiter which is a little slow but can still let us buy early
+check metadata further using solscan api
+add wallet balance checker to check if its able to purchase another token
+
+
+what i noticed is that jupiter has a lag with adding logo uri so when a token doesn't have a logo uri (do not add it to the list of visited tokens as those tokens could be moon coins(URGENT)
+
+
+might delete the token file or re design the code as no matter if the token was a mooner or not we dont want to trigger the bot for this token if it was already released ( might still keep the file for the list of pas mooners for back testing )
+
+
+readng the jupiter api website initally is fine but inside the loop im not sure yet(important)
+
+break even after it goes above 120% from entry
+
+check for liquidy pairs (orca)
