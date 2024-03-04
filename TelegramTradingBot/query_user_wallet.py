@@ -1,13 +1,6 @@
 from helius import BalancesAPI
 
 balances_api = BalancesAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
-solscan_header = {
-    'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
-             '.eyJjcmVhdGVkQXQiOjE3MDY3NTM5ODAzOTQsImVtYWlsIjoic29sYmFieTMyNUBnbWFpbC5jb20iLCJhY3Rpb24iOiJ0b2tlbi1hcGkiLCJpYXQiOjE3MDY3NTM5ODB9.Lp77APFLV-rOnNbDzc1ob43Vp-9-KpeMe_b-fiOQrr0',
-    'accept': 'application/json',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                  'Chrome/89.0.4389.82 Safari/537.36'
-}
 
 
 def return_token_balances(wallet_address):  # up to 25 addresses return a string
@@ -32,6 +25,7 @@ def return_token_balances(wallet_address):  # up to 25 addresses return a string
 
 
 def return_specific_balance(spl_token, wallet_address):
+    print(wallet_address)
     spl_balances = balances_api.get_balances(wallet_address)
     tokens = spl_balances["tokens"]
     for token in tokens:
