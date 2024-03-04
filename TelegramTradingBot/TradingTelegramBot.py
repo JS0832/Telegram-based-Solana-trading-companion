@@ -7,6 +7,7 @@ import new_bot
 import query_token
 import check_advanced_rug
 import buy_jupiter
+import query_user_wallet
 
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
@@ -79,8 +80,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                         if full_configuration[4] == "ON":
                             slippage = float(full_configuration[12])
                             sol_amount = float(full_configuration[3])
-                            buyer_id = user[0]
-                            await auto_buy_for_user(token_ca, slippage, sol_amount, buyer_id)
+                            ekey = full_configuration[2]
+                            await auto_buy_for_user(token_ca, slippage, sol_amount, ekey)
                             # maybe place on some queue idk how to approach this issue
                         await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token : `{token_ca}`\n\n😈 SAFU "
                                                                           f"Parameters:"
@@ -190,6 +191,9 @@ async def help_func_callback(callback_query: types.CallbackQuery):
     ping_tokens_to_lp = str(temp[2])
     ping_risk_level = str(temp[3])
     lch = str(temp[4])
+    # wallet stuff:
+    wallet_address = str(user_settings[1])
+    balances_string = query_user_wallet.return_token_balances(wallet_address)
     help_markup = types.InlineKeyboardMarkup(row_width=6)
     auto_buy = types.InlineKeyboardButton("Auto Buy", callback_data="AB_SETTINGS")
     auto_sell = types.InlineKeyboardButton("Auto Sell", callback_data="AS_SETTINGS")
@@ -206,13 +210,15 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                                user_settings[5])}*\n\n__Ping Settings:__\n\n🎉 Initial "
                            f"Liquidity : {ping_inital_liquidty}\n🔥 Liquidity Burned : {ping_liquidty_burned}\n🌊"
                            f"Tokens sent to LP : {ping_tokens_to_lp}\n🩸 Risk Level : {ping_risk_level}\n🐋 Largest "
-                           f"Cumulative holder : < {lch}"
+                           f"Cumulative holder : < {lch}\n👝 Wallet Balances : \n\n📍 My Address : *`{wallet_address}`*\n{balances_string}"
                            f"\n\n__Select the setting you wish to"
                            f" modify:__", reply_markup=help_markup, parse_mode='MarkdownV2')
 
 
 # trading settings clone (till i figure out how to not delete the buy notification
-@bot.callback_query_handler(func=lambda query: query.data == "trading_settings2") #here i need to add wallet balance check ,current wallet adress and spl token balances too
+@bot.callback_query_handler(func=lambda
+        query: query.data == "trading_settings2")  # here i need to add wallet balance check ,current wallet adress
+# and spl token balances too
 async def help_func_callback(callback_query: types.CallbackQuery):
     await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
     # here display current settings:
@@ -231,10 +237,9 @@ async def help_func_callback(callback_query: types.CallbackQuery):
     ping_risk_level = str(temp[3])
     lch = str(temp[4])
 
-    #wallet stuff:
+    # wallet stuff:
     wallet_address = str(user_settings[1])
-    sol_balance =
-    spl_balance_list = #[[spl_name,ui_amount]]......
+    balances_string = query_user_wallet.return_token_balances(wallet_address)
     help_markup2 = types.InlineKeyboardMarkup(row_width=6)
     auto_buy = types.InlineKeyboardButton("Auto Buy", callback_data="AB_SETTINGS")
     auto_sell = types.InlineKeyboardButton("Auto Sell", callback_data="AS_SETTINGS")
@@ -251,7 +256,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                                user_settings[5])}*\n\n__Ping Settings:__\n\n🎉 Initial "
                            f"Liquidity : {ping_inital_liquidty}\n🔥 Liquidity Burned : {ping_liquidty_burned}\n🌊"
                            f"Tokens sent to LP : {ping_tokens_to_lp}\n🩸 Risk Level : {ping_risk_level}\n🐋 Largest "
-                           f"Cumulative holder : < {lch}\n👝 Wallet Information : \n📍 Address : *{wallet_address}*"
+                           f"Cumulative holder : < {lch}\n👝 Wallet Balances : \n\n📍 My Address : *`{wallet_address}`*\n{balances_string}"
                            f"\n\n__Select the setting you wish to"
                            f" modify:__", reply_markup=help_markup2, parse_mode='MarkdownV2')
 
@@ -957,10 +962,19 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             all_settings = trading_db.return_all_settings(user_id)
             sol_amount = float(str(all_settings[3]))
             slippage = float(str(all_settings[12]))
-            result = str(await buy_jupiter.buy_token(token_ca, sol_amount, slippage))
+            ekey = all_settings[2]
+            result = str(await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey))
             await bot.send_message(chat_id=callback_query.from_user.id, text=f"Token Purchased tx:\n{result}")
-        elif response_value.split()[0] == "trigger_sell":
-            pass
+        elif response_value.split()[0] == "trigger_sell":  # for now sell the whole position
+            all_user_info = trading_db.return_all_settings(user_id)
+            wallet_address = all_user_info[1]
+            token_balance = query_user_wallet.return_specific_balance(token_ca, wallet_address)
+            if token_balance > 0:
+                slippage = all_user_info[12]
+                ekey = all_user_info[2]
+                await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey)
+
+                # execute a 100% sell order
 
 
 def subscription():

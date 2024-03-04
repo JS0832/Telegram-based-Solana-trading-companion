@@ -38,16 +38,14 @@ async def buy_token(token_ca, amount, slippage, e_private_key):
     return f"Transaction sent: https://explorer.solana.com/tx/{transaction_id}"
 
 
-async def sell_token(token_ca, token_amount, token_decimals, slippage, e_private_key):
+async def sell_token(token_ca, token_amount, slippage, e_private_key):
     pkey = CaesarCipher(e_private_key, offset=8)
     private_key = Keypair.from_bytes(base58.b58decode(pkey.decoded))
     jupiter = Jupiter(async_client, private_key)
-    converted_amount = int(amount * 10 ** 9)  # might not need if i prvde the ui amount
-    print(converted_amount)
     transaction_data = await jupiter.swap(
         input_mint=token_ca,
         output_mint="So11111111111111111111111111111111111111112",
-        amount=converted_amount,  # this is the amount of sol used ? ( 0.5 sol each time for now)
+        amount=token_amount,  # this is the amount of sol used ? ( 0.5 sol each time for now)
         slippage_bps=slippage,
     )
     # Returns str: serialized transactions to execute the swap.
