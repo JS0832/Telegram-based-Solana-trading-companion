@@ -45,8 +45,8 @@ class TradingDatabase:
         sql = "INSERT INTO tradingusers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
         public_address, private_key = create_users_public_private_key.create_trading_wallet()
         self.cursor2.execute(sql,
-                             (telegram_id, public_address, private_key, "1", "1", "OFF", "OFF", "OFF", "NULL", 3,
-                              "False","DEFAULT", "1"))
+                             (telegram_id, public_address, private_key, "1", "OFF", "OFF", "OFF", "NULL", 3, "False",
+                              "DEFAULT", "NULL", "1"))
         # IF PING SETTINGS ARE CHANGED BY USER IT WILL BE A COMMA SEPARATED LIST OF VALUES
         self.connection.commit()
 

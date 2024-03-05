@@ -8,6 +8,7 @@ import query_token
 import check_advanced_rug
 import buy_jupiter
 import query_user_wallet
+import threading
 
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
@@ -482,7 +483,7 @@ async def liquity_burned_ping(callback_query: types.CallbackQuery):
                            reply_markup=inital_liq_buttons)
 
 
-# liquidty burned pinig settings
+# liquidty burned ping settings
 
 @bot.callback_query_handler(func=lambda query: query.data == "90_percent_ping")
 async def liquity_burned_ping(callback_query: types.CallbackQuery):
@@ -677,16 +678,16 @@ async def risk_level_ping(callback_query: types.CallbackQuery):
 @bot.callback_query_handler(func=lambda query: query.data == "slippage")  # hiding the settings menu
 async def risk_level_ping(callback_query: types.CallbackQuery):
     await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
-    sippage_settings = types.InlineKeyboardMarkup(row_width=1)
+    slippage_settings = types.InlineKeyboardMarkup(row_width=1)
     back = types.InlineKeyboardButton("Go back", callback_data="AB_SETTINGS")
     zo_slippage = types.InlineKeyboardButton("0.1%", callback_data="zo_slippage")
     zf_slippage = types.InlineKeyboardButton("0.5%", callback_data="zf_slippage")
     one_slippage = types.InlineKeyboardButton("1.0%", callback_data="one_slippage")
     five_slippage = types.InlineKeyboardButton("5.0%", callback_data="five_slippage")
     ten_slippage = types.InlineKeyboardButton("10.0%", callback_data="ten_slippage")
-    sippage_settings.add(back, zo_slippage, zf_slippage, one_slippage, five_slippage, ten_slippage)
+    slippage_settings.add(back, zo_slippage, zf_slippage, one_slippage, five_slippage, ten_slippage)
     await bot.send_message(chat_id=callback_query.from_user.id, text="Adjust Slippage settings",
-                           reply_markup=sippage_settings)
+                           reply_markup=slippage_settings)
 
 
 # slippage sub settings
@@ -694,35 +695,35 @@ async def risk_level_ping(callback_query: types.CallbackQuery):
 @bot.callback_query_handler(func=lambda query: query.data == "zo_slippage")  # hiding the settings menu
 async def risk_level_ping(callback_query: types.CallbackQuery):
     user_id = int(callback_query.from_user.id)
-    trading_db.ten_slippage(user_id, str(0.1))
+    trading_db.update_slippage(user_id, str(0.1))
     await bot.send_message(user_id, text="Updated to 0.1 % Slippage")
 
 
 @bot.callback_query_handler(func=lambda query: query.data == "zf_slippage")  # hiding the settings menu
 async def risk_level_ping(callback_query: types.CallbackQuery):
     user_id = int(callback_query.from_user.id)
-    trading_db.ten_slippage(user_id, str(0.5))
+    trading_db.update_slippage(user_id, str(0.5))
     await bot.send_message(user_id, text="Updated to 0.5 % Slippage")
 
 
 @bot.callback_query_handler(func=lambda query: query.data == "one_slippage")  # hiding the settings menu
 async def risk_level_ping(callback_query: types.CallbackQuery):
     user_id = int(callback_query.from_user.id)
-    trading_db.ten_slippage(user_id, str(1.0))
+    trading_db.update_slippage(user_id, str(1.0))
     await bot.send_message(user_id, text="Updated to 1.0 % Slippage")
 
 
 @bot.callback_query_handler(func=lambda query: query.data == "five_slippage")  # hiding the settings menu
 async def risk_level_ping(callback_query: types.CallbackQuery):
     user_id = int(callback_query.from_user.id)
-    trading_db.ten_slippage(user_id, str(5.0))
+    trading_db.update_slippage(user_id, str(5.0))
     await bot.send_message(user_id, text="Updated to 5.0 % Slippage")
 
 
 @bot.callback_query_handler(func=lambda query: query.data == "ten_slippage")  # hiding the settings menu
 async def risk_level_ping(callback_query: types.CallbackQuery):
     user_id = int(callback_query.from_user.id)
-    trading_db.ten_slippage(user_id, str(10.0))
+    trading_db.update_slippage(user_id, str(10.0))
     await bot.send_message(user_id, text="Updated to 10 % Slippage")
 
 
@@ -982,8 +983,7 @@ def subscription():
 
 
 if __name__ == "__main__":
+    threading.Thread(target=new_bot.run).start()  # starts bot on different thread
     loop = asyncio.get_event_loop()
-    bot_coros = [new_bot.verify_token(), new_bot.main(), new_bot.append_past_tokens_to_file(), new_bot.process_queue(),
-                 new_bot.token_report(), new_bot.check_for_large_holder()]
-    coros = [ping_all_subscribers(), bot.polling(non_stop=True)] + bot_coros
+    coros = [ping_all_subscribers(), bot.polling(non_stop=True)]
     loop.run_until_complete(asyncio.gather(*coros))

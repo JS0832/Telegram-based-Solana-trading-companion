@@ -482,7 +482,8 @@ async def check_for_large_holder():
                             temp_associated_wallets.append(root)
                             all_seen_wallets.append(root)
                             temp_total_spl_balance = 0
-                            while True:  # here traverse all wallets connected to one wallet and count the total supply holding.
+                            while True:  # here traverse all wallets connected to one wallet and count the total
+                                # supply holding.
                                 if len(temp_associated_wallets) > 0:  # means there is more to check
                                     temp_wallet = str(temp_associated_wallets.pop())
                                     try:
@@ -557,7 +558,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
     spl_executable = r'C:\\Users\MEMEdev\.local\share\solana\install\active_release\bin\spl-token.exe'  # for
     # checking mint
     special_meta_key = ["bafkrei", "mypinata", "ipfs.nftstorage.link"]  # for now, it will use this
-    minimum_initial_liquidty = 4  # most good coins have 10
+    minimum_initial_liquidty = 5  # most good coins have 10
     while True:  # infinite loop to keep checking
         index = 0
         for token in token_queue:
@@ -885,7 +886,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
 
 def run():
     print("Running Bot....")
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     coros = [verify_token(), main(), append_past_tokens_to_file(), process_queue(),
              token_report(), check_for_large_holder()]  # poll_dev_wallet_activity()]
     loop.run_until_complete(asyncio.gather(*coros))

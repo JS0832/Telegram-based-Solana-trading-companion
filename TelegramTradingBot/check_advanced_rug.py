@@ -50,8 +50,8 @@ def check(token_address):
     balance_sum = 0
     try:
         for holder in holder_list["data"]:
-            spl_balance = query_user_wallet.return_specific_balance(token_address, str(holder["owner"]))
             if str(holder["owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # ignore raydium
+                spl_balance = query_user_wallet.return_specific_balance(token_address, str(holder["owner"]))
                 try:
                     res = solana_client.get_signatures_for_address(
                         Pubkey.from_string(str(holder["owner"])),
