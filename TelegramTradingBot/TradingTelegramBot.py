@@ -18,6 +18,8 @@ trading_db = dataBase.trading_db  # initialise
 buy_queue = []  # will feed the buy engine so each user purchases a token (each user who selected auto buy
 
 
+# [token_ca,amount,slippage,e_private_key,user_id]
+
 # make a dictionary of pinged tokens and when used requests it can easily preview data
 
 # add "past criminal activity such as "withdraw liquidty"
@@ -30,6 +32,16 @@ buy_queue = []  # will feed the buy engine so each user purchases a token (each 
 # open trades: (buy amount in sol,token address,token supply,),().....
 # to share pnl(unrealised you fetch current price and compare to buy price
 # to share pnl realised you search the wallet and see what token sells where made(harder)
+async def buy_engine():
+    while True:
+        if len(buy_queue) > 0:  # need to be changed in the future
+            order_details = buy_queue[0]
+            await buy_jupiter.buy_token(order_details[0], order_details[1], order_details[2], order_details[3],
+                                        order_details[4])
+            buy_queue.pop(0)
+        await asyncio.sleep(0.1)  # fast check
+
+
 async def ping_all_subscribers():  # when a token is abot to get pinged generate its "ai" summary please ( make this
     # o sperate thread too) ,check how to manage variable used by different threads in python
     while True:
@@ -81,12 +93,11 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                         temp = [2, 98, 60, 6, 20]  # change a bit later
                     if int(data[1]) >= int(temp[0]) and int(data[2]) >= int(temp[1]) and int(data[3]) >= int(
                             temp[2]) and int(data[0]) <= int(temp[4]):  # implement risk level here later
-                        if full_configuration[4] == "ON":
+                        if full_configuration[4] == "ON":  # maybe here place on a buy queue
                             slippage = float(full_configuration[12])
                             sol_amount = float(full_configuration[3])
                             ekey = full_configuration[2]
-                            await auto_buy_for_user(token_ca, slippage, sol_amount, ekey)
-                            # maybe place on some queue idk how to approach this issue
+                            buy_queue.append([token_ca, sol_amount, slippage, ekey, int(user[0])])
                         await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token : `{token_ca}`\n\n😈 SAFU "
                                                                           f"Parameters:"
                                                                           f"Liquidty Burned and Mint Disabled 🍀"
@@ -110,14 +121,13 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                reply_markup=markup, parse_mode='MarkdownV2')
             new_bot.ping_queue.pop(0)  # remove from the queue (FIFO)
         await asyncio.sleep(1)
+@bot.message_handler(commands=['positions']) #
+async def check_open_positions(message):#handle user positions
+    #buy price  -> comapre to current price and deduce roi based on evrage entry price and corrent holdings x price?
 
-
-async def auto_buy_for_user(token_ca, slippage, sol_amount, buyer_id):
-    ekey = trading_db.return_all_settings(buyer_id)[2]
-    result = str(await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey))
-    await bot.send_message(chat_id=buyer_id,
-                           text=f"Auto buy enabled,Token Purchased tx:\n{result} using {sol_amount} SOL")
-
+    #roi will simpl be inital sol spent vs current sol holdigns in that token
+    # (token ca , initial buy amount in sol)
+    #convert comma separated string into a list then every 2 places is new entry
 
 @bot.message_handler(commands=['start'])
 async def activate_bot(message):
@@ -988,5 +998,5 @@ def subscription():
 if __name__ == "__main__":
     threading.Thread(target=new_bot.run).start()  # starts bot on different thread
     loop = asyncio.get_event_loop()
-    coros = [ping_all_subscribers(), bot.polling(non_stop=True)]
+    coros = [ping_all_subscribers(), bot.polling(non_stop=True), buy_engine()]
     loop.run_until_complete(asyncio.gather(*coros))
