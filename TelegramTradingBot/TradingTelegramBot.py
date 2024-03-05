@@ -18,6 +18,8 @@ trading_db = dataBase.trading_db  # initialise
 buy_queue = []  # will feed the buy engine so each user purchases a token (each user who selected auto buy
 
 
+# make a dictionary of pinged tokens and when used requests it can easily preview data
+
 # add "past criminal activity such as "withdraw liquidty"
 
 # confirm of buy
@@ -28,7 +30,8 @@ buy_queue = []  # will feed the buy engine so each user purchases a token (each 
 # open trades: (buy amount in sol,token address,token supply,),().....
 # to share pnl(unrealised you fetch current price and compare to buy price
 # to share pnl realised you search the wallet and see what token sells where made(harder)
-async def ping_all_subscribers():  # when a token is abot to get pinged generate its "ai" summary please
+async def ping_all_subscribers():  # when a token is abot to get pinged generate its "ai" summary please ( make this
+    # o sperate thread too) ,check how to manage variable used by different threads in python
     while True:
         if len(new_bot.ping_queue) > 0:  # if there is a token to be pinged
             list_of_users = db.return_all_activated_users()
@@ -926,7 +929,7 @@ async def settings(message):
                            reply_markup=settings_command_buttons)
 
 
-# refresh info+other individual specifi actions dsuck as buying or selling it:
+# refresh info+other individual specific actions dsuck as buying or selling it:
 @bot.callback_query_handler(func=lambda call: True)
 async def help_func_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.from_user.id)

@@ -93,7 +93,8 @@ def check_holders(token_address, token_supply):
     return total_held_string, five_or_above
 
 
-def check_for_large_holder(token_address, token_supp):
+def check_for_large_holder(token_address, token_supp):  # instead of recomputing how about tracking the wallets
+    # associated to largest holder
     holders = []
     URI = "https://mainnet.helius-rpc.com/?api-key=3e1717e1-bf69-45ae-af63-361e43b78961"
     solana_client = Client(URI)
