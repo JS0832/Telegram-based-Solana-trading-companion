@@ -130,8 +130,8 @@ class TradingDatabase:
         user = self.cursor2.fetchone()
         return user[3]  # returns a string so need to convert it to a float
 
-    def open_a_position(self, telegram_id, token_ca, sol_used, amount_of_tokens_received):
-        temp_list = [telegram_id, token_ca, sol_used, amount_of_tokens_received]
+    def open_a_position(self, telegram_id, token_ca, initial_sol_used):
+        temp_list = [telegram_id, token_ca, initial_sol_used]
         position_string = ",".join(temp_list)
         sql = "UPDATE tradingusers SET openPosition=? WHERE telegramId=?"
         self.cursor2.execute(sql, [position_string, telegram_id])

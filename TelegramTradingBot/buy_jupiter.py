@@ -12,6 +12,7 @@ from solana.rpc.async_api import AsyncClient
 from solana.rpc.commitment import Processed
 from jupiter_python_sdk.jupiter import Jupiter
 from caesarcipher import CaesarCipher
+import tradingDataBase  # for inserting new positions
 
 async_client = AsyncClient("https://mainnet.helius-rpc.com/?api-key=3e1717e1-bf69-45ae-af63-361e43b78961")
 order_queue = []  # soon will implement this
@@ -22,7 +23,7 @@ bot = AsyncTeleBot(token=TOKEN)
 
 async def buy_token(token_ca, amount, slippage, e_private_key, user_id):
     pkey = CaesarCipher(e_private_key, offset=8).message
-    private_key = Keypair.from_bytes(base58.b58decode(str(pkey)))
+    private_key = Keypair.from_bytes(base58.b58decode(str(pkey.decoded)))
     jupiter = Jupiter(async_client, private_key)
     converted_amount = int(amount * 10 ** 9)
     print(converted_amount)
@@ -39,6 +40,7 @@ async def buy_token(token_ca, amount, slippage, e_private_key, user_id):
     opts = TxOpts(skip_preflight=False, preflight_commitment=Processed)
     result = await async_client.send_raw_transaction(txn=bytes(signed_txn), opts=opts)
     transaction_id = json.loads(result.to_json())['result']
+    # in the future check if the transaction is finalised
     await bot.send_message(user_id, f"Transaction sent: https://explorer.solana.com/tx/{transaction_id}")
 
 
@@ -61,3 +63,7 @@ async def sell_token(token_ca, token_amount, slippage, e_private_key):
     transaction_id = json.loads(result.to_json())['result']
 
     return f"Transaction sent: https://explorer.solana.com/tx/{transaction_id}"
+
+
+async def buy_token_func(token_ca, amount, slippage, e_private_key, user_id):
+    asyncio.run(buy_token(token_ca, amount, slippage, e_private_key, user_id))

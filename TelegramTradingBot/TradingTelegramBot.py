@@ -36,8 +36,8 @@ async def buy_engine():
     while True:
         if len(buy_queue) > 0:  # need to be changed in the future
             order_details = buy_queue[0]
-            await buy_jupiter.buy_token(order_details[0], order_details[1], order_details[2], order_details[3],
-                                        order_details[4])
+            await buy_jupiter.buy_token_func(order_details[0], order_details[1], order_details[2], order_details[3],
+                                             order_details[4])
             buy_queue.pop(0)
         await asyncio.sleep(0.1)  # fast check
 
@@ -121,13 +121,17 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                reply_markup=markup, parse_mode='MarkdownV2')
             new_bot.ping_queue.pop(0)  # remove from the queue (FIFO)
         await asyncio.sleep(1)
-@bot.message_handler(commands=['positions']) #
-async def check_open_positions(message):#handle user positions
-    #buy price  -> comapre to current price and deduce roi based on evrage entry price and corrent holdings x price?
 
-    #roi will simpl be inital sol spent vs current sol holdigns in that token
+
+@bot.message_handler(commands=['positions'])  #
+async def check_open_positions(message):  # handle user positions
+    pass
+    # buy price  -> comapre to current price and deduce roi based on evrage entry price and corrent holdings x price?
+
+    # roi will simpl be inital sol spent vs current sol holdigns in that token
     # (token ca , initial buy amount in sol)
-    #convert comma separated string into a list then every 2 places is new entry
+    # convert comma separated string into a list then every 2 places is new entry
+
 
 @bot.message_handler(commands=['start'])
 async def activate_bot(message):
