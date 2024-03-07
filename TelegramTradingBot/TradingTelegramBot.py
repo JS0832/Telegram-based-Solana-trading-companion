@@ -9,6 +9,7 @@ import check_advanced_rug
 import buy_jupiter
 import query_user_wallet
 import threading
+import dev_sold_so_far
 
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
@@ -16,6 +17,8 @@ db = dataBase.DataBase()  # initialise
 trading_db = dataBase.trading_db  # initialise
 
 buy_queue = []  # will feed the buy engine so each user purchases a token (each user who selected auto buy
+
+dev_wallets_dict = {}  # will store pinged token wallets and the key is the token ca
 
 
 # [token_ca,amount,slippage,e_private_key,user_id]
@@ -72,6 +75,11 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                     iterator += 1
             else:
                 past_tokens_string = "None Detected Except this token"
+
+            # dev selling report:
+            result = dev_sold_so_far.check_dev(txn_hash, token_ca)
+            dev_wallets_dict[token_ca] = result[1]
+            percent_amount = result[0]
             # extract data from the ping queue
             markup = types.InlineKeyboardMarkup(row_width=7)
             t_settings = types.InlineKeyboardButton("Settings", callback_data="trading_settings")
@@ -79,7 +87,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             sell = types.InlineKeyboardButton("Sell", callback_data="trigger_sell " + str(data[0]))
             refresh = types.InlineKeyboardButton("Refresh Info", callback_data="refresh " + str(data[0]))
             positions = types.InlineKeyboardButton("Check all positions", callback_data="positions")
-            listen_to_dev = types.InlineKeyboardButton("Listen to Dev selling", callback_data="listen")
+            listen_to_dev = types.InlineKeyboardButton("refresh to Dev selling", callback_data="refresh_dev")
             info = types.InlineKeyboardButton("Info", callback_data="info")
             share = types.InlineKeyboardButton("Share PNL", callback_data="pnl")
             markup.add(t_settings, buy, sell, refresh, positions, share, info, listen_to_dev)
@@ -106,7 +114,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                                           f"token summary : *Coming Soon* \n🐋 "
                                                                           f"Largest Cumulative"
                                                                           f"holder : *{
-                                                                          largest_holder}*\n🎉 Initial Liquidity : "
+                                                                          largest_holder}*\nDev sold : {percent_amount} percent so far\n🎉 Initial Liquidity :"
                                                                           f"*{inital_liq}*\n🔥 Liquidity Burned : "
                                                                           f"*{liq_burned}*\n🌊 Tokens sent to LP : "
                                                                           f"*{tokens_to_lp_percent}*\n💳 "
@@ -992,11 +1000,10 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                 slippage = all_user_info[12]
                 ekey = all_user_info[2]
                 await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey)
-        elif response_value.split()[0] == "listen":
-            pass
-            #create a new thread and run it for 2h unless the user turns off the feature then kil th thread and run dev selling script
-
-                # execute a 100% sell order
+        elif response_value.split()[0] == "refresh_dev":
+            await bot.send_message(chat_id=user_id, text="refreshing...")
+            percent_result = dev_sold_so_far.check_wallet_balanced(dev_wallets_dict[token_ca], token_ca)
+            await bot.send_message(chat_id=user_id, text="the current dev balance is: " + str(percent_result) + " %")
 
 
 def subscription():
