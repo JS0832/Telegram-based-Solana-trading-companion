@@ -73,15 +73,16 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             else:
                 past_tokens_string = "None Detected Except this token"
             # extract data from the ping queue
-            markup = types.InlineKeyboardMarkup(row_width=6)
+            markup = types.InlineKeyboardMarkup(row_width=7)
             t_settings = types.InlineKeyboardButton("Settings", callback_data="trading_settings")
             buy = types.InlineKeyboardButton("Buy", callback_data="trigger_buy " + str(data[0]))
             sell = types.InlineKeyboardButton("Sell", callback_data="trigger_sell " + str(data[0]))
             refresh = types.InlineKeyboardButton("Refresh Info", callback_data="refresh " + str(data[0]))
             positions = types.InlineKeyboardButton("Check all positions", callback_data="positions")
+            listen_to_dev = types.InlineKeyboardButton("Listen to Dev selling", callback_data="listen")
             info = types.InlineKeyboardButton("Info", callback_data="info")
             share = types.InlineKeyboardButton("Share PNL", callback_data="pnl")
-            markup.add(t_settings, buy, sell, refresh, positions, share, info)
+            markup.add(t_settings, buy, sell, refresh, positions, share, info, listen_to_dev)
             for user in list_of_users:  # just so I can debug
                 full_configuration = trading_db.return_all_settings(user[0])
                 if full_configuration[9] == "True":  # if active trading user
@@ -947,7 +948,7 @@ async def settings(message):
 @bot.callback_query_handler(func=lambda call: True)
 async def help_func_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.from_user.id)
-    matches = ["trigger_buy", "trigger_sell", "refresh"]
+    matches = ["trigger_buy", "trigger_sell", "refresh", "listen"]
     response_value = str(callback_query.data)
     token_ca = response_value.split()[1]
     msg_to_remove = callback_query.message.message_id
@@ -991,6 +992,9 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                 slippage = all_user_info[12]
                 ekey = all_user_info[2]
                 await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey)
+        elif response_value.split()[0] == "listen":
+            pass
+            #create a new thread and run it for 2h unless the user turns off the feature then kil th thread and run dev selling script
 
                 # execute a 100% sell order
 

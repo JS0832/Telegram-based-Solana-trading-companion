@@ -13,7 +13,7 @@ solscan_header = {
 wallet_stack = []  # wallets to be checked
 visited_wallets = []  # all wallets that have been visited
 token_supply = 100000000  # will be known anyway
-token_addrres = "7SU47XTwaPeeLZJkbGEWjTnPaKcTWPit6E75LhYPvby1"  # will be known
+token_addrres = "2Zj2FHP84q9WhEzVyNinnGuES8qKC9ht7TGn8wbz7rc5"  # will be known
 wallet_balances = []
 
 
@@ -90,7 +90,7 @@ def main(txn_hash):
     print(str(float(amount_sold) / float(token_supply) * float(100)) + "%")
 
 
-# her we are lookign for a wallet that make a spl transfer of the total exact supply amount for a "" wallet means
+# her we are looking for a wallet that make a spl transfer of the total exact supply amount for a "" wallet means
 # minted.
 def check_mint_wallet(liquidty_add_txn_hash):
     liquidity_tx_info = request('GET',
@@ -111,9 +111,13 @@ def check_mint_wallet(liquidty_add_txn_hash):
                                  "https://pro-api.solscan.io/v1.0/account/splTransfers?account=" + str(
                                      temp_wallet) + "&limit=" + str(10) + "&offset=0",
                                  headers=solscan_header)  # query all spl token transactions
-            spl_transfers = all_spl_tx.json()["data"]  # all spl transfers in this current wallet
-            for spl_transfer in spl_transfers:  # loop over all transaction per give wallet
+            spl_transfers = all_spl_tx.json()  # all spl transfers in this current wallet
+            for spl_transfer in spl_transfers["data"]:  # loop over all transaction per give wallet
                 if str(spl_transfer["tokenAddress"]) == token_addrres:
+                    if str(spl_transfer["changeType"]) == "inc":
+                        if int(float(int(spl_transfer["changeAmount"])) / float(
+                                10 ** int(spl_transfer["decimals"]))) == token_supply:
+                            return str(signer)
                     temp_hash = str(spl_transfer["signature"][0])
                     time.sleep(0.1)
                     tx_info = request('GET',
@@ -126,11 +130,65 @@ def check_mint_wallet(liquidty_add_txn_hash):
                             if str(tx_items["destination_owner"]) not in visited_wallets:  # seen before?
                                 wallet_stack.append(str(tx_items["destination_owner"]))
         else:
-            break  # done
+            return str(signer)
+        return ""
 
+def check_dev(txn_hash):  # instead of recomputing how about tracking the wallets
+    URI = "https://mainnet.helius-rpc.com/?api-key=3e1717e1-bf69-45ae-af63-361e43b78961"
+    solana_client = Client(URI)
+    all_seen_wallets = []
+    true_supply_held_by_top_twenty = []  # this list will show true token holdings by the top 20 holders
 
-##fix tmrw
+    temp_associated_wallets = []  # for each holder checked (stack)
+    root =
+    temp_associated_wallets.append(root)
+    all_seen_wallets.append(root)
+    temp_total_spl_balance = 0
+    while True:  # here traverse all wallets connected to one wallet and count the total supply holding.
+        if len(temp_associated_wallets) > 0:  # means there is more to check
+            temp_wallet = str(temp_associated_wallets.pop())
+            balances = balances_api.get_balances(temp_wallet)
+            for token in balances["tokens"]:
+                if str(token["mint"]) == token_addy:
+                    temp_total_spl_balance += int(float(token["amount"]) / 10 ** float(token["decimals"]))
+            res = solana_client.get_signatures_for_address(
+                Pubkey.from_string('459JAd5ibXmNdAZTUEPQ5uC9wCWBaJ1stpqunfQy96gc'),
+                limit=5  # Specify how much last transactions to fetch
+            )
+            transactions = json.loads(str(res.to_json()))["result"]
 
+            for tx_hash in transactions:  # loop over all transaction per give wallet (limit it to 20 )
+                parsed_transactions = transactions_api.get_parsed_transactions(
+                    transactions=[tx_hash["signature"]])
+                if len(parsed_transactions[0]["tokenTransfers"]) > 0:
+                    temp_token_transfer_counter = 0
+                    for tx_items in parsed_transactions[0]["tokenTransfers"]:
+                        if str(tx_items["mint"]) == token_addy:
+                            if str(tx_items["toUserAccount"]) == temp_wallet:
+                                if str(tx_items["fromUserAccount"]) not in all_seen_wallets:
+                                    if str(tx_items[
+                                               "fromUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1" and str(
+                                        tx_items[
+                                            "fromUserAccount"]) != "":  # because thats just a mint operation
+                                        temp_associated_wallets.append(str(tx_items["fromUserAccount"]))
+                                        all_seen_wallets.append(str(tx_items["fromUserAccount"]))
+                            elif str(tx_items["fromUserAccount"]) == temp_wallet:
+                                if str(tx_items["toUserAccount"]) not in all_seen_wallets:
+                                    if str(tx_items[
+                                               "toUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":
+                                        print("to user" + str(tx_items["toUserAccount"]))
+                                        temp_associated_wallets.append(str(tx_items["toUserAccount"]))
+                                        all_seen_wallets.append(str(tx_items["toUserAccount"]))
+                        if temp_token_transfer_counter > 10:
+                            break
+                        else:
+                            temp_token_transfer_counter += 1
+                print("checking.....")
+        else:
+            percentage = int(float(temp_total_spl_balance) / float(token_supply) * float(100))
+            true_supply_held_by_top_twenty.append(percentage)  # convert it as a percentage
+                break  # done
+    return max(true_supply_held_by_top_twenty)  # return max value
 
 async def poll_dev_wallet_activity():  # make it for one ping atm
     while True:
@@ -159,6 +217,7 @@ async def poll_dev_wallet_activity():  # make it for one ping atm
             index += 1
         await asyncio.sleep(3)
 
+def execute_dev_selling_reporting(token_ca,liquidty_hash,telegram_user_id):
 
 if __name__ == "__main__":
     main("2EFkLeUFAT8SxRBJCvnGNVzLyHvBTQL8P9ShHtvZNVU2YUJ9ZrURr3uGBJwa22hPoQZYJCVDLnBFCSaXydmy8ZQy")
