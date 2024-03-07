@@ -610,6 +610,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                             "content-type": "application/json"
                         }
                         get_supply_response = requests.post(alchemy_url, json=payload, headers=alchemy_headers)
+                        print(get_supply_response)
                         token[10] = int(float(get_supply_response.json()["result"]['value']["uiAmountString"]))
                     try:  # try doing it all with rpc soon
                         req = request('GET',

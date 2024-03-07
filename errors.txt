@@ -3449,3 +3449,6 @@
 ['removed token due to low token ratio added to the lp pool:  ', 'D3FLNoWDKZmdxF5TbZR4uT8GAgovTHDdzWbBzksgaKvA']
 ['removed token due to low token ratio added to the lp pool:  ', '7ker369gqNQCJHv6EDm5uD2SvXjtghcAUa1oRK3kvSbF']
 ['removed token due to low token ratio added to the lp pool:  ', '7ker369gqNQCJHv6EDm5uD2SvXjtghcAUa1oRK3kvSbF']
+['removed token due to very low amount of  tokens sent to lp pool ', '94cxjtrAWJduw4CeW1uWicEwrcE5VpAUTrxuQ73czxzK']
+['removed token due to low token ratio added to the lp pool:  ', 'EUk26XKLy8kc9193nvmmQAfokdsoF4FZ91LjH5sFWBJN']
+['removed token due to low initial liquidity :  ', 'FD2qbio9gQpRXM7NDGpX4ozQTiRDAz5MeqFiAGaDSstR']
