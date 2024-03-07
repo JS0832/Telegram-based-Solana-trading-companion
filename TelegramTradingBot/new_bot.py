@@ -505,7 +505,7 @@ async def check_for_large_holder():
                                     for spl_transfer in transactions:  # loop over all transaction per give wallet
                                         parsed_transactions = transactions_api.get_parsed_transactions(
                                             transactions=[spl_transfer["signature"]])
-                                        if len(parsed_transactions)>0:
+                                        if len(parsed_transactions) > 0:
                                             if "tokenTransfers" in parsed_transactions[0]:
                                                 if len(parsed_transactions[0]["tokenTransfers"]) > 0:
                                                     for tx_items in parsed_transactions[0]["tokenTransfers"]:
@@ -548,6 +548,8 @@ async def check_for_large_holder():
                         print("for token: " + str(token_address) + " " + str(true_supply_held_by_top_twenty))
                 index += 1
         await asyncio.sleep(1)
+
+
 class TokenError(Exception):
     pass
 
@@ -596,7 +598,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                             token_queue.pop(index)
                             continue
 
-                        alchemy_url = "https://solana-mainnet.g.alchemy.com/v2/7I2u5DUEiE6J52ML8Yo9In0CdDk-UcnO"
+                        alchemy_url = "https://solana-mainnet.g.alchemy.com/v2/bzkveugN6acIccgGUJTetb95Sz0yo8W_"
                         payload = {
                             "id": 1,
                             "jsonrpc": "2.0",
@@ -794,7 +796,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                         if passed and token_checked:
                                                             holder_result = request('GET',
                                                                                     "https://pro-api.solscan.io/v1.0/token/holders?tokenAddress=" + str(
-                                                                                        token[0]) + "&limit=13&offset=0",
+                                                                                        token[
+                                                                                            0]) + "&limit=13&offset=0",
                                                                                     headers=solscan_header)
                                                             holder_list = holder_result.json()
                                                             five_or_above = 0  # number of holders that have 5%+
@@ -824,14 +827,17 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                 if int(float(total_supply_held / supply) * float(
                                                                         100)) < 20:  # safu
                                                                     total_held_string = "Excellent : " + str(
-                                                                        int(float(total_supply_held / supply) * float(100)))
+                                                                        int(float(total_supply_held / supply) * float(
+                                                                            100)))
                                                                 elif 40 > int(float(total_supply_held / supply) * float(
                                                                         100)) > 20:  # moderate risk
                                                                     total_held_string = "Moderate : " + str(
-                                                                        int(float(total_supply_held / supply) * float(100)))
+                                                                        int(float(total_supply_held / supply) * float(
+                                                                            100)))
                                                                 else:  # high risk
                                                                     total_held_string = "Poor : " + str(
-                                                                        int(float(total_supply_held / supply) * float(100)))
+                                                                        int(float(total_supply_held / supply) * float(
+                                                                            100)))
                                                                 five_above_string = str(
                                                                     five_or_above)
                                                             await asyncio.sleep(2)
@@ -848,7 +854,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                             token_queue.pop(index)
                                                             continue
                                                         elif token_checked and not passed:
-                                                            print("token was most likely sniped by dev: " + str(token[0]))
+                                                            print(
+                                                                "token was most likely sniped by dev: " + str(token[0]))
                                                             token_remove_errors.append(
                                                                 ["token sniped by dev: ", token[0]])
                                                             token_queue.pop(index)
@@ -860,7 +867,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                 float(meta_burn_tx["params"]["amount"]) /
                                                                 float(token[5])) + " " + str(token[0]))
                                                         token_remove_errors.append(
-                                                            ["low amount of liquidty burned..removing token ", token[0]])
+                                                            ["low amount of liquidty burned..removing token ",
+                                                             token[0]])
                                                         token_queue.pop(index)
                                                         continue
                                                 else:

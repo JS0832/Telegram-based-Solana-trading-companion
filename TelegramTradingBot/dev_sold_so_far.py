@@ -16,11 +16,9 @@ solscan_header = {
 }
 transactions_api = TransactionsAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
 balances_api = BalancesAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
-alchemy_url = "https://solana-mainnet.g.alchemy.com/v2/7I2u5DUEiE6J52ML8Yo9In0CdDk-UcnO"
-
+alchemy_url = "https://solana-mainnet.g.alchemy.com/v2/bzkveugN6acIccgGUJTetb95Sz0yo8W_"
 
 def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking the wallets
-
     payload = {
         "id": 1,
         "jsonrpc": "2.0",
@@ -108,6 +106,3 @@ def check_wallet_balanced(list_of_wallets, spl_token):
                 temp_total_spl_balance = temp_total_spl_balance + int(
                     float(token["amount"]) / 10 ** float(token["decimals"]))
     return int(temp_total_spl_balance / token_supply * 100)
-
-
-

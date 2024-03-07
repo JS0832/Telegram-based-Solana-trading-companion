@@ -20,7 +20,7 @@ solscan_header = {
 
 
 def check(token_address):
-    alchemy_url = "https://solana-mainnet.g.alchemy.com/v2/7I2u5DUEiE6J52ML8Yo9In0CdDk-UcnO"
+    alchemy_url = "https://solana-mainnet.g.alchemy.com/v2/bzkveugN6acIccgGUJTetb95Sz0yo8W_"
     payload = {
         "id": 1,
         "jsonrpc": "2.0",
