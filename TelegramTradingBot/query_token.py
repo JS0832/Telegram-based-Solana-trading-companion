@@ -12,9 +12,8 @@ solscan_header = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/89.0.4389.82 Safari/537.36'
 }
-transactions_api = TransactionsAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
-balances_api = BalancesAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
-transactions_api = TransactionsAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
+transactions_api = TransactionsAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
+balances_api = BalancesAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
 # Sniper/Large holder check#
 """
     largest_holder = str(data[0])  DONE
@@ -96,7 +95,7 @@ def check_holders(token_address, token_supply):
 def check_for_large_holder(token_address, token_supp):  # instead of recomputing how about tracking the wallets
     # associated to largest holder
     holders = []
-    URI = "https://mainnet.helius-rpc.com/?api-key=3e1717e1-bf69-45ae-af63-361e43b78961"
+    URI = "https://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
     solana_client = Client(URI)
     holder_result = request('GET',
                             "https://pro-api.solscan.io/v1.0/token/holders?tokenAddress=" + str(

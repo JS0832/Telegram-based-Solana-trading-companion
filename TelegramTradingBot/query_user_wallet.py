@@ -1,6 +1,6 @@
 from helius import BalancesAPI
 
-balances_api = BalancesAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
+balances_api = BalancesAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
 
 
 def return_token_balances(wallet_address):  # up to 25 addresses return a string

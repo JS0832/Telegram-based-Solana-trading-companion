@@ -24,8 +24,8 @@ from solders.transaction_status import UiPartiallyDecodedInstruction, ParsedInst
 # Raydium Liquidity Pool V4
 RaydiumLPV4 = "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
 RaydiumLPV4 = Pubkey.from_string(RaydiumLPV4)
-URI = "https://mainnet.helius-rpc.com/?api-key=3e1717e1-bf69-45ae-af63-361e43b78961"
-WSS = "wss://mainnet.helius-rpc.com/?api-key=3e1717e1-bf69-45ae-af63-361e43b78961"
+URI = "https://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
+WSS = "wss://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
 solana_client = Client(URI)
 # Radium function call name, look at raydium-amm/program/src/instruction.rs
 log_instruction = "initialize2"
@@ -41,8 +41,8 @@ import subprocess
 from helius import BalancesAPI
 from helius import TransactionsAPI
 
-transactions_api = TransactionsAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
-balances_api = BalancesAPI("3e1717e1-bf69-45ae-af63-361e43b78961")  # my private key to the api
+transactions_api = TransactionsAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
+balances_api = BalancesAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")  # my private key to the api
 # from jsonrpcclient import request, parse, Ok
 import solana.transaction
 
@@ -440,6 +440,8 @@ def check_mint_wallet(liquidty_add_txn_hash, token_supp, token_add):
 #  [[token_address,checked=true/flase,passed=true or false,supply]]
 large_holder_check_queue = []
 
+removed_tokens_queue = []  # here i will jsut place any token that has very bad results
+
 
 # large_holder_check_queue.append([token[0],False,False,token[10],True])
 async def check_for_large_holder():
@@ -547,6 +549,7 @@ async def check_for_large_holder():
                         max_val = 70  # this is the danger zone of very high odds snipe
                         if any(val >= max_val for val in true_supply_held_by_top_twenty):
                             item[2] = False  # failed
+                            removed_tokens_queue.append(item[0])  # add address
                         else:
                             item[2] = True  # passed
                             item[5] = max(true_supply_held_by_top_twenty)
@@ -561,10 +564,11 @@ class TokenError(Exception):
 
 async def verify_token():  # figure out how to make this async (needs to be async) ( for now concurrent)
     print("Executing token verification thread....")
-    token_expiration_time = 3600  # 60 minutes in seconds
+    token_expiration_time = 2400  # 40 minutes in seconds
+    inital_checks_expiration_time = 900  # 15 minutes for initial checks
     minimum_token_sent_to_lp_percent = 60
     decimals = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}  # a list of allowable decimal amount
-    rpc_url = "https://mainnet.helius-rpc.com/?api-key=3e1717e1-bf69-45ae-af63-361e43b78961"
+    rpc_url = "https://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
     spl_executable = r'C:\\Users\MEMEdev\.local\share\solana\install\active_release\bin\spl-token.exe'  # for
     # checking mint
     special_meta_key = ["bafkrei", "mypinata", "ipfs.nftstorage.link"]  # for now, it will use this
@@ -585,6 +589,25 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                 token_queue.pop(index)  # remove the token from the queue as its expired
                 continue
             else:
+                if token[0] in removed_tokens_queue:
+                    print("removed token due to a bad holder result: " + str(token[0]))
+                    token_queue.pop(index)  # remove the token from the queue as its expired
+                    continue
+                # here also check if the token has not passed the initial checks after first 25 min then remove it
+                # because most likely rugged by now
+                if int(time.time()) - token[1] > inital_checks_expiration_time and not token[2]:  # 15 minutes passed
+                    # but not verified
+                    token_remove_errors.append(
+                        ["removed token since its initial checks aren't still validated ", token[0]])
+                    print("removed token since its initial checks aren't still validated ", token[0])
+                    temp = 0
+                    for item in large_holder_check_queue:
+                        if item[0] == token[0]:
+                            large_holder_check_queue.pop(temp)
+                            break
+                        temp += 1
+                    token_queue.pop(index)  # remove the token from the queue as its expired
+                    continue
                 if not token[2]:  # a boolean to save on api calls
                     if token[10] == 0:  # (used to wait for image uri to update)
                         token_amount_sent_to_lp_pool = 0  # to keep track how many tokens are sent to the pool
@@ -855,7 +878,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                     100))), token[
                                                                      8], total_held_string, five_above_string, token[0],
                                                                  token[3]])
-                                                            print("pinged token: "+str(token[0]))
+                                                            print("pinged token: " + str(token[0]))
                                                             sell_amount = 0
                                                             token_queue.pop(index)
                                                             continue
@@ -902,7 +925,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                     token_queue.pop(index)
                     continue
             index += 1
-        await asyncio.sleep(1)  # small pause
+        await asyncio.sleep(4)  # small pause
 
 
 def run():

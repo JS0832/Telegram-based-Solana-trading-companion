@@ -15,8 +15,8 @@ solscan_header = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/89.0.4389.82 Safari/537.36'
 }
-transactions_api = TransactionsAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
-balances_api = BalancesAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
+transactions_api = TransactionsAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
+balances_api = BalancesAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
 alchemy_url = "https://solana-mainnet.g.alchemy.com/v2/bzkveugN6acIccgGUJTetb95Sz0yo8W_"
 
 
@@ -42,7 +42,7 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
     liquidity_tx_info_json = liquidity_tx_info.json()
     root = str(liquidity_tx_info_json["signer"][0])
     token_address = token_d
-    URI = "https://mainnet.helius-rpc.com/?api-key=3e1717e1-bf69-45ae-af63-361e43b78961"
+    URI = "https://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
     solana_client = Client(URI)
     all_seen_wallets = []
     temp_associated_wallets = []  # (stack) for all associated wallets

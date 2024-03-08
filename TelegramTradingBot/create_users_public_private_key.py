@@ -2,7 +2,7 @@ from solana.rpc.api import Client, Keypair
 import base58
 from caesarcipher import CaesarCipher
 
-client2 = Client("https://mainnet.helius-rpc.com/?api-key=3e1717e1-bf69-45ae-af63-361e43b78961")
+client2 = Client("https://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
 
 
 def create_trading_wallet():  # used when the user first subscribes ( or when they wish to change their wallets)
