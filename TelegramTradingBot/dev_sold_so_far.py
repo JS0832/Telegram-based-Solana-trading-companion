@@ -1,13 +1,14 @@
 # here calculate if the dev sold anything so far and add their wallets for polling later
 from requests import request
 import time
+from solana.exceptions import SolanaRpcException
 from requests import request
 from helius import TransactionsAPI
 from helius import BalancesAPI
 import json
 from solana.rpc.api import Client, Pubkey
 import requests
-
+import solana
 solscan_header = {
     'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkQXQiOjE3MDY3NTM5ODAzOTQsImVtYWlsIjoic29sYmFieTMyNUBnbWFpbC5jb20iLCJhY3Rpb24iOiJ0b2tlbi1hcGkiLCJpYXQiOjE3MDY3NTM5ODB9.Lp77APFLV-rOnNbDzc1ob43Vp-9-KpeMe_b-fiOQrr0',
     'accept': 'application/json',
@@ -57,10 +58,16 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
             break  # done
         temp_wallet = temp_associated_wallets.pop()
         print("checking " + str(temp_wallet))
-        res = solana_client.get_signatures_for_address(
-            Pubkey.from_string(temp_wallet),
-            limit=12  # Specify how much last transactions to fetch
-        )
+        tx_count = 12
+        while True:
+            try:
+                res = solana_client.get_signatures_for_address(
+                    Pubkey.from_string(temp_wallet),
+                    limit=tx_count  # Specify how much last transactions to fetch
+                )
+                break
+            except solana.exceptions.SolanaRpcException:
+                tx_count = tx_count - 2  # decrement until we get to allowable amount
         transactions = json.loads(str(res.to_json()))["result"]
         for tx_hash in transactions:
             if str(tx_hash["signature"]) != txn_hash:  # ignoring liquidty add

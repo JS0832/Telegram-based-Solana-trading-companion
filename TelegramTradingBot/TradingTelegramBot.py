@@ -79,7 +79,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             # dev selling report:
             result = dev_sold_so_far.check_dev(txn_hash, token_ca)
             dev_wallets_dict[token_ca] = result[1]
-            percent_amount = result[0]
+            percent_amount = str(result[0]).replace('.', ',')
             # extract data from the ping queue
             markup = types.InlineKeyboardMarkup(row_width=7)
             t_settings = types.InlineKeyboardButton("Settings", callback_data="trading_settings")
@@ -114,7 +114,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                                           f"token summary : *Coming Soon* \n🐋 "
                                                                           f"Largest Cumulative"
                                                                           f"holder : *{
-                                                                          largest_holder}*\nDev sold : {percent_amount} percent so far\n🎉 Initial Liquidity :"
+                                                                          largest_holder}*\n🎗 Dev sold : {percent_amount} percent so far\n🎉 Initial Liquidity :"
                                                                           f"*{inital_liq}*\n🔥 Liquidity Burned : "
                                                                           f"*{liq_burned}*\n🌊 Tokens sent to LP : "
                                                                           f"*{tokens_to_lp_percent}*\n💳 "
@@ -130,7 +130,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                reply_markup=markup, parse_mode='MarkdownV2')
             new_bot.ping_queue.pop(0)  # remove from the queue (FIFO)
         await asyncio.sleep(1)
-
+#add scoails commands
+#add all list comands too
 
 @bot.message_handler(commands=['positions'])  #
 async def check_open_positions(message):  # handle user positions

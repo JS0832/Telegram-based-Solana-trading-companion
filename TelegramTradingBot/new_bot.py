@@ -902,7 +902,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                     token_queue.pop(index)
                     continue
             index += 1
-        await asyncio.sleep(0.6)  # small pause
+        await asyncio.sleep(1)  # small pause
 
 
 def run():
