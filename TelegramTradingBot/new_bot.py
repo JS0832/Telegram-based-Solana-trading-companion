@@ -496,11 +496,16 @@ async def check_for_large_holder():
                                         if str(token["mint"]) == token_addy:
                                             temp_total_spl_balance += int(float(token["amount"])) / 10 ** float(
                                                 token["decimals"])
-
-                                    res = solana_client.get_signatures_for_address(
-                                        Pubkey.from_string(temp_wallet),
-                                        limit=5  # Specify how much last transactions to fetch
-                                    )
+                                    tx_count = 8
+                                    while True:
+                                        try:
+                                            res = solana_client.get_signatures_for_address(
+                                                Pubkey.from_string(temp_wallet),
+                                                limit=tx_count  # Specify how much last transactions to fetch
+                                            )
+                                            break
+                                        except solana.exceptions.SolanaRpcException:
+                                            tx_count = tx_count - 2  # decrement until we get to allowable amount
                                     transactions = json.loads(str(res.to_json()))["result"]
                                     for spl_transfer in transactions:  # loop over all transaction per give wallet
                                         parsed_transactions = transactions_api.get_parsed_transactions(
@@ -610,7 +615,6 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                             "content-type": "application/json"
                         }
                         get_supply_response = requests.post(alchemy_url, json=payload, headers=alchemy_headers)
-                        print(get_supply_response)
                         token[10] = int(float(get_supply_response.json()["result"]['value']["uiAmountString"]))
                     try:  # try doing it all with rpc soon
                         req = request('GET',
@@ -851,6 +855,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                     100))), token[
                                                                      8], total_held_string, five_above_string, token[0],
                                                                  token[3]])
+                                                            print("pinged token: "+str(token[0]))
                                                             sell_amount = 0
                                                             token_queue.pop(index)
                                                             continue

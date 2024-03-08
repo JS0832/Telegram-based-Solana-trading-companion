@@ -18,7 +18,9 @@ transactions_api = TransactionsAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
 balances_api = BalancesAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
 alchemy_url = "https://solana-mainnet.g.alchemy.com/v2/bzkveugN6acIccgGUJTetb95Sz0yo8W_"
 
+
 def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking the wallets
+    print("checking dev selling activity... for token: "+str(token_d))
     payload = {
         "id": 1,
         "jsonrpc": "2.0",
@@ -82,6 +84,7 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
                                     print("received from wallet " + str(tx_items["toUserAccount"]))
                                     temp_associated_wallets.append(str(tx_items["fromUserAccount"]))
         all_seen_wallets.append(temp_wallet)
+    print("for token "+str(token_d)+" dev sold: "+str(total_sold / token_supply * 100))
     return total_sold / token_supply * 100, all_seen_wallets  # dev selling amount in relation to the total supply
 
 
