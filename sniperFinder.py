@@ -8,14 +8,14 @@ solscan_header = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/89.0.4389.82 Safari/537.36'
 }
-transactions_api = TransactionsAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
-balances_api = BalancesAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
-transactions_api = TransactionsAPI("3e1717e1-bf69-45ae-af63-361e43b78961")
+transactions_api = TransactionsAPI("962e2148-dad7-4760-896b-ca30883f14f1")
+balances_api = BalancesAPI("962e2148-dad7-4760-896b-ca30883f14f1")
+transactions_api = TransactionsAPI("962e2148-dad7-4760-896b-ca30883f14f1")
 
 
 def main():
-    token = "3WthbuHxUxD9DpYezeSxa5KH3LfpJpseGHtS1DiSRpfr"
-    check_for_large_holder(token, 1000000000)
+    token = "bsAwuVJMPAazbQSVpPQND69mvwftQutZhxpWqsf2BUE"
+    check_for_large_holder(token, 69420000)
 
 
 # optimise and possibly show updates
@@ -30,7 +30,7 @@ def check_for_large_holder(token_address, token_supp):
         if int(holder_list["total"]) > 8:
             iterator = 0
             for holder in holder_list["data"]:
-                if iterator > 8:
+                if iterator > 25:
                     break
                 if str(holder["owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # raydium pool
                     holders.append(str(holder["owner"]))

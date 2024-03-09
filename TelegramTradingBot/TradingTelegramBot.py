@@ -10,6 +10,7 @@ import buy_jupiter
 import query_user_wallet
 import threading
 import dev_sold_so_far
+import calcualte_risk_level
 
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
@@ -60,7 +61,6 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             decentralisation = str(data[4])
             whale_holders = str(data[5])
             token_ca = str(data[6])
-            risk_level = "Coming soon"
             past_token_list = dev_previous_projects.check_previous_project(txn_hash, token_ca)
             advnaced_rug = check_advanced_rug.check(token_ca)  # add this to the refresh (query token code)
             if advnaced_rug == "Extremely High":
@@ -80,6 +80,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             if int(result[0]) > 2:  # dev selling early is bearish
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
+            risk_level = calcualte_risk_level.process_risk(advnaced_rug, largest_holder, result[0],tokens_to_lp_percent, decentralisation)
             dev_wallets_dict[token_ca] = result[1]
             percent_amount = str(result[0]).replace('.', ',')
             # extract data from the ping queue
@@ -122,7 +123,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                                           f"Decentralisation :  "
                                                                           f"*{decentralisation}*\n🐳 Number of whale "
                                                                           f"holders : *{whale_holders}*\n⚰️ Advanced "
-                                                                          f"Rug : *{advnaced_rug}*\n🩸 Risk"
+                                                                          f"Rug : *{advnaced_rug}*\n🩸 Risk "
                                                                           f"Level : *{risk_level}*\n\n📈 [Token Chart]("
                                                                           f"https://dexscreener.com/solana/{token_ca})"
                                                                           f"\n📱 [Telegram]("
@@ -974,7 +975,8 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             whale_holders = str(response[2])
             token_ca = str(token_ca)
             risk_level = "Coming soon"
-            dev_sell = str(dev_sold_so_far.check_wallet_balanced(dev_wallets_dict[token_ca], token_ca)).replace('.', ',')
+            dev_sell = str(dev_sold_so_far.check_wallet_balanced(dev_wallets_dict[token_ca], token_ca)).replace('.',
+                                                                                                                ',')
             refreshed_info = types.InlineKeyboardMarkup(row_width=1)
             hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
             refreshed_info.add(hide_refreshed_info)
@@ -984,7 +986,8 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                                                          f"Decentralisation :  "
                                                          f"*{decentralisation}*\n🐳 Number of whale "
                                                          f"holders : *{whale_holders}*\n🩸 Risk "
-                                                         f"Level : *{risk_level}*\n💁🏽 Dev Balance: {dev_sell} Percent", parse_mode='MarkdownV2',
+                                                         f"Level : *{risk_level}*\n💁🏽 Dev Balance: {dev_sell} Percent",
+                                   parse_mode='MarkdownV2',
                                    reply_markup=refreshed_info)
         elif response_value.split()[0] == "hide_refreshed_info":
             await bot.delete_message(user_id, msg_to_remove)
