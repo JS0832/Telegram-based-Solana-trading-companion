@@ -83,17 +83,15 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             dev_wallets_dict[token_ca] = result[1]
             percent_amount = str(result[0]).replace('.', ',')
             # extract data from the ping queue
-            markup = types.InlineKeyboardMarkup(row_width=7)
+            markup = types.InlineKeyboardMarkup(row_width=6)
             t_settings = types.InlineKeyboardButton("Settings", callback_data="trading_settings")
             buy = types.InlineKeyboardButton("Buy", callback_data="trigger_buy " + str(data[6]))
             sell = types.InlineKeyboardButton("Sell", callback_data="trigger_sell " + str(data[6]))
             refresh = types.InlineKeyboardButton("Refresh Info", callback_data="refresh " + str(data[6]))
             positions = types.InlineKeyboardButton("Check all positions", callback_data="positions")
-            listen_to_dev = types.InlineKeyboardButton("refresh Dev selling",
-                                                       callback_data="refresh_dev " + str(data[6]))
             info = types.InlineKeyboardButton("Info", callback_data="info")
             share = types.InlineKeyboardButton("Share PNL", callback_data="pnl")
-            markup.add(t_settings, buy, sell, refresh, positions, share, info, listen_to_dev)
+            markup.add(t_settings, buy, sell, refresh, positions, share, info)
             for user in list_of_users:  # just so I can debug
                 full_configuration = trading_db.return_all_settings(user[0])
                 if full_configuration[9] == "True":  # if active trading user
@@ -111,7 +109,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                             ekey = full_configuration[2]
                             buy_queue.append([token_ca, sol_amount, slippage, ekey, int(user[0])])
                         await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token : `{token_ca}`\n\n😈 SAFU "
-                                                                          f"Parameters:"
+                                                                          f"Parameters: "
                                                                           f"Liquidty Burned and Mint Disabled 🍀"
                                                                           f"\n🤖 AI "
                                                                           f"token summary : *Coming Soon* \n🐋 "
@@ -971,7 +969,6 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             await bot.send_message(user_id, "Processing Request Please be patient,The AI is recomputing token "
                                             "metrics...")
             response = query_token.main_query(token_ca)
-            print("fff")
             largest_holder = str(response[0])  # 1
             decentralisation = str(response[1]) + " % held by top 10"
             whale_holders = str(response[2])
@@ -983,9 +980,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             refreshed_info.add(hide_refreshed_info)
             # have dev selling report here i think instead a separate dev wallet
             await bot.send_message(chat_id=user_id, text=f"🤑 Refreshed Token Metrics : `{token_ca}`\nToken metrics "
-                                                         f"that do not change have been omitted\n\n🐋 Largest Cumulative"
-                                                         f" Holder : *{
-                                                         largest_holder}*\n💳 "
+                                                         f"that do not change have been omitted\n\n💳 "
                                                          f"Decentralisation :  "
                                                          f"*{decentralisation}*\n🐳 Number of whale "
                                                          f"holders : *{whale_holders}*\n🩸 Risk "

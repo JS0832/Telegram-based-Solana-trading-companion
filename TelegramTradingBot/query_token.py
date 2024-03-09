@@ -36,7 +36,6 @@ def main_query(token_ca):
         "accept": "application/json",
         "content-type": "application/json"
     }
-    print(token_ca)
     get_supply_response = requests.post(alchemy_url, json=payload, headers=alchemy_headers)
     token_supply = int(float(get_supply_response.json()["result"]['value']["uiAmountString"]))
     temp = check_holders(token_ca, token_supply)
