@@ -9,6 +9,7 @@ import json
 from solana.rpc.api import Client, Pubkey
 import requests
 import solana
+
 solscan_header = {
     'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkQXQiOjE3MDY3NTM5ODAzOTQsImVtYWlsIjoic29sYmFieTMyNUBnbWFpbC5jb20iLCJhY3Rpb24iOiJ0b2tlbi1hcGkiLCJpYXQiOjE3MDY3NTM5ODB9.Lp77APFLV-rOnNbDzc1ob43Vp-9-KpeMe_b-fiOQrr0',
     'accept': 'application/json',
@@ -21,7 +22,7 @@ alchemy_url = "https://solana-mainnet.g.alchemy.com/v2/bzkveugN6acIccgGUJTetb95S
 
 
 def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking the wallets
-    print("checking dev selling activity... for token: "+str(token_d))
+    print("checking dev selling activity... for token: " + str(token_d))
     payload = {
         "id": 1,
         "jsonrpc": "2.0",
@@ -52,6 +53,8 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
     all_seen_wallets.append(root)
     total_sold = 0
     while True:  # here traverse all wallets connected to one wallet and count the total supply holding.
+        if len(all_seen_wallets) > 15:  # dev is trying to hide tokens clearly so no need to really compute more
+            return 100.0, []
         if len(temp_associated_wallets) > 0:
             pass
         else:
@@ -91,7 +94,7 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
                                     print("received from wallet " + str(tx_items["toUserAccount"]))
                                     temp_associated_wallets.append(str(tx_items["fromUserAccount"]))
         all_seen_wallets.append(temp_wallet)
-    print("for token "+str(token_d)+" dev sold: "+str(total_sold / token_supply * 100))
+    print("for token " + str(token_d) + " dev sold: " + str(total_sold / token_supply * 100))
     return total_sold / token_supply * 100, all_seen_wallets  # dev selling amount in relation to the total supply
 
 

@@ -74,7 +74,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                     past_tokens_string += f"📈 [Previous Project {iterator}]({temp_string})\n"
                     iterator += 1
             else:
-                past_tokens_string = "None Detected Except this token"
+                past_tokens_string = " *None Detected Except this token*"
 
             # dev selling report:
             result = dev_sold_so_far.check_dev(txn_hash, token_ca)
@@ -87,7 +87,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             sell = types.InlineKeyboardButton("Sell", callback_data="trigger_sell " + str(data[0]))
             refresh = types.InlineKeyboardButton("Refresh Info", callback_data="refresh " + str(data[0]))
             positions = types.InlineKeyboardButton("Check all positions", callback_data="positions")
-            listen_to_dev = types.InlineKeyboardButton("refresh to Dev selling", callback_data="refresh_dev")
+            listen_to_dev = types.InlineKeyboardButton("refresh Dev selling",
+                                                       callback_data="refresh_dev " + str(data[0]))
             info = types.InlineKeyboardButton("Info", callback_data="info")
             share = types.InlineKeyboardButton("Share PNL", callback_data="pnl")
             markup.add(t_settings, buy, sell, refresh, positions, share, info, listen_to_dev)
@@ -130,8 +131,10 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                reply_markup=markup, parse_mode='MarkdownV2')
             new_bot.ping_queue.pop(0)  # remove from the queue (FIFO)
         await asyncio.sleep(1)
-#add scoails commands
-#add all list comands too
+
+
+# add scoails commands
+# add all list comands too
 
 @bot.message_handler(commands=['positions'])  #
 async def check_open_positions(message):  # handle user positions

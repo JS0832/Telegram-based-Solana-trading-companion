@@ -444,7 +444,7 @@ removed_tokens_queue = []  # here i will jsut place any token that has very bad 
 
 
 # large_holder_check_queue.append([token[0],False,False,token[10],True])
-async def check_for_large_holder():
+async def check_for_large_holder():  # here maybe mostly focus on wallets with a low tx count too?
     while True:
         if len(large_holder_check_queue) > 0:
             index = 0
@@ -477,6 +477,20 @@ async def check_for_large_holder():
                     token_supply = token_supp
                     true_supply_held_by_top_twenty = []  # this list will show true token holdings by the top 20 holders
                     for holder in holders:
+                        try:
+                            res = solana_client.get_signatures_for_address(
+                                Pubkey.from_string(str(holder)),
+                                limit=25  # Specify how much last transactions to fetch
+                            )
+                            transactions = json.loads(str(res.to_json()))["result"]
+                            temp_count = 0
+                            for tx in transactions:
+                                temp_count += 1
+                            if temp_count > 15:  # this wallet is probably safe
+
+                                continue
+                        except ValueError:
+                            continue
                         if holder not in all_seen_wallets:
                             print("checking holder: " + str(holder))
                             temp_associated_wallets = []  # for each holder checked (stack)
@@ -486,7 +500,7 @@ async def check_for_large_holder():
                             temp_total_spl_balance = 0
                             while True:  # here traverse all wallets connected to one wallet and count the total
                                 if len(all_seen_wallets) > 15:  # not good
-                                    true_supply_held_by_top_twenty.append(100)#we dont want this token
+                                    true_supply_held_by_top_twenty.append(100)  # we dont want this token
                                     break
                                 # supply holding.
                                 if len(temp_associated_wallets) > 0:  # means there is more to check
