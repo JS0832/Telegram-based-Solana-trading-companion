@@ -1,5 +1,6 @@
 from helius import BalancesAPI
-
+import helius_api_key
+helius_key = helius_api_key.hel_api_key
 balances_api = BalancesAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
 
 

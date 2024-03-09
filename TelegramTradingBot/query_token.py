@@ -5,7 +5,8 @@ from helius import BalancesAPI
 import requests
 import json
 from solana.rpc.api import Client, Pubkey
-
+import helius_api_key
+helius_key = helius_api_key.hel_api_key
 solscan_header = {
     'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkQXQiOjE3MDY3NTM5ODAzOTQsImVtYWlsIjoic29sYmFieTMyNUBnbWFpbC5jb20iLCJhY3Rpb24iOiJ0b2tlbi1hcGkiLCJpYXQiOjE3MDY3NTM5ODB9.Lp77APFLV-rOnNbDzc1ob43Vp-9-KpeMe_b-fiOQrr0',
     'accept': 'application/json',

@@ -45,7 +45,8 @@ transactions_api = TransactionsAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
 balances_api = BalancesAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")  # my private key to the api
 # from jsonrpcclient import request, parse, Ok
 import solana.transaction
-
+import helius_api_key
+helius_key = helius_api_key.hel_api_key
 token_queue = []  # [token addy,epoch time,verified previously? (bool)]
 past_tokens = []  # all tokens (to not allow replicate)
 token_remove_errors = []  # [[token,reason],...]

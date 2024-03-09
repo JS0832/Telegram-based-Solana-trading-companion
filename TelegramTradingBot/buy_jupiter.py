@@ -13,7 +13,8 @@ from solana.rpc.commitment import Processed
 from jupiter_python_sdk.jupiter import Jupiter
 from caesarcipher import CaesarCipher
 import tradingDataBase  # for inserting new positions
-
+import helius_api_key
+helius_key = helius_api_key.hel_api_key
 async_client = AsyncClient("https://mainnet.helius-rpc.com/?api-key=3e1717e1-bf69-45ae-af63-361e43b78961")
 order_queue = []  # soon will implement this
 

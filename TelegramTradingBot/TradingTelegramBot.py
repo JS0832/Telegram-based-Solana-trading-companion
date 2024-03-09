@@ -74,10 +74,10 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                     past_tokens_string += f"📈 [Previous Project {iterator}]({temp_string})\n"
                     iterator += 1
             else:
-                past_tokens_string = " *None Detected !*"
+                past_tokens_string = " *None Detected 😇*"
             # dev selling report:
             result = dev_sold_so_far.check_dev(txn_hash, token_ca)
-            if int(result) > 2:  # dev selling early is bearish
+            if int(result[0]) > 2:  # dev selling early is bearish
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
             dev_wallets_dict[token_ca] = result[1]
@@ -977,10 +977,11 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             whale_holders = str(response[2])
             token_ca = str(token_ca)
             risk_level = "Coming soon"
+            dev_sell = str(dev_sold_so_far.check_wallet_balanced(dev_wallets_dict[token_ca], token_ca)).replace('.', ',')
             refreshed_info = types.InlineKeyboardMarkup(row_width=1)
             hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
             refreshed_info.add(hide_refreshed_info)
-            # have dev sellign report here i think instead a seperate dev wallet
+            # have dev selling report here i think instead a separate dev wallet
             await bot.send_message(chat_id=user_id, text=f"🤑 Refreshed Token Metrics : `{token_ca}`\nToken metrics "
                                                          f"that do not change have been omitted\n\n🐋 Largest Cumulative"
                                                          f" Holder : *{
@@ -988,7 +989,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                                                          f"Decentralisation :  "
                                                          f"*{decentralisation}*\n🐳 Number of whale "
                                                          f"holders : *{whale_holders}*\n🩸 Risk "
-                                                         f"Level : *{risk_level}*", parse_mode='MarkdownV2',
+                                                         f"Level : *{risk_level}*\n💁🏽 Dev Balance: {dev_sell} Percent", parse_mode='MarkdownV2',
                                    reply_markup=refreshed_info)
         elif response_value.split()[0] == "hide_refreshed_info":
             await bot.delete_message(user_id, msg_to_remove)
