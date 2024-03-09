@@ -35,13 +35,14 @@ def main_query(token_ca):
         "accept": "application/json",
         "content-type": "application/json"
     }
+    print(token_ca)
     get_supply_response = requests.post(alchemy_url, json=payload, headers=alchemy_headers)
     token_supply = int(float(get_supply_response.json()["result"]['value']["uiAmountString"]))
     temp = check_holders(token_ca, token_supply)
     decentralisation = temp[0]
     whale_holders = temp[1]
-    largest_holder = check_for_large_holder(token_ca, token_supply)
-    return [largest_holder, decentralisation, whale_holders]
+    # largest_holder = check_for_large_holder(token_ca, token_supply)
+    return ["UPDATE SOON", decentralisation, whale_holders]
 
 
 def check_holders(token_address, token_supply):
@@ -59,6 +60,7 @@ def check_holders(token_address, token_supply):
                                 token_address) + "&limit=13&offset=0",
                             headers=solscan_header)
     holder_list = holder_result.json()
+
     five_or_above = 0  # number of holders that have 5%+
     total_supply_held = 0  # amount fo supply top 10 holders hold
     amount_of_coins_for_five_percent = \
@@ -131,7 +133,7 @@ def check_for_large_holder(token_address, token_supp):  # instead of recomputing
                         if str(token["mint"]) == token_addy:
                             temp_total_spl_balance += int(float(token["amount"]) / 10 ** float(token["decimals"]))
                     res = solana_client.get_signatures_for_address(
-                        Pubkey.from_string('459JAd5ibXmNdAZTUEPQ5uC9wCWBaJ1stpqunfQy96gc'),
+                        Pubkey.from_string('459JAd5ibXmNdAZTUEPQ5uC9wCWBaJ1stpqunfQy96gc'),#SHOUDLTN BE THIS WALLET
                         limit=5  # Specify how much last transactions to fetch
                     )
                     transactions = json.loads(str(res.to_json()))["result"]

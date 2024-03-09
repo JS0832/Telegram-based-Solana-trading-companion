@@ -74,21 +74,23 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                     past_tokens_string += f"📈 [Previous Project {iterator}]({temp_string})\n"
                     iterator += 1
             else:
-                past_tokens_string = " *None Detected Except this token*"
-
+                past_tokens_string = " *None Detected !*"
             # dev selling report:
             result = dev_sold_so_far.check_dev(txn_hash, token_ca)
+            if int(result) > 2:  # dev selling early is bearish
+                new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
+                continue
             dev_wallets_dict[token_ca] = result[1]
             percent_amount = str(result[0]).replace('.', ',')
             # extract data from the ping queue
             markup = types.InlineKeyboardMarkup(row_width=7)
             t_settings = types.InlineKeyboardButton("Settings", callback_data="trading_settings")
-            buy = types.InlineKeyboardButton("Buy", callback_data="trigger_buy " + str(data[0]))
-            sell = types.InlineKeyboardButton("Sell", callback_data="trigger_sell " + str(data[0]))
-            refresh = types.InlineKeyboardButton("Refresh Info", callback_data="refresh " + str(data[0]))
+            buy = types.InlineKeyboardButton("Buy", callback_data="trigger_buy " + str(data[6]))
+            sell = types.InlineKeyboardButton("Sell", callback_data="trigger_sell " + str(data[6]))
+            refresh = types.InlineKeyboardButton("Refresh Info", callback_data="refresh " + str(data[6]))
             positions = types.InlineKeyboardButton("Check all positions", callback_data="positions")
             listen_to_dev = types.InlineKeyboardButton("refresh Dev selling",
-                                                       callback_data="refresh_dev " + str(data[0]))
+                                                       callback_data="refresh_dev " + str(data[6]))
             info = types.InlineKeyboardButton("Info", callback_data="info")
             share = types.InlineKeyboardButton("Share PNL", callback_data="pnl")
             markup.add(t_settings, buy, sell, refresh, positions, share, info, listen_to_dev)
@@ -969,14 +971,16 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             await bot.send_message(user_id, "Processing Request Please be patient,The AI is recomputing token "
                                             "metrics...")
             response = query_token.main_query(token_ca)
+            print("fff")
             largest_holder = str(response[0])  # 1
             decentralisation = str(response[1]) + " % held by top 10"
             whale_holders = str(response[2])
             token_ca = str(token_ca)
             risk_level = "Coming soon"
-            refreshed_info = types.InlineKeyboardMarkup(row_width=6)
+            refreshed_info = types.InlineKeyboardMarkup(row_width=1)
             hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
             refreshed_info.add(hide_refreshed_info)
+            # have dev sellign report here i think instead a seperate dev wallet
             await bot.send_message(chat_id=user_id, text=f"🤑 Refreshed Token Metrics : `{token_ca}`\nToken metrics "
                                                          f"that do not change have been omitted\n\n🐋 Largest Cumulative"
                                                          f" Holder : *{

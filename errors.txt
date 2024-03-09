@@ -3907,3 +3907,8 @@
 ["removed token since its initial checks aren't still validated ", '8bhmGN1j975Q46K4ZMvt4sWWgDiwiB1ZXSrX23hQyHVr']
 ["removed token since its initial checks aren't still validated ", '3i9T8hwdR7n9SPHL4mocy1mewjNvE8dUtzztoKvELqTD']
 ["removed token since its initial checks aren't still validated ", 'CYfXmHtRp4giRTZ1GobJGajdGgCao3VXiiyqU4aUaXVP']
+['removed token due to low initial liquidity :  ', '67udEAWLVRYXZsafugY2wEKnkRw2AjC9hQVr2twKcR2B']
+['removed token due to low token ratio added to the lp pool:  ', 'XLLRknzUf2rYp1uwsMaL2iutqAV1y6JMs8qxuVaiE9V']
+['removed token due to very low amount of  tokens sent to lp pool ', 'WUofaYKCZhdPC3tK56yrbTrkUoGi5wFZxN4gTZMeGbj']
+['removed token due to low initial liquidity :  ', 'BPZo2BEHcuM7V5PJ6zoasmTDtBEN5N1RnzvmJ7oJq7as']
+['removed token due to low token ratio added to the lp pool:  ', '4WkG8Aa2daN34D65kbp3zRiARZXF9HmEGEDwQrQ9BABE']
