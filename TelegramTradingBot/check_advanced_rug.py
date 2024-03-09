@@ -5,10 +5,12 @@ import requests
 from helius import BalancesAPI
 import query_user_wallet
 import helius_api_key
+
 helius_key = helius_api_key.hel_api_key
 balances_api = BalancesAPI(helius_key)
-URI = "https://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
+URI = "https://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
 from requests import request
+
 solana_client = Client(URI)
 
 solscan_header = {
@@ -69,7 +71,7 @@ def check(token_address):
     except KeyError:
         print("error check:" + str(holder_list))
     low_tx_count_sum = sum(i <= 6 for i in holder_tx_per_wallet_list)
-    supply_percent_held_by_low_tx_wallets = int(balance_sum/get_total_supply * 100)
+    supply_percent_held_by_low_tx_wallets = int(balance_sum / get_total_supply * 100)
     if low_tx_count_sum <= 3:
         return "Low"
     elif 3 < low_tx_count_sum < 6:

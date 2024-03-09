@@ -21,12 +21,13 @@ from solders.rpc.responses import RpcLogsResponse, SubscriptionResult, LogsNotif
 from solders.signature import Signature
 from solders.transaction_status import UiPartiallyDecodedInstruction, ParsedInstruction
 import helius_api_key
+
 helius_key = helius_api_key.hel_api_key
 # Raydium Liquidity Pool V4
 RaydiumLPV4 = "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
 RaydiumLPV4 = Pubkey.from_string(RaydiumLPV4)
-URI = "https://mainnet.helius-rpc.com/?api-key="+str(helius_key)
-WSS = "wss://mainnet.helius-rpc.com/?api-key="+str(helius_key)
+URI = "https://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
+WSS = "wss://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
 solana_client = Client(URI)
 # Radium function call name, look at raydium-amm/program/src/instruction.rs
 log_instruction = "initialize2"
@@ -46,6 +47,7 @@ transactions_api = TransactionsAPI(helius_key)
 balances_api = BalancesAPI(helius_key)  # my private key to the api
 # from jsonrpcclient import request, parse, Ok
 import solana.transaction
+
 token_queue = []  # [token addy,epoch time,verified previously? (bool)]
 past_tokens = []  # all tokens (to not allow replicate)
 token_remove_errors = []  # [[token,reason],...]
@@ -443,6 +445,10 @@ large_holder_check_queue = []
 removed_tokens_queue = []  # here i will jsut place any token that has very bad results
 
 
+class StopSniperCheck(Exception):
+    pass
+
+
 # large_holder_check_queue.append([token[0],False,False,token[10],True])
 async def check_for_large_holder():  # here maybe mostly focus on wallets with a low tx count too?
     while True:
@@ -476,92 +482,94 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                     token_addy = token_address
                     token_supply = token_supp
                     true_supply_held_by_top_twenty = []  # this list will show true token holdings by the top 20 holders
-                    for holder in holders:
-                        try:
-                            res = solana_client.get_signatures_for_address(
-                                Pubkey.from_string(str(holder)),
-                                limit=25  # Specify how much last transactions to fetch
-                            )
-                            transactions = json.loads(str(res.to_json()))["result"]
-                            temp_count = 0
-                            for tx in transactions:
-                                temp_count += 1
-                            if temp_count > 15:  # this wallet is probably safe
-
+                    try:
+                        for holder in holders:
+                            try:
+                                res = solana_client.get_signatures_for_address(
+                                    Pubkey.from_string(str(holder)),
+                                    limit=25  # Specify how much last transactions to fetch
+                                )
+                                transactions = json.loads(str(res.to_json()))["result"]
+                                temp_count = 0
+                                for tx in transactions:
+                                    temp_count += 1
+                                if temp_count > 20:  # this wallet is probably safe ( no need to compute it)
+                                    continue
+                            except ValueError:
                                 continue
-                        except ValueError:
-                            continue
-                        if holder not in all_seen_wallets:
-                            print("checking holder: " + str(holder))
-                            temp_associated_wallets = []  # for each holder checked (stack)
-                            root = holder
-                            temp_associated_wallets.append(root)
-                            all_seen_wallets.append(root)
-                            temp_total_spl_balance = 0
-                            while True:  # here traverse all wallets connected to one wallet and count the total
-                                if len(all_seen_wallets) > 15:  # not good
-                                    true_supply_held_by_top_twenty.append(100)  # we dont want this token
-                                    break
-                                # supply holding.
-                                if len(temp_associated_wallets) > 0:  # means there is more to check
-                                    temp_wallet = str(temp_associated_wallets.pop())
-                                    try:
-                                        balances = balances_api.get_balances(temp_wallet)
-                                    except ValueError:
-                                        print("error reading address...ignoring the wallet" + str(temp_wallet))
-                                        continue
-                                    spl_balance = balances["tokens"]
-                                    for token in spl_balance:
-                                        if str(token["mint"]) == token_addy:
-                                            temp_total_spl_balance += int(float(token["amount"])) / 10 ** float(
-                                                token["decimals"])
-                                    tx_count = 8
-                                    while True:
+                            if holder not in all_seen_wallets:
+                                print("checking holder: " + str(holder))
+                                temp_associated_wallets = []  # for each holder checked (stack)
+                                root = holder
+                                temp_associated_wallets.append(root)
+                                all_seen_wallets.append(root)
+                                temp_total_spl_balance = 0
+                                while True:  # here traverse all wallets connected to one wallet and count the total
+                                    if len(temp_associated_wallets) > 15:  # not good
+                                        true_supply_held_by_top_twenty.append(100)  # we don't want this token
+                                        raise StopSniperCheck #too many
+                                    # supply holding.
+                                    if len(temp_associated_wallets) > 0:  # means there is more to check
+                                        temp_wallet = str(temp_associated_wallets.pop())
                                         try:
-                                            res = solana_client.get_signatures_for_address(
-                                                Pubkey.from_string(temp_wallet),
-                                                limit=tx_count  # Specify how much last transactions to fetch
-                                            )
-                                            break
-                                        except solana.exceptions.SolanaRpcException:
-                                            tx_count = tx_count - 2  # decrement until we get to allowable amount
-                                    if tx_count == 0:
-                                        continue
-                                    transactions = json.loads(str(res.to_json()))["result"]
-                                    for spl_transfer in transactions:  # loop over all transaction per give wallet
-                                        parsed_transactions = transactions_api.get_parsed_transactions(
-                                            transactions=[spl_transfer["signature"]])
-                                        if len(parsed_transactions) > 0:
-                                            if "tokenTransfers" in parsed_transactions[0]:
-                                                if len(parsed_transactions[0]["tokenTransfers"]) > 0:
-                                                    for tx_items in parsed_transactions[0]["tokenTransfers"]:
-                                                        if str(tx_items["mint"]) == token_addy:
-                                                            if str(tx_items["toUserAccount"]) == temp_wallet:
-                                                                if str(tx_items[
-                                                                           "fromUserAccount"]) not in all_seen_wallets:
+                                            balances = balances_api.get_balances(temp_wallet)
+                                        except ValueError:
+                                            print("error reading address...ignoring the wallet" + str(temp_wallet))
+                                            continue
+                                        spl_balance = balances["tokens"]
+                                        for token in spl_balance:
+                                            if str(token["mint"]) == token_addy:
+                                                temp_total_spl_balance += int(float(token["amount"])) / 10 ** float(
+                                                    token["decimals"])
+                                        tx_count = 8
+                                        while True:
+                                            try:
+                                                res = solana_client.get_signatures_for_address(
+                                                    Pubkey.from_string(temp_wallet),
+                                                    limit=tx_count  # Specify how much last transactions to fetch
+                                                )
+                                                break
+                                            except solana.exceptions.SolanaRpcException:
+                                                tx_count = tx_count - 2  # decrement until we get to allowable amount
+                                        if tx_count == 0:
+                                            continue
+                                        transactions = json.loads(str(res.to_json()))["result"]
+                                        for spl_transfer in transactions:  # loop over all transaction per give wallet
+                                            parsed_transactions = transactions_api.get_parsed_transactions(
+                                                transactions=[spl_transfer["signature"]])
+                                            if len(parsed_transactions) > 0:
+                                                if "tokenTransfers" in parsed_transactions[0]:
+                                                    if len(parsed_transactions[0]["tokenTransfers"]) > 0:
+                                                        for tx_items in parsed_transactions[0]["tokenTransfers"]:
+                                                            if str(tx_items["mint"]) == token_addy:
+                                                                if str(tx_items["toUserAccount"]) == temp_wallet:
                                                                     if str(tx_items[
-                                                                               "fromUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1" and str(
-                                                                        tx_items[
-                                                                            "fromUserAccount"]) != "":
-                                                                        temp_associated_wallets.append(
-                                                                            str(tx_items["fromUserAccount"]))
-                                                                        all_seen_wallets.append(
-                                                                            str(tx_items["fromUserAccount"]))
-                                                            elif str(tx_items["fromUserAccount"]) == temp_wallet:
-                                                                if str(tx_items[
-                                                                           "toUserAccount"]) not in all_seen_wallets:
+                                                                               "fromUserAccount"]) not in all_seen_wallets:
+                                                                        if str(tx_items[
+                                                                                   "fromUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1" and str(
+                                                                            tx_items[
+                                                                                "fromUserAccount"]) != "":
+                                                                            temp_associated_wallets.append(
+                                                                                str(tx_items["fromUserAccount"]))
+                                                                            all_seen_wallets.append(
+                                                                                str(tx_items["fromUserAccount"]))
+                                                                elif str(tx_items["fromUserAccount"]) == temp_wallet:
                                                                     if str(tx_items[
-                                                                               "toUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":
-                                                                        temp_associated_wallets.append(
-                                                                            str(tx_items["toUserAccount"]))
-                                                                        all_seen_wallets.append(
-                                                                            str(tx_items["toUserAccount"]))
-                                            else:
-                                                print("strange error wallet: " + str(temp_wallet))
-                                else:
-                                    percentage = float(temp_total_spl_balance) / float(token_supply) * float(100)
-                                    true_supply_held_by_top_twenty.append(percentage)  # convert it as a percentage
-                                    break  # done
+                                                                               "toUserAccount"]) not in all_seen_wallets:
+                                                                        if str(tx_items[
+                                                                                   "toUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":
+                                                                            temp_associated_wallets.append(
+                                                                                str(tx_items["toUserAccount"]))
+                                                                            all_seen_wallets.append(
+                                                                                str(tx_items["toUserAccount"]))
+                                                else:
+                                                    print("strange error wallet: " + str(temp_wallet))
+                                    else:
+                                        percentage = float(temp_total_spl_balance) / float(token_supply) * float(100)
+                                        true_supply_held_by_top_twenty.append(percentage)  # convert it as a percentage
+                                        break  # done
+                    except StopSniperCheck:
+                        print("one wallet tied to many other wallets stoppign reading....")
                     if len(true_supply_held_by_top_twenty) == 0:
                         large_holder_check_queue.pop(index)
                     else:
@@ -587,7 +595,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
     inital_checks_expiration_time = 900  # 15 minutes for initial checks
     minimum_token_sent_to_lp_percent = 60
     decimals = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}  # a list of allowable decimal amount
-    rpc_url = "https://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
+    rpc_url = "https://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
     spl_executable = r'C:\\Users\MEMEdev\.local\share\solana\install\active_release\bin\spl-token.exe'  # for
     # checking mint
     special_meta_key = ["bafkrei", "mypinata", "ipfs.nftstorage.link"]  # for now, it will use this
