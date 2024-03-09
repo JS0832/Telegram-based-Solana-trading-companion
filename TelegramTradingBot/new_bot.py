@@ -466,7 +466,7 @@ async def check_for_large_holder():
                                 if iterator > 10:
                                     break
                                 if str(holder[
-                                           "owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # raydium pool
+                                           "owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # radium pool
                                     holders.append(str(holder["owner"]))
                                 iterator += 1
                         else:
@@ -485,6 +485,9 @@ async def check_for_large_holder():
                             all_seen_wallets.append(root)
                             temp_total_spl_balance = 0
                             while True:  # here traverse all wallets connected to one wallet and count the total
+                                if len(all_seen_wallets) > 15:  # not good
+                                    true_supply_held_by_top_twenty.append(100)#we dont want this token
+                                    break
                                 # supply holding.
                                 if len(temp_associated_wallets) > 0:  # means there is more to check
                                     temp_wallet = str(temp_associated_wallets.pop())
@@ -508,6 +511,8 @@ async def check_for_large_holder():
                                             break
                                         except solana.exceptions.SolanaRpcException:
                                             tx_count = tx_count - 2  # decrement until we get to allowable amount
+                                    if tx_count == 0:
+                                        continue
                                     transactions = json.loads(str(res.to_json()))["result"]
                                     for spl_transfer in transactions:  # loop over all transaction per give wallet
                                         parsed_transactions = transactions_api.get_parsed_transactions(

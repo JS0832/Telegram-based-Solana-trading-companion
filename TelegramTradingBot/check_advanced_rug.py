@@ -81,6 +81,7 @@ def check(token_address):
             return "Moderate"
     else:
         if supply_percent_held_by_low_tx_wallets > 30:
+            print("advanced rug confirmed")
             return "Extremely High"
         else:
             return "High"
