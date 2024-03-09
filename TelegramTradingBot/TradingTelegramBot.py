@@ -80,7 +80,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             if int(result[0]) > 2:  # dev selling early is bearish
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
-            risk_level = calcualte_risk_level.process_risk(advnaced_rug, largest_holder, result[0],tokens_to_lp_percent, decentralisation)
+            risk_level = calcualte_risk_level.process_risk(advnaced_rug, largest_holder, result[0],
+                                                           tokens_to_lp_percent, decentralisation)
             dev_wallets_dict[token_ca] = result[1]
             percent_amount = str(result[0]).replace('.', ',')
             # extract data from the ping queue
@@ -114,7 +115,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                                           f"Liquidty Burned and Mint Disabled 🍀"
                                                                           f"\n🤖 AI "
                                                                           f"token summary : *Coming Soon* \n🐋 "
-                                                                          f"Largest Cumulative"
+                                                                          f"Largest Cumulative "
                                                                           f"holder : *{
                                                                           largest_holder}*\n🎗 Dev sold : {percent_amount} percent so far\n🎉 Initial Liquidity :"
                                                                           f"*{inital_liq}*\n🔥 Liquidity Burned : "
@@ -970,13 +971,11 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             await bot.send_message(user_id, "Processing Request Please be patient,The AI is recomputing token "
                                             "metrics...")
             response = query_token.main_query(token_ca)
-            largest_holder = str(response[0])  # 1
             decentralisation = str(response[1]) + " % held by top 10"
             whale_holders = str(response[2])
-            token_ca = str(token_ca)
-            risk_level = "Coming soon"
-            dev_sell = str(dev_sold_so_far.check_wallet_balanced(dev_wallets_dict[token_ca], token_ca)).replace('.',
-                                                                                                                ',')
+            # ADD A DATABASE FOR DEV WALLETS
+            dev_sell = str(dev_sold_so_far.check_wallet_balance(dev_wallets_dict[token_ca], token_ca)).replace('.',
+                                                                                                               ',')
             refreshed_info = types.InlineKeyboardMarkup(row_width=1)
             hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
             refreshed_info.add(hide_refreshed_info)
@@ -985,8 +984,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                                                          f"that do not change have been omitted\n\n💳 "
                                                          f"Decentralisation :  "
                                                          f"*{decentralisation}*\n🐳 Number of whale "
-                                                         f"holders : *{whale_holders}*\n🩸 Risk "
-                                                         f"Level : *{risk_level}*\n💁🏽 Dev Balance: {dev_sell} Percent",
+                                                         f"holders : *{whale_holders}*\n💁🏽 Dev Balance: {dev_sell} Percent",
                                    parse_mode='MarkdownV2',
                                    reply_markup=refreshed_info)
         elif response_value.split()[0] == "hide_refreshed_info":
@@ -1007,10 +1005,6 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                 slippage = all_user_info[12]
                 ekey = all_user_info[2]
                 await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey)
-        elif response_value.split()[0] == "refresh_dev":
-            await bot.send_message(chat_id=user_id, text="refreshing...")
-            percent_result = dev_sold_so_far.check_wallet_balanced(dev_wallets_dict[token_ca], token_ca)
-            await bot.send_message(chat_id=user_id, text="the current dev balance is: " + str(percent_result) + " %")
 
 
 def subscription():

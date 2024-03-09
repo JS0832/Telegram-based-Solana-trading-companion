@@ -99,7 +99,7 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
     return total_sold / token_supply * 100, all_seen_wallets  # dev selling amount in relation to the total supply
 
 
-def check_wallet_balanced(list_of_wallets, spl_token):
+def check_wallet_balance(list_of_wallets, spl_token):
     payload = {
         "id": 1,
         "jsonrpc": "2.0",

@@ -14,21 +14,21 @@ def process_risk(advanced_rug, lcm, dev_sold, tokens_to_lp, decent):
     elif advanced_rug == "High":
         risk += 5
     # now checking the largest holder
-    if 5 < lcm <= 10:
+    if 5 < int(lcm) <= 10:
         risk = risk * 1.1
-    elif 11 < lcm < 20:
+    elif 11 < int(lcm) < 20:
         risk = risk * 1.2
-    elif 21 < lcm < 30:
+    elif 21 < int(lcm) < 30:
         risk = risk * 1.3
-    elif 31 < lcm < 40:
+    elif 31 < int(lcm) < 40:
         risk = risk * 1.4
     # now check dev sell:
-    if 1 > dev_sold > 0:
+    if 1 > float(dev_sold) > 0:
         risk = risk * 1.3
-    elif dev_sold > 1:
+    elif float(dev_sold) > 1:
         risk = risk * 1.4
     # now check token to lp
-    if tokens_to_lp < 70:
+    if int(tokens_to_lp) < 70:
         risk = risk * 1.2
     # DECENTRALISATION
     if decent == "Moderate":

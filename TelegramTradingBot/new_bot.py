@@ -484,6 +484,7 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                     true_supply_held_by_top_twenty = []  # this list will show true token holdings by the top 20 holders
                     try:
                         for holder in holders:
+                            '''
                             try:
                                 res = solana_client.get_signatures_for_address(
                                     Pubkey.from_string(str(holder)),
@@ -497,6 +498,7 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                                     continue
                             except ValueError:
                                 continue
+                            '''
                             if holder not in all_seen_wallets:
                                 print("checking holder: " + str(holder))
                                 temp_associated_wallets = []  # for each holder checked (stack)
