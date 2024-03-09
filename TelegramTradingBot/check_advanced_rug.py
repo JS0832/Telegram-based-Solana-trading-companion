@@ -4,12 +4,11 @@ from solders.signature import Signature
 import requests
 from helius import BalancesAPI
 import query_user_wallet
-
-balances_api = BalancesAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
-URI = "https://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
-from requests import request
 import helius_api_key
 helius_key = helius_api_key.hel_api_key
+balances_api = BalancesAPI(helius_key)
+URI = "https://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
+from requests import request
 solana_client = Client(URI)
 
 solscan_header = {

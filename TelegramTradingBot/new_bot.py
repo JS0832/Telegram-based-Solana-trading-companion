@@ -20,12 +20,13 @@ from solana.rpc.websocket_api import SolanaWsClientProtocol
 from solders.rpc.responses import RpcLogsResponse, SubscriptionResult, LogsNotification, GetTransactionResp
 from solders.signature import Signature
 from solders.transaction_status import UiPartiallyDecodedInstruction, ParsedInstruction
-
+import helius_api_key
+helius_key = helius_api_key.hel_api_key
 # Raydium Liquidity Pool V4
 RaydiumLPV4 = "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
 RaydiumLPV4 = Pubkey.from_string(RaydiumLPV4)
-URI = "https://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
-WSS = "wss://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
+URI = "https://mainnet.helius-rpc.com/?api-key="+str(helius_key)
+WSS = "wss://mainnet.helius-rpc.com/?api-key="+str(helius_key)
 solana_client = Client(URI)
 # Radium function call name, look at raydium-amm/program/src/instruction.rs
 log_instruction = "initialize2"
@@ -41,12 +42,10 @@ import subprocess
 from helius import BalancesAPI
 from helius import TransactionsAPI
 
-transactions_api = TransactionsAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
-balances_api = BalancesAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")  # my private key to the api
+transactions_api = TransactionsAPI(helius_key)
+balances_api = BalancesAPI(helius_key)  # my private key to the api
 # from jsonrpcclient import request, parse, Ok
 import solana.transaction
-import helius_api_key
-helius_key = helius_api_key.hel_api_key
 token_queue = []  # [token addy,epoch time,verified previously? (bool)]
 past_tokens = []  # all tokens (to not allow replicate)
 token_remove_errors = []  # [[token,reason],...]

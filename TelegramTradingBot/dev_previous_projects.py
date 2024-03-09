@@ -2,12 +2,12 @@ from solana.rpc.api import Client, Pubkey
 import json
 from helius import TransactionsAPI
 from requests import request
-
-transactions_api = TransactionsAPI("f28fd952-90ec-44cd-a8f2-e54b2481d7a8")
-URI = "https://mainnet.helius-rpc.com/?api-key=f28fd952-90ec-44cd-a8f2-e54b2481d7a8"
-solana_client = Client(URI)
 import helius_api_key
 helius_key = helius_api_key.hel_api_key
+transactions_api = TransactionsAPI(helius_key)
+URI = "https://mainnet.helius-rpc.com/?api-key="+str(helius_key)
+solana_client = Client(URI)
+
 solscan_header = {
     'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
              '.eyJjcmVhdGVkQXQiOjE3MDY3NTM5ODAzOTQsImVtYWlsIjoic29sYmFieTMyNUBnbWFpbC5jb20iLCJhY3Rpb24iOiJ0b2tlbi1hcGkiLCJpYXQiOjE3MDY3NTM5ODB9.Lp77APFLV-rOnNbDzc1ob43Vp-9-KpeMe_b-fiOQrr0',
