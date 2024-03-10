@@ -32,7 +32,7 @@ solana_client = Client(URI)
 # Radium function call name, look at raydium-amm/program/src/instruction.rs
 log_instruction = "initialize2"
 #liquidty removed is not accurate so do fix this alter
-
+import threading
 # my imports
 import time
 import telegram
@@ -451,7 +451,7 @@ class StopSniperCheck(Exception):
 
 
 # large_holder_check_queue.append([token[0],False,False,token[10],True])
-async def check_for_large_holder():  # here maybe mostly focus on wallets with a low tx count too?
+def check_for_large_holder():  # here maybe mostly focus on wallets with a low tx count too?
     while True:
         if len(large_holder_check_queue) > 0:
             index = 0
@@ -585,7 +585,7 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                             item[5] = max(true_supply_held_by_top_twenty)
                         print("for token: " + str(token_address) + " " + str(true_supply_held_by_top_twenty))
                 index += 1
-        await asyncio.sleep(1)
+        time.sleep(1)
 
 
 class TokenError(Exception):
@@ -962,9 +962,11 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
 
 
 def run():
+    th = threading.Thread(target=check_for_large_holder)
+    th.start()
     print("Running Bot....")
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     coros = [verify_token(), main(), append_past_tokens_to_file(), process_queue(),
-             token_report(), check_for_large_holder()]  # poll_dev_wallet_activity()]
+             token_report()]#, check_for_large_holder()]  # poll_dev_wallet_activity()]
     loop.run_until_complete(asyncio.gather(*coros))
