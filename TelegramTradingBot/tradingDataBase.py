@@ -103,7 +103,7 @@ class TradingDatabase:
         sql = ("UPDATE tradingusers SET SolAmountForAutoBuy=? AutoBuy=? SellWithDev=? AutoSell=? AutoSellSettings=? "
                "SentimentPings=? ping_settings=? WHERE telegramId=?")
         self.cursor2.execute(sql, ["1", "OFF", "OFF", "OFF", "NULL", 3, telegram_id, "DEFAULT"])
-        self.connection.commit()
+        self.connection.commit()#bug here!!!!!!!!!!!!!!!!!!!!!!!
 
     def update_active(self, telegram_id, active):  # ITS TEXT BECAUSE WE WANT TO STORE AF FLOAT
         sql = "UPDATE tradingusers SET Active =? WHERE telegramId=?"

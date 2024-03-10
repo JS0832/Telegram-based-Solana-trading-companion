@@ -22,7 +22,6 @@ wb = DevWalletDatabase.DevWalletDataBase()
 buy_queue = []  # will feed the buy engine so each user purchases a token (each user who selected auto buy
 
 
-
 # [token_ca,amount,slippage,e_private_key,user_id]
 
 # make a dictionary of pinged tokens and when used requests it can easily preview data
@@ -95,9 +94,10 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             positions = types.InlineKeyboardButton("Check all positions", callback_data="positions")
             info = types.InlineKeyboardButton("Info", callback_data="info")
             share = types.InlineKeyboardButton("Share PNL", callback_data="pnl")
+            rate = types.InlineKeyboardButton("Rate This Ping", callback_data="rate " + str(data[6]))
             markup.row(t_settings, buy, sell)
             markup.row(refresh, positions)
-            markup.row(share, info)
+            markup.row(share, info, rate)
             for user in list_of_users:  # just so I can debug
                 full_configuration = trading_db.return_all_settings(user[0])
                 if full_configuration[9] == "True":  # if active trading user
@@ -135,13 +135,13 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                                           f"http://www.example.com/)\n\n📚 Dev's Previous "
                                                                           f"Projects: {past_tokens_string}",
                                                reply_markup=markup, parse_mode='MarkdownV2',
-                                               disable_web_page_preview=True)  # CHEKC IS IT WORKS
+                                               disable_web_page_preview=True)  # CHECK IS IT WORKS
             new_bot.ping_queue.pop(0)  # remove from the queue (FIFO)
         await asyncio.sleep(1)
 
 
 # add scoails commands
-# add all list comands too
+# add all list commands too
 
 @bot.message_handler(commands=['positions'])  #
 async def check_open_positions(message):  # handle user positions
@@ -1013,8 +1013,29 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                 slippage = all_user_info[12]
                 ekey = all_user_info[2]
                 await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey)
-
-
+        elif response_value.split()[0] == "rate":
+            # token columen , rateings couling(list) users who rated ,coulum(list)
+            score = types.InlineKeyboardMarkup(row_width=5)
+            score_one = types.InlineKeyboardButton("1", callback_data="sore_one " + str(token_ca))
+            score_two = types.InlineKeyboardButton("2", callback_data="score_two " + str(token_ca))
+            score_three = types.InlineKeyboardButton("3", callback_data="score_three " + str(token_ca))
+            score_four = types.InlineKeyboardButton("4", callback_data="score_four " + str(token_ca))
+            score_five = types.InlineKeyboardButton("5", callback_data="score_five " + str(token_ca))
+            score.add(score_one, score_two, score_three, score_four, score_five)
+            # have dev selling report here i think instead a separate dev wallet
+            await bot.send_message(chat_id=user_id, text="💯 Please Select a rating Score from 1-5 (higher is better)",
+                                   parse_mode='MarkdownV2',
+                                   reply_markup=score)
+        elif response_value.split()[0] == "sore_one":
+            pass
+        elif response_value.split()[0] == "score_two":
+            pass
+        elif response_value.split()[0] == "score_three":
+            pass
+        elif response_value.split()[0] == "score_four":
+            pass
+        elif response_value.split()[0] == "score_five":
+            pass
 def subscription():
     pass
 

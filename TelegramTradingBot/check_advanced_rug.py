@@ -74,7 +74,6 @@ def check(token_address):
                     for tx in transactions:
                         temp_count += 1
                     holder_tx_per_wallet_list.append(temp_count)
-                    print(temp_count)
                     if temp_count < 6:
                         balance_sum += spl_balance
                 except ValueError:
@@ -83,8 +82,6 @@ def check(token_address):
         print("error check:" + str(holder_list))
     low_tx_count_sum = sum(i <= 6 for i in holder_tx_per_wallet_list)
     supply_percent_held_by_low_tx_wallets = int(balance_sum / get_total_supply * 100)
-    print(low_tx_count_sum)
-    print(supply_percent_held_by_low_tx_wallets)
     if low_tx_count_sum <= 3:
         return "Low"
     elif 3 < low_tx_count_sum < 6:
