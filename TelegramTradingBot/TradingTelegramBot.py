@@ -74,7 +74,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                     past_tokens_string += f"📈 [Previous Project {iterator}]({temp_string})\n"
                     iterator += 1
             else:
-                past_tokens_string = " *None Detected 😇*"
+                past_tokens_string = " *None 😇*"
             # dev selling report:
             result = dev_sold_so_far.check_dev(txn_hash, token_ca)
             if int(result[0]) > 2:  # dev selling early is bearish
@@ -85,7 +85,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             dev_wallets_dict[token_ca] = result[1]
             percent_amount = str(result[0]).replace('.', ',')
             # extract data from the ping queue
-            markup = types.InlineKeyboardMarkup(row_width=6)
+            markup = types.InlineKeyboardMarkup()
             t_settings = types.InlineKeyboardButton("Settings", callback_data="trading_settings")
             buy = types.InlineKeyboardButton("Buy", callback_data="trigger_buy " + str(data[6]))
             sell = types.InlineKeyboardButton("Sell", callback_data="trigger_sell " + str(data[6]))
@@ -93,7 +93,9 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             positions = types.InlineKeyboardButton("Check all positions", callback_data="positions")
             info = types.InlineKeyboardButton("Info", callback_data="info")
             share = types.InlineKeyboardButton("Share PNL", callback_data="pnl")
-            markup.add(t_settings, buy, sell, refresh, positions, share, info)
+            markup.row(t_settings, buy, sell)
+            markup.row(refresh, positions)
+            markup.row(share, info)
             for user in list_of_users:  # just so I can debug
                 full_configuration = trading_db.return_all_settings(user[0])
                 if full_configuration[9] == "True":  # if active trading user
@@ -128,9 +130,10 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                                           f"Level : *{risk_level}*\n\n📈 [Token Chart]("
                                                                           f"https://dexscreener.com/solana/{token_ca})"
                                                                           f"\n📱 [Telegram]("
-                                                                          f"http://www.example.com/)\n\nDev's Previous "
-                                                                          f"Projects:\n{past_tokens_string}",
-                                               reply_markup=markup, parse_mode='MarkdownV2')
+                                                                          f"http://www.example.com/)\n\n📚 Dev's Previous "
+                                                                          f"Projects: {past_tokens_string}",
+                                               reply_markup=markup, parse_mode='MarkdownV2',
+                                               disable_web_page_preview=True)  # CHEKC IS IT WORKS
             new_bot.ping_queue.pop(0)  # remove from the queue (FIFO)
         await asyncio.sleep(1)
 
@@ -227,16 +230,17 @@ async def help_func_callback(callback_query: types.CallbackQuery):
     # wallet stuff:
     wallet_address = str(user_settings[1])
     balances_string = query_user_wallet.return_token_balances(wallet_address)
-    help_markup = types.InlineKeyboardMarkup(row_width=6)
+    help_markup = types.InlineKeyboardMarkup()
     auto_buy = types.InlineKeyboardButton("Auto Buy", callback_data="AB_SETTINGS")
     auto_sell = types.InlineKeyboardButton("Auto Sell", callback_data="AS_SETTINGS")
     sell_w_dev_settings = types.InlineKeyboardButton("sell with dev", callback_data="SWD_SETTINGS")
-    customise_pings = types.InlineKeyboardButton("customise pings", callback_data="PING_SETTINGS")
+    customise_pings = types.InlineKeyboardButton("Configure pings", callback_data="PING_SETTINGS")
     reset_default = types.InlineKeyboardButton("Reset to defaults", callback_data="default_config")
     funds = types.InlineKeyboardButton("Configure Funding", callback_data="funds_config")
     hide_trading_settings = types.InlineKeyboardButton("Hide Settings", callback_data="hide")
-    help_markup.add(funds, auto_buy, auto_sell, sell_w_dev_settings, customise_pings, reset_default,
-                    hide_trading_settings)
+    help_markup.row(auto_buy, auto_sell, sell_w_dev_settings)
+    help_markup.row(funds, customise_pings)
+    help_markup.row(reset_default, hide_trading_settings)
     await bot.send_message(callback_query.from_user.id,
                            f"__Current Settings:__\n\n💰 Manual/Auto Buy Amount: *{sol_buy_amount}* SOL\n💳 Auto Buy : *{str(user_settings[4])}*\n🤑 Auto "
                            f"Sell : *{str(user_settings[6])}*\n👳🏾 Sell With Dev : *{str(
@@ -273,16 +277,17 @@ async def help_func_callback(callback_query: types.CallbackQuery):
     # wallet stuff:
     wallet_address = str(user_settings[1])
     balances_string = query_user_wallet.return_token_balances(wallet_address)
-    help_markup2 = types.InlineKeyboardMarkup(row_width=6)
+    help_markup2 = types.InlineKeyboardMarkup()
     auto_buy = types.InlineKeyboardButton("Auto Buy", callback_data="AB_SETTINGS")
     auto_sell = types.InlineKeyboardButton("Auto Sell", callback_data="AS_SETTINGS")
     sell_w_dev_settings = types.InlineKeyboardButton("sell with dev", callback_data="SWD_SETTINGS")
-    customise_pings = types.InlineKeyboardButton("customise pings", callback_data="PING_SETTINGS")
+    customise_pings = types.InlineKeyboardButton("Configure pings", callback_data="PING_SETTINGS")
     reset_default = types.InlineKeyboardButton("Reset to defaults", callback_data="default_config")  # giving problems
     funds = types.InlineKeyboardButton("Configure Funding", callback_data="funds_config")
     hide_trading_settings = types.InlineKeyboardButton("Hide Settings", callback_data="hide")
-    help_markup2.add(funds, auto_buy, auto_sell, sell_w_dev_settings, customise_pings, reset_default,
-                     hide_trading_settings)
+    help_markup2.row(auto_buy, auto_sell, sell_w_dev_settings)
+    help_markup2.row(funds, customise_pings)
+    help_markup2.row(reset_default, hide_trading_settings)
     await bot.send_message(callback_query.from_user.id,
                            f"__Current Settings:__\n\n💰 Manual/Auto Buy Amount: *{sol_buy_amount}* SOL\n💳 Auto Buy : *{str(user_settings[4])}*\n🤑 Auto"
                            f"Sell : *{str(user_settings[6])}*\n👳🏾 Sell With Dev : *{str(
