@@ -33,18 +33,19 @@ class TokenRateDataBase:
 
     def add_token(self, token_ca):
         if not self.check_token(token_ca):
-            sql = "INSERT INTO devWallets VALUES (?,?,?)"
+            sql = "INSERT INTO tokenrate VALUES (?,?,?)"
             self.cursor3.execute(sql,
-                                 (token_ca, "", ""))
+                                 (token_ca, "d,d", "d,d"))  # dummy value to prevent bug
             self.connection.commit()
 
     def check_if_user_rated(self, token_ca):
-        sql = "SELECT * FROM devWallets WHERE tokenCa =?"
+        sql = "SELECT * FROM tokenrate WHERE tokenCa =?"
         self.cursor3.execute(sql, [token_ca])
         token = self.cursor3.fetchone()
         return token[1]  # return the comma separated list of wallets
 
     def add_rating(self, token_ca, user_id, rating_value):
+        sql = "UPDATE tokenrate SET Ratings=? UsersWhoRated=?  WHERE tokenCa=?"
         temp_users_who_rated = self.fetch_token_data(token_ca)[1].split(",")  # list of users who rated the token
         temp_users_who_rated.append(user_id)
         users_string = ",".join(temp_users_who_rated)
@@ -52,8 +53,7 @@ class TokenRateDataBase:
         temp_rating_list = self.fetch_token_data(token_ca)[2].split(",")  # list of users who rated the token
         temp_rating_list.append(rating_value)
         rating_string = ",".join(temp_rating_list)
-        sql = ("UPDATE tokenrate SET Ratings=? UsersWhoRated=?  WHERE tokenCa=?")
-        self.cursor3.execute(sql, [rating_string, users_string, token_ca])
+        self.cursor3.execute(sql, [rating_string, users_string, str(token_ca)])
         self.connection.commit()
 
         # add the info back to db

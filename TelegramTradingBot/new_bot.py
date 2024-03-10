@@ -31,6 +31,7 @@ WSS = "wss://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
 solana_client = Client(URI)
 # Radium function call name, look at raydium-amm/program/src/instruction.rs
 log_instruction = "initialize2"
+#liquidty removed is not accurate so do fix this alter
 
 # my imports
 import time

@@ -123,7 +123,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                                           f"Largest Cumulative "
                                                                           f"holder : *{
                                                                           largest_holder}*\n🎗 Dev sold : {percent_amount} percent so far\n🎉 Initial Liquidity :"
-                                                                          f"*{inital_liq}*\n🔥 Liquidity Burned : "
+                                                                          f" *{inital_liq}*\n🔥 Liquidity Burned : "
                                                                           f"*{liq_burned}*\n🌊 Tokens sent to LP : "
                                                                           f"*{tokens_to_lp_percent}*\n💳 "
                                                                           f"Decentralisation :  "
@@ -970,98 +970,105 @@ async def settings(message):
 @bot.callback_query_handler(func=lambda call: True)
 async def help_func_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.from_user.id)
-    matches = ["trigger_buy", "trigger_sell", "refresh", "listen"]
     response_value = str(callback_query.data)
     token_ca = response_value.split()[1]
     msg_to_remove = callback_query.message.message_id
-    if any(x in response_value for x in matches):
-        if response_value.split()[0] == "refresh":
-            await bot.send_message(user_id, "Processing Request Please be patient,The AI is recomputing token "
-                                            "metrics...")
-            response = query_token.main_query(token_ca)
-            decentralisation = str(response[1]) + " % held by top 10"
-            whale_holders = str(response[2])
-            # ADD A DATABASE FOR DEV WALLETS
-            wallet_list = wb.return_dev_wallets(token_ca).split(",")
-            dev_sell = str(dev_sold_so_far.check_wallet_balance(wallet_list, token_ca)).replace('.',
-                                                                                                ',')
-            refreshed_info = types.InlineKeyboardMarkup(row_width=1)
-            hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
-            refreshed_info.add(hide_refreshed_info)
-            # have dev selling report here i think instead a separate dev wallet
-            await bot.send_message(chat_id=user_id, text=f"🤑 Refreshed Token Metrics : `{token_ca}`\nToken metrics "
-                                                         f"that do not change have been omitted\n\n💳 "
-                                                         f"Decentralisation :  "
-                                                         f"*{decentralisation}*\n🐳 Number of whale "
-                                                         f"holders : *{whale_holders}*\n💁🏽 Dev Balance: {dev_sell} Percent",
-                                   parse_mode='MarkdownV2',
-                                   reply_markup=refreshed_info)
-        elif response_value.split()[0] == "hide_refreshed_info":
-            await bot.delete_message(user_id, msg_to_remove)
-        elif response_value.split()[0] == "trigger_buy":  # needs user wallet private key
-            # check user trading settings
-            all_settings = trading_db.return_all_settings(user_id)
-            sol_amount = float(str(all_settings[3]))
-            slippage = float(str(all_settings[12]))
-            ekey = all_settings[2]
-            result = str(await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey))
-            await bot.send_message(chat_id=callback_query.from_user.id, text=f"Token Purchased tx:\n{result}")
-        elif response_value.split()[0] == "trigger_sell":  # for now sell the whole position
-            all_user_info = trading_db.return_all_settings(user_id)
-            wallet_address = all_user_info[1]
-            token_balance = query_user_wallet.return_specific_balance(token_ca, wallet_address)
-            if token_balance > 0:
-                slippage = all_user_info[12]
-                ekey = all_user_info[2]
-                await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey)
-        elif response_value.split()[0] == "rate":
-            # token columen , rateings couling(list) users who rated ,coulum(list)
-            score = types.InlineKeyboardMarkup(row_width=5)
-            score_one = types.InlineKeyboardButton("1", callback_data="sore_one " + str(token_ca))
-            score_two = types.InlineKeyboardButton("2", callback_data="score_two " + str(token_ca))
-            score_three = types.InlineKeyboardButton("3", callback_data="score_three " + str(token_ca))
-            score_four = types.InlineKeyboardButton("4", callback_data="score_four " + str(token_ca))
-            score_five = types.InlineKeyboardButton("5", callback_data="score_five " + str(token_ca))
-            score.add(score_one, score_two, score_three, score_four, score_five)
-            # have dev selling report here i think instead a separate dev wallet
-            await bot.send_message(chat_id=user_id, text="💯 Please Select a rating Score from 1-5 (higher is better)",
-                                   parse_mode='MarkdownV2',
-                                   reply_markup=score)
-        elif response_value.split()[0] == "sore_one":
-            score = 1
-            if rd.check_token(token_ca):
-                rd.add_rating(token_ca, user_id, score)
-            else:
-                rd.add_token(token_ca)
-            await bot.send_message(chat_id=user_id, text="Thank you for rating!")
-        elif response_value.split()[0] == "score_two":
-            score = 2
-            if rd.check_token(token_ca):
-                rd.add_rating(token_ca, user_id, score)
-            else:
-                rd.add_token(token_ca)
-            await bot.send_message(chat_id=user_id, text="Thank you for rating!")
-        elif response_value.split()[0] == "score_three":
-            score = 3
-            if rd.check_token(token_ca):
-                rd.add_rating(token_ca, user_id, score)
-            else:
-                rd.add_token(token_ca)
-            await bot.send_message(chat_id=user_id, text="Thank you for rating!")
-        elif response_value.split()[0] == "score_four":
-            score = 4
-            if rd.check_token(token_ca):
-                rd.add_rating(token_ca, user_id, score)
-            else:
-                rd.add_token(token_ca)
-            await bot.send_message(chat_id=user_id, text="Thank you for rating!")
-        elif response_value.split()[0] == "score_five":
-            score = 5
-            if rd.check_token(token_ca):
-                rd.add_rating(token_ca, user_id, score)
-            else:
-                rd.add_token(token_ca)
-            await bot.send_message(chat_id=user_id, text="Thank you for rating!")
+    if response_value.split()[0] == "refresh":
+        await bot.send_message(user_id, "Processing Request Please be patient,The AI is recomputing token "
+                                        "metrics...")
+        response = query_token.main_query(token_ca)
+        decentralisation = str(response[1]) + " % held by top 10"
+        whale_holders = str(response[2])
+        # ADD A DATABASE FOR DEV WALLETS
+        wallet_list = wb.return_dev_wallets(token_ca).split(",")
+        dev_sell = str(dev_sold_so_far.check_wallet_balance(wallet_list, token_ca)).replace('.',
+                                                                                            ',')
+        refreshed_info = types.InlineKeyboardMarkup(row_width=1)
+        hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
+        refreshed_info.add(hide_refreshed_info)
+        # have dev selling report here i think instead a separate dev wallet
+        await bot.send_message(chat_id=user_id, text=f"🤑 Refreshed Token Metrics : `{token_ca}`\nToken metrics "
+                                                     f"that do not change have been omitted\n\n💳 "
+                                                     f"Decentralisation :  "
+                                                     f"*{decentralisation}*\n🐳 Number of whale "
+                                                     f"holders : *{whale_holders}*\n💁🏽 Dev Balance: {dev_sell} Percent",
+                               parse_mode='MarkdownV2',
+                               reply_markup=refreshed_info)
+    elif response_value.split()[0] == "hide_refreshed_info":
+        await bot.delete_message(user_id, msg_to_remove)
+    elif response_value.split()[0] == "trigger_buy":  # needs user wallet private key
+        # check user trading settings
+        all_settings = trading_db.return_all_settings(user_id)
+        sol_amount = float(str(all_settings[3]))
+        slippage = float(str(all_settings[12]))
+        ekey = all_settings[2]
+        result = str(await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey))
+        await bot.send_message(chat_id=callback_query.from_user.id, text=f"Token Purchased tx:\n{result}")
+    elif response_value.split()[0] == "trigger_sell":  # for now sell the whole position
+        all_user_info = trading_db.return_all_settings(user_id)
+        wallet_address = all_user_info[1]
+        token_balance = query_user_wallet.return_specific_balance(token_ca, wallet_address)
+        if token_balance > 0:
+            slippage = all_user_info[12]
+            ekey = all_user_info[2]
+            await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey)
+    elif response_value.split()[0] == "rate":
+        score = types.InlineKeyboardMarkup(row_width=6)
+        score_one = types.InlineKeyboardButton("1", callback_data="sore_one " + str(token_ca))
+        score_two = types.InlineKeyboardButton("2", callback_data="score_two " + str(token_ca))
+        score_three = types.InlineKeyboardButton("3", callback_data="score_three " + str(token_ca))
+        score_four = types.InlineKeyboardButton("4", callback_data="score_four " + str(token_ca))
+        score_five = types.InlineKeyboardButton("5", callback_data="score_five " + str(token_ca))
+        hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
+        score.add(score_one, score_two, score_three, score_four, score_five, hide_refreshed_info)
+        # have dev selling report here i think instead a separate dev wallet
+        await bot.send_message(chat_id=user_id, text="💯 Please Select a rating Score from 1-5 (higher is better)",
+                               reply_markup=score)
+    elif response_value.split()[0] == "sore_one":
+        score = "1"
+        if rd.check_token(token_ca):
+            if not rd.check_if_user_rated(str(user_id)): #if user not rated already
+                rd.add_rating(token_ca, str(user_id), score)
+        else:
+            rd.add_token(token_ca)
+            rd.add_rating(token_ca, str(user_id), score)
+        await bot.send_message(chat_id=user_id, text="Thank you for rating!")
+    elif response_value.split()[0] == "score_two":
+        score = "2"
+        if rd.check_token(token_ca):
+            if not rd.check_if_user_rated(str(user_id)):
+                rd.add_rating(token_ca, str(user_id), score)
+        else:
+            rd.add_token(token_ca)
+            rd.add_rating(token_ca, str(user_id), score)
+        await bot.send_message(chat_id=user_id, text="Thank you for rating!")
+    elif response_value.split()[0] == "score_three":
+        score = "3"
+        if rd.check_token(token_ca):
+            if not rd.check_if_user_rated(str(user_id)):
+                rd.add_rating(token_ca, str(user_id), score)
+        else:
+            rd.add_token(token_ca)
+            rd.add_rating(token_ca, str(user_id), score)
+        await bot.send_message(chat_id=user_id, text="Thank you for rating!")
+    elif response_value.split()[0] == "score_four":
+        score = "4"
+        if rd.check_token(token_ca):
+            if not rd.check_if_user_rated(str(user_id)):
+                rd.add_rating(token_ca, str(user_id), score)
+        else:
+            rd.add_token(token_ca)
+            rd.add_rating(token_ca, str(user_id), score)
+        await bot.send_message(chat_id=user_id, text="Thank you for rating!")
+    elif response_value.split()[0] == "score_five":
+        score = "5"
+        if rd.check_token(token_ca):
+            if not rd.check_if_user_rated(str(user_id)):
+                rd.add_rating(token_ca, str(user_id), score)
+        else:
+            rd.add_token(token_ca)
+            rd.add_rating(token_ca, str(user_id), score)
+        await bot.send_message(chat_id=user_id, text="Thank you for rating!")
 
 
 def subscription():
