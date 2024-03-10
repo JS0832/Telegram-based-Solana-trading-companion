@@ -509,7 +509,7 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                                 while True:  # here traverse all wallets connected to one wallet and count the total
                                     if len(temp_associated_wallets) > 15:  # not good
                                         true_supply_held_by_top_twenty.append(100)  # we don't want this token
-                                        raise StopSniperCheck #too many
+                                        raise StopSniperCheck  # too many
                                     # supply holding.
                                     if len(temp_associated_wallets) > 0:  # means there is more to check
                                         temp_wallet = str(temp_associated_wallets.pop())
@@ -898,7 +898,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                 five_above_string = str(
                                                                     five_or_above)
                                                             await asyncio.sleep(2)
-                                                            # here add all data to ping queue (ready to sent off to users)
+                                                            # here add all data to ping queue (ready to sent off to
+                                                            # users)
                                                             ping_queue.append(
                                                                 [int(largest_holder), token[6], int(math.floor(float(
                                                                     meta_burn_tx["params"][
@@ -907,7 +908,9 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                     100))), token[
                                                                      8], total_held_string, five_above_string, token[0],
                                                                  token[3]])
-                                                            print("pinged token: " + str(token[0]))
+                                                            print(
+                                                                "sent token for further checks (pre ping - DO NOT BUY!): " + str(
+                                                                    token[0]))
                                                             sell_amount = 0
                                                             token_queue.pop(index)
                                                             continue

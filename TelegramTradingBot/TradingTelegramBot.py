@@ -112,8 +112,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                             sol_amount = float(full_configuration[3])
                             ekey = full_configuration[2]
                             buy_queue.append([token_ca, sol_amount, slippage, ekey, int(user[0])])
-                        await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token : `{token_ca}`\n\n😈 SAFU "
-                                                                          f"Parameters: "
+                        await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token : `{token_ca}`\n\n🤝 Basics "
+                                                                          f": "
                                                                           f"Liquidty Burned and Mint Disabled 🍀"
                                                                           f"\n🤖 AI "
                                                                           f"token summary : *Coming Soon* \n🐋 "

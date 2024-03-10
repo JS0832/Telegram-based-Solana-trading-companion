@@ -1,3 +1,4 @@
+import solana
 from solana.rpc.api import Client, Pubkey
 import json
 from solders.signature import Signature
@@ -5,6 +6,7 @@ import requests
 from helius import BalancesAPI
 import query_user_wallet
 import helius_api_key
+from solana.exceptions import SolanaRpcException
 
 helius_key = helius_api_key.hel_api_key
 balances_api = BalancesAPI(helius_key)
@@ -41,11 +43,11 @@ def check(token_address):
                             headers=solscan_header)
     holder_list = holder_result.json()
     if "total" in holder_list:
-        if int(holder_list["total"]) < 20:
-            return "Small Number of holders,Non deterministic result"
+        if int(holder_list["total"]) < 16:
+            return "Too little holders"
     holder_result = request('GET',
                             "https://pro-api.solscan.io/v1.0/token/holders?tokenAddress=" + str(
-                                token_address) + "&limit=20&offset=0",
+                                token_address) + "&limit=16&offset=0",
                             headers=solscan_header)
     holder_list = holder_result.json()
     holder_tx_per_wallet_list = []
@@ -55,15 +57,24 @@ def check(token_address):
             if str(holder["owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # ignore raydium
                 spl_balance = query_user_wallet.return_specific_balance(token_address, str(holder["owner"]))
                 try:
-                    res = solana_client.get_signatures_for_address(
-                        Pubkey.from_string(str(holder["owner"])),
-                        limit=20  # Specify how much last transactions to fetch
-                    )
+                    tx_count = 18
+                    while True:
+                        try:
+                            res = solana_client.get_signatures_for_address(
+                                Pubkey.from_string(str(holder["owner"])),
+                                limit=tx_count  # Specify how much last transactions to fetch
+                            )
+                            break
+                        except solana.exceptions.SolanaRpcException:
+                            tx_count = tx_count - 2  # decrement until we get to allowable amount
+                    if tx_count == 0:  # ERROR IN THE WALLET, PROBABLY.
+                        continue
                     transactions = json.loads(str(res.to_json()))["result"]
                     temp_count = 0
                     for tx in transactions:
                         temp_count += 1
                     holder_tx_per_wallet_list.append(temp_count)
+                    print(temp_count)
                     if temp_count < 6:
                         balance_sum += spl_balance
                 except ValueError:
@@ -72,6 +83,8 @@ def check(token_address):
         print("error check:" + str(holder_list))
     low_tx_count_sum = sum(i <= 6 for i in holder_tx_per_wallet_list)
     supply_percent_held_by_low_tx_wallets = int(balance_sum / get_total_supply * 100)
+    print(low_tx_count_sum)
+    print(supply_percent_held_by_low_tx_wallets)
     if low_tx_count_sum <= 3:
         return "Low"
     elif 3 < low_tx_count_sum < 6:
@@ -87,3 +100,4 @@ def check(token_address):
             return "Extremely High"
         else:
             return "High"
+
