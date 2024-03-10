@@ -11,15 +11,16 @@ import query_user_wallet
 import threading
 import dev_sold_so_far
 import calcualte_risk_level
+import DevWalletDatabase
 
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
 db = dataBase.DataBase()  # initialise
 trading_db = dataBase.trading_db  # initialise
+wb = DevWalletDatabase.DevWalletDataBase()
 
 buy_queue = []  # will feed the buy engine so each user purchases a token (each user who selected auto buy
 
-dev_wallets_dict = {}  # will store pinged token wallets and the key is the token ca
 
 
 # [token_ca,amount,slippage,e_private_key,user_id]
@@ -82,7 +83,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                 continue
             risk_level = calcualte_risk_level.process_risk(advnaced_rug, largest_holder, result[0],
                                                            tokens_to_lp_percent, decentralisation)
-            dev_wallets_dict[token_ca] = result[1]
+            if not wb.check_token(token_ca):  # if toke has not been saved in database
+                wb.add_dev_wallets(token_ca, ','.join(result[1]))
             percent_amount = str(result[0]).replace('.', ',')
             # extract data from the ping queue
             markup = types.InlineKeyboardMarkup()
@@ -979,8 +981,9 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             decentralisation = str(response[1]) + " % held by top 10"
             whale_holders = str(response[2])
             # ADD A DATABASE FOR DEV WALLETS
-            dev_sell = str(dev_sold_so_far.check_wallet_balance(dev_wallets_dict[token_ca], token_ca)).replace('.',
-                                                                                                               ',')
+            wallet_list = wb.return_dev_wallets(token_ca).split(",")
+            dev_sell = str(dev_sold_so_far.check_wallet_balance(wallet_list, token_ca)).replace('.',
+                                                                                                ',')
             refreshed_info = types.InlineKeyboardMarkup(row_width=1)
             hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
             refreshed_info.add(hide_refreshed_info)
