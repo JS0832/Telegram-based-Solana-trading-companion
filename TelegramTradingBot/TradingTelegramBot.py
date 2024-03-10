@@ -12,13 +12,14 @@ import threading
 import dev_sold_so_far
 import calcualte_risk_level
 import DevWalletDatabase
+import Ratings_database
 
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
 db = dataBase.DataBase()  # initialise
 trading_db = dataBase.trading_db  # initialise
 wb = DevWalletDatabase.DevWalletDataBase()
-
+rd = Ratings_database.TokenRateDataBase()
 buy_queue = []  # will feed the buy engine so each user purchases a token (each user who selected auto buy
 
 
@@ -1027,15 +1028,42 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                                    parse_mode='MarkdownV2',
                                    reply_markup=score)
         elif response_value.split()[0] == "sore_one":
-            pass
+            score = 1
+            if rd.check_token(token_ca):
+                rd.add_rating(token_ca, user_id, score)
+            else:
+                rd.add_token(token_ca)
+            await bot.send_message(chat_id=user_id, text="Thank you for rating!")
         elif response_value.split()[0] == "score_two":
-            pass
+            score = 2
+            if rd.check_token(token_ca):
+                rd.add_rating(token_ca, user_id, score)
+            else:
+                rd.add_token(token_ca)
+            await bot.send_message(chat_id=user_id, text="Thank you for rating!")
         elif response_value.split()[0] == "score_three":
-            pass
+            score = 3
+            if rd.check_token(token_ca):
+                rd.add_rating(token_ca, user_id, score)
+            else:
+                rd.add_token(token_ca)
+            await bot.send_message(chat_id=user_id, text="Thank you for rating!")
         elif response_value.split()[0] == "score_four":
-            pass
+            score = 4
+            if rd.check_token(token_ca):
+                rd.add_rating(token_ca, user_id, score)
+            else:
+                rd.add_token(token_ca)
+            await bot.send_message(chat_id=user_id, text="Thank you for rating!")
         elif response_value.split()[0] == "score_five":
-            pass
+            score = 5
+            if rd.check_token(token_ca):
+                rd.add_rating(token_ca, user_id, score)
+            else:
+                rd.add_token(token_ca)
+            await bot.send_message(chat_id=user_id, text="Thank you for rating!")
+
+
 def subscription():
     pass
 

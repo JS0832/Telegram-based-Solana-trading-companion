@@ -4230,3 +4230,5 @@
 ['error fetching lp token holder data ', 'GXVAE2689FzdXxYB3MzkCPFTdCc1PGCtxyz4nzg132r8']
 ['removed token due to low initial liquidity :  ', '9Z4DzJhnRkZjCZ3zPT2TH5HAPz6EAm8wmgUT5XieXbu4']
 ['liquidty removed', '9eBJnCrSc9hp2TFKuupvfR1RorwDH4Wxt3ajjZue9gMF']
+["removed token since its initial checks aren't still validated ", '7sjXGKipnJuUKauMwY8n7kh8gRA5N3yonCiegg2Ne6dm']
+['removed token due to low token ratio added to the lp pool:  ', 'GzgBwaYaFxN9J14oVrKzNSnJuZ3ZLowMGtyzmpAJzfQz']
