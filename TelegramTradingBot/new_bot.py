@@ -976,5 +976,5 @@ def run():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     coros = [verify_token(), main(), append_past_tokens_to_file(), process_queue(),
-             token_report()],check_for_large_holder()]  # poll_dev_wallet_activity()]
+             token_report(),check_for_large_holder()]  # poll_dev_wallet_activity()]
     loop.run_until_complete(asyncio.gather(*coros))

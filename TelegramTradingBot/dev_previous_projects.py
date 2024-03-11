@@ -3,9 +3,10 @@ import json
 from helius import TransactionsAPI
 from requests import request
 import helius_api_key
+
 helius_key = helius_api_key.hel_api_key
 transactions_api = TransactionsAPI(helius_key)
-URI = "https://mainnet.helius-rpc.com/?api-key="+str(helius_key)
+URI = "https://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
 solana_client = Client(URI)
 
 solscan_header = {
@@ -32,7 +33,7 @@ def check_previous_project(txn_hash,
 
     res = solana_client.get_signatures_for_address(
         Pubkey.from_string(dev_wallet),
-        limit=100  # Specify how much last transactions to fetch
+        limit=30  # Specify how much last transactions to fetch
     )
     transactions = json.loads(str(res.to_json()))["result"]
     token_list = []
@@ -49,7 +50,4 @@ def check_previous_project(txn_hash,
                         if tokens_count > 3:
                             return token_list + temp_token_list
             token_list = token_list + temp_token_list
-    return token_list
-
-
-
+    return token_list, dev_wallet

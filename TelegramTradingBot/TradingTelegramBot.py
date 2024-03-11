@@ -62,7 +62,9 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             decentralisation = str(data[4])
             whale_holders = str(data[5])
             token_ca = str(data[6])
-            past_token_list = dev_previous_projects.check_previous_project(txn_hash, token_ca)
+            temp_dev_info =  dev_previous_projects.check_previous_project(txn_hash, token_ca)
+            past_token_list = temp_dev_info[0]
+            deployer = temp_dev_info[1]
             advnaced_rug = check_advanced_rug.check(token_ca)  # add this to the refresh (query token code)
             if advnaced_rug == "Extremely High":
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
@@ -133,7 +135,9 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                                           f"Level : *{risk_level}*\n\n📈 [Token Chart]("
                                                                           f"https://dexscreener.com/solana/{token_ca})"
                                                                           f"\n📱 [Telegram]("
-                                                                          f"http://www.example.com/)\n\n📚 Dev's Previous "
+                                                                          f"http://www.example.com/)\n\n👝 [Deployer]("
+                                                                          f"https://solscan.io/account/{Deployer})\n 📚 "
+                                                                          f"Dev's Previous"
                                                                           f"Projects: {past_tokens_string}",
                                                reply_markup=markup, parse_mode='MarkdownV2',
                                                disable_web_page_preview=True)  # CHECK IS IT WORKS
