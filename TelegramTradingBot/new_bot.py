@@ -451,7 +451,7 @@ class StopSniperCheck(Exception):
 
 
 # large_holder_check_queue.append([token[0],False,False,token[10],True])
-def check_for_large_holder():  # here maybe mostly focus on wallets with a low tx count too?
+async def check_for_large_holder():  # here maybe mostly focus on wallets with a low tx count too?
     while True:
         if len(large_holder_check_queue) > 0:
             index = 0
@@ -534,8 +534,10 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                                 break
                                             except solana.exceptions.SolanaRpcException:
                                                 tx_count = tx_count - 2  # decrement until we get to allowable amount
+                                            if tx_count == 0:
+                                                break
                                         if tx_count == 0:
-                                            continue
+                                            break
                                         transactions = json.loads(str(res.to_json()))["result"]
                                         for spl_transfer in transactions:  # loop over all transaction per give wallet
                                             parsed_transactions = transactions_api.get_parsed_transactions(
@@ -572,7 +574,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                         true_supply_held_by_top_twenty.append(percentage)  # convert it as a percentage
                                         break  # done
                     except StopSniperCheck:
-                        print("one wallet tied to many other wallets stoppign reading....")
+                        print("one wallet tied to many other wallets stopping reading....")
                     if len(true_supply_held_by_top_twenty) == 0:
                         large_holder_check_queue.pop(index)
                     else:
@@ -585,7 +587,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                             item[5] = max(true_supply_held_by_top_twenty)
                         print("for token: " + str(token_address) + " " + str(true_supply_held_by_top_twenty))
                 index += 1
-        time.sleep(1)
+        await asyncio.sleep(1)
 
 
 class TokenError(Exception):
@@ -913,6 +915,12 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                 "sent token for further checks (pre ping - DO NOT BUY!): " + str(
                                                                     token[0]))
                                                             sell_amount = 0
+                                                            temp = 0
+                                                            for item in large_holder_check_queue:#remove it from the check queue
+                                                                if item[0] == token[0]:
+                                                                    large_holder_check_queue.pop(temp)
+                                                                    break
+                                                                temp += 1
                                                             token_queue.pop(index)
                                                             continue
                                                         elif token_checked and not passed:
@@ -962,11 +970,11 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
 
 
 def run():
-    th = threading.Thread(target=check_for_large_holder)
-    th.start()
+    #th = threading.Thread(target=check_for_large_holder)
+    #th.start()
     print("Running Bot....")
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     coros = [verify_token(), main(), append_past_tokens_to_file(), process_queue(),
-             token_report()]#, check_for_large_holder()]  # poll_dev_wallet_activity()]
+             token_report()],check_for_large_holder()]  # poll_dev_wallet_activity()]
     loop.run_until_complete(asyncio.gather(*coros))
