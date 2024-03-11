@@ -31,7 +31,7 @@ WSS = "wss://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
 solana_client = Client(URI)
 # Radium function call name, look at raydium-amm/program/src/instruction.rs
 log_instruction = "initialize2"
-#liquidty removed is not accurate so do fix this alter
+# liquidty removed is not accurate so do fix this alter
 import threading
 # my imports
 import time
@@ -671,7 +671,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                         }
                         get_supply_response = requests.post(alchemy_url, json=payload, headers=alchemy_headers)
                         token[10] = int(float(get_supply_response.json()["result"]['value']["uiAmountString"]))
-                    try:  # try doing it all with rpc soon
+                        token[11] = int(get_supply_response.json()["result"]['value']["decimals"])
+                    '''try:  # try doing it all with rpc soon
                         req = request('GET',
                                       "https://pro-api.solscan.io/v1.0/token/meta?tokenAddress=" + str(token[0]),
                                       headers=solscan_header)
@@ -688,10 +689,12 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                             continue
                         else:
                             token[11] = int(req.json()['decimals'])
+                            print(token[0], token[11])
                         # we can check lp token here too as it's a one time event too
+
                     except ValueError:
                         print("retrying request....")
-                        continue
+                        continue'''
                     tx_hash = str(token[3])
                     result = request('GET', "https://pro-api.solscan.io/v1.0/transaction/" + tx_hash,
                                      headers=solscan_header)
@@ -916,7 +919,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                     token[0]))
                                                             sell_amount = 0
                                                             temp = 0
-                                                            for item in large_holder_check_queue:#remove it from the check queue
+                                                            for item in large_holder_check_queue:  # remove it from the check queue
                                                                 if item[0] == token[0]:
                                                                     large_holder_check_queue.pop(temp)
                                                                     break
@@ -961,8 +964,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                             continue
                 else:
                     token_remove_errors.append(
-                        ["Removed a token due to metadata mismatch", token[0]])
-                    print("Removed a token due to metadata mismatch " + str(token[0]))
+                        ["Removed a token due to token errors", token[0]])
+                    print("Removed a token due to token errors " + str(token[0]))
                     token_queue.pop(index)
                     continue
             index += 1
@@ -970,11 +973,11 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
 
 
 def run():
-    #th = threading.Thread(target=check_for_large_holder)
-    #th.start()
+    # th = threading.Thread(target=check_for_large_holder)
+    # th.start()
     print("Running Bot....")
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     coros = [verify_token(), main(), append_past_tokens_to_file(), process_queue(),
-             token_report(),check_for_large_holder()]  # poll_dev_wallet_activity()]
+             token_report(), check_for_large_holder()]  # poll_dev_wallet_activity()]
     loop.run_until_complete(asyncio.gather(*coros))

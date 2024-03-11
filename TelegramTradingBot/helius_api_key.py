@@ -1,1 +1,1 @@
-hel_api_key = "7bbb129b-e2af-4020-b2e7-71814c6376e4"
+hel_api_key = "e7f43205-ace4-4c13-bb20-740e2a5d8b66"
