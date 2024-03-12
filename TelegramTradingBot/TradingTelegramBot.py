@@ -93,7 +93,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             t_settings = types.InlineKeyboardButton("Settings", callback_data="trading_settings")
             buy = types.InlineKeyboardButton("Buy", callback_data="trigger_buy " + str(data[6]))
             sell = types.InlineKeyboardButton("Sell", callback_data="trigger_sell " + str(data[6]))
-            refresh = types.InlineKeyboardButton("Refresh Info", callback_data="refresh " + str(data[6]))
+            refresh = types.InlineKeyboardButton("Refresh Info",
+                                                 callback_data="refresh " + str(data[6]) + " " + tokens_to_lp_percent)
             positions = types.InlineKeyboardButton("Check all positions", callback_data="positions")
             info = types.InlineKeyboardButton("Info", callback_data="info")
             share = types.InlineKeyboardButton("Share PNL", callback_data="pnl")
@@ -970,7 +971,7 @@ async def settings(message):
                            reply_markup=settings_command_buttons)
 
 
-# refresh info+other individual specific actions dsuck as buying or selling it:
+# refresh info+other individual specific actions duck as buying or selling it:
 @bot.callback_query_handler(func=lambda call: True)
 async def help_func_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.from_user.id)
@@ -978,15 +979,22 @@ async def help_func_callback(callback_query: types.CallbackQuery):
     token_ca = response_value.split()[1]
     msg_to_remove = callback_query.message.message_id
     if response_value.split()[0] == "refresh":
-        await bot.send_message(user_id, "Processing Request Please be patient,The AI is recomputing token "
-                                        "metrics...")
         response = query_token.main_query(token_ca)
+        dev_intial_holdings = 100 - int(
+            response_value.split()[2])  # percent that the ev held is 100-percent fo tokens sent to lp
         decentralisation = str(response[1]) + " % held by top 10"
         whale_holders = str(response[2])
         # ADD A DATABASE FOR DEV WALLETS
         wallet_list = wb.return_dev_wallets(token_ca).split(",")
-        dev_sell = str(dev_sold_so_far.check_wallet_balance(wallet_list, token_ca)).replace('.',
-                                                                                            ',')
+        dev_sell = dev_sold_so_far.check_wallet_balance(wallet_list, token_ca)
+        str_dev_sell = str(dev_sell).replace('.', ',')
+        temp_val = -1 * (dev_sell - dev_intial_holdings)
+        if temp_val > 0:
+            # dev is selling
+            percent_sold = "Reduced by " + str(temp_val) + " percent"
+        else:
+            percent_sold = "Increased by " + str(temp_val) + " percent"
+            # dev is buying
         refreshed_info = types.InlineKeyboardMarkup(row_width=1)
         hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
         refreshed_info.add(hide_refreshed_info)
@@ -995,7 +1003,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                                                      f"that do not change have been omitted\n\n💳 "
                                                      f"Decentralisation :  "
                                                      f"*{decentralisation}*\n🐳 Number of whale "
-                                                     f"holders : *{whale_holders}*\n💁🏽 Dev Balance: {dev_sell} Percent",
+                                                     f"holders : *{whale_holders}*\n💁🏽 Dev Balance: {str_dev_sell} Percent\n💸 Dev's balance change: {percent_sold}",
                                parse_mode='MarkdownV2',
                                reply_markup=refreshed_info)
     elif response_value.split()[0] == "hide_refreshed_info":
