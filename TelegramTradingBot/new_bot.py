@@ -517,7 +517,7 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                                         try:
                                             balances = balances_api.get_balances(temp_wallet)
                                         except ValueError:
-                                            print("error reading address...ignoring the wallet" + str(temp_wallet))
+                                            print("error reading address...ignoring the wallet: " + str(temp_wallet))
                                             continue
                                         spl_balance = balances["tokens"]
                                         for token in spl_balance:
@@ -540,8 +540,12 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                                             break
                                         transactions = json.loads(str(res.to_json()))["result"]
                                         for spl_transfer in transactions:  # loop over all transaction per give wallet
-                                            parsed_transactions = transactions_api.get_parsed_transactions(
-                                                transactions=[spl_transfer["signature"]])
+                                            try:
+                                                parsed_transactions = transactions_api.get_parsed_transactions( ##some  issue here
+                                                    transactions=[spl_transfer["signature"]])
+                                            except ValueError:
+                                                print(spl_transfer)
+                                                break
                                             if len(parsed_transactions) > 0:
                                                 if "tokenTransfers" in parsed_transactions[0]:
                                                     if len(parsed_transactions[0]["tokenTransfers"]) > 0:
@@ -710,7 +714,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                         if str(tx['extra'][
                                                    'tokenAddress']) == "So11111111111111111111111111111111111111112" and str(
                                             tx['extra'][
-                                                'destinationOwner']) == "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # raydium authority
+                                                'destinationOwner']) == "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  #raydium authority
                                             initial_sol_amount = int(int(tx['extra']['amount']) / 1000000000)
                                         if str(tx['extra'][
                                                    'tokenAddress']) == str(
@@ -903,9 +907,6 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                             100)))
                                                                 five_above_string = str(
                                                                     five_or_above)
-                                                            await asyncio.sleep(2)
-                                                            # here add all data to ping queue (ready to sent off to
-                                                            # users)
                                                             ping_queue.append(
                                                                 [int(largest_holder), token[6], int(math.floor(float(
                                                                     meta_burn_tx["params"][
@@ -915,7 +916,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                      8], total_held_string, five_above_string, token[0],
                                                                  token[3]])
                                                             print(
-                                                                "sent token for further checks (pre ping - DO NOT BUY!): " + str(
+                                                                "sent token for further checks (pre ping - DO NOT "
+                                                                "BUY!): " + str(
                                                                     token[0]))
                                                             sell_amount = 0
                                                             temp = 0
@@ -925,14 +927,14 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                     break
                                                                 temp += 1
                                                             token_queue.pop(index)
-                                                            continue
+                                                            raise TokenError
                                                         elif token_checked and not passed:
                                                             print(
                                                                 "token was most likely sniped by dev: " + str(token[0]))
                                                             token_remove_errors.append(
                                                                 ["token sniped by dev: ", token[0]])
                                                             token_queue.pop(index)
-                                                            continue
+                                                            raise TokenError
                                                     else:
                                                         print(
                                                             "low amount of liquidty burned..removing token ,amount the jeet"
@@ -959,7 +961,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                 token_queue.pop(index)
                                 continue
                         except TokenError:
-                            print("token error....removed!")
+                            print("token removed!")
                             token_queue.pop(index)
                             continue
                 else:

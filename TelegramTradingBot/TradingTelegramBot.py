@@ -62,7 +62,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             decentralisation = str(data[4])
             whale_holders = str(data[5])
             token_ca = str(data[6])
-            temp_dev_info =  dev_previous_projects.check_previous_project(txn_hash, token_ca)
+            temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
             past_token_list = temp_dev_info[0]
             deployer = temp_dev_info[1]
             advnaced_rug = check_advanced_rug.check(token_ca)  # add this to the refresh (query token code)
@@ -136,7 +136,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                                           f"https://dexscreener.com/solana/{token_ca})"
                                                                           f"\n📱 [Telegram]("
                                                                           f"http://www.example.com/)\n\n👝 [Deployer]("
-                                                                          f"https://solscan.io/account/{Deployer})\n 📚 "
+                                                                          f"https://solscan.io/account/{deployer})\n 📚 "
                                                                           f"Dev's Previous"
                                                                           f"Projects: {past_tokens_string}",
                                                reply_markup=markup, parse_mode='MarkdownV2',
@@ -1031,7 +1031,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
     elif response_value.split()[0] == "sore_one":
         score = "1"
         if rd.check_token(token_ca):
-            if not rd.check_if_user_rated(str(user_id)): #if user not rated already
+            if not rd.check_if_user_rated(str(user_id)):  # if user not rated already
                 rd.add_rating(token_ca, str(user_id), score)
         else:
             rd.add_token(token_ca)
