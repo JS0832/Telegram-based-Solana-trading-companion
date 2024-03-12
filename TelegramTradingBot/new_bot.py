@@ -676,29 +676,6 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                         get_supply_response = requests.post(alchemy_url, json=payload, headers=alchemy_headers)
                         token[10] = int(float(get_supply_response.json()["result"]['value']["uiAmountString"]))
                         token[11] = int(get_supply_response.json()["result"]['value']["decimals"])
-                    '''try:  # try doing it all with rpc soon
-                        req = request('GET',
-                                      "https://pro-api.solscan.io/v1.0/token/meta?tokenAddress=" + str(token[0]),
-                                      headers=solscan_header)
-                        if 'icon' in req.json():
-                            img_uri = str(req.json()['icon'])
-                        else:
-                            index += 1  # move on
-                            continue
-                        if 'decimals' not in req.json():
-                            print("token has no decimals!")
-                            token_remove_errors.append(
-                                ["token has no decimals!", token[0]])
-                            token_queue.pop(index)  # useless token
-                            continue
-                        else:
-                            token[11] = int(req.json()['decimals'])
-                            print(token[0], token[11])
-                        # we can check lp token here too as it's a one time event too
-
-                    except ValueError:
-                        print("retrying request....")
-                        continue'''
                     tx_hash = str(token[3])
                     result = request('GET', "https://pro-api.solscan.io/v1.0/transaction/" + tx_hash,
                                      headers=solscan_header)
