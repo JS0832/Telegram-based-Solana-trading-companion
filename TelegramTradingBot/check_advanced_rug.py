@@ -24,6 +24,7 @@ solscan_header = {
 
 
 def check(token_address):
+    print("checking for advanced rug....")
     alchemy_url = "https://solana-mainnet.g.alchemy.com/v2/bzkveugN6acIccgGUJTetb95Sz0yo8W_"
     payload = {
         "id": 1,
@@ -57,7 +58,7 @@ def check(token_address):
             if str(holder["owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # ignore radium
                 spl_balance = query_user_wallet.return_specific_balance(token_address, str(holder["owner"]))
                 try:
-                    tx_count = 18
+                    tx_count = 10
                     while True:
                         try:
                             res = solana_client.get_signatures_for_address(
@@ -82,6 +83,7 @@ def check(token_address):
         print("error check:" + str(holder_list))
     low_tx_count_sum = sum(i <= 6 for i in holder_tx_per_wallet_list)
     supply_percent_held_by_low_tx_wallets = int(balance_sum / get_total_supply * 100)
+    print("advanced rug check complete.")
     if low_tx_count_sum <= 3:
         return "Low"
     elif 3 < low_tx_count_sum < 6:

@@ -56,6 +56,7 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
     total_sold = 0
     while True:  # here traverse all wallets connected to one wallet and count the total supply holding.
         if len(all_seen_wallets) > 15:  # dev is trying to hide tokens clearly so no need to really compute more
+            print("strong evidence for dev hiding tokens...discarding!")
             return 100.0, []
         if len(temp_associated_wallets) > 0:
             pass
