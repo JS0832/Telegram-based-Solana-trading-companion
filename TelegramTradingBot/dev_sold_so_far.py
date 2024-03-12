@@ -10,6 +10,7 @@ from solana.rpc.api import Client, Pubkey
 import requests
 import solana
 import helius_api_key
+
 helius_key = helius_api_key.hel_api_key
 solscan_header = {
     'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkQXQiOjE3MDY3NTM5ODAzOTQsImVtYWlsIjoic29sYmFieTMyNUBnbWFpbC5jb20iLCJhY3Rpb24iOiJ0b2tlbi1hcGkiLCJpYXQiOjE3MDY3NTM5ODB9.Lp77APFLV-rOnNbDzc1ob43Vp-9-KpeMe_b-fiOQrr0',
@@ -44,7 +45,7 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
     liquidity_tx_info_json = liquidity_tx_info.json()
     root = str(liquidity_tx_info_json["signer"][0])
     token_address = token_d
-    URI = "https://mainnet.helius-rpc.com/?api-key="+str(helius_key)
+    URI = "https://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
     solana_client = Client(URI)
     all_seen_wallets = []
     temp_associated_wallets = []  # (stack) for all associated wallets
@@ -61,7 +62,7 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
         else:
             break  # done
         temp_wallet = temp_associated_wallets.pop()
-        #print("checking " + str(temp_wallet))
+        # print("checking " + str(temp_wallet))
         tx_count = 12
         while True:
             try:
@@ -84,7 +85,7 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
                                         tx_items["toUserAccount"]) != "":
                                     if str(tx_items["toUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":
                                         temp_associated_wallets.append(str(tx_items["toUserAccount"]))
-                                        #print("sent " + str(tx_items["toUserAccount"]))
+                                        # print("sent " + str(tx_items["toUserAccount"]))
                                     else:
                                         total_sold = total_sold + int(tx_items["tokenAmount"])
                             elif str(tx_items["toUserAccount"]) == temp_wallet:  # sends tokens from current wallet
@@ -92,7 +93,7 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
                                            "fromUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1" and str(
                                     tx_items["fromUserAccount"]) not in all_seen_wallets and str(
                                     tx_items["fromUserAccount"]) != "":
-                                    #print("received from wallet " + str(tx_items["toUserAccount"]))
+                                    # print("received from wallet " + str(tx_items["toUserAccount"]))
                                     temp_associated_wallets.append(str(tx_items["fromUserAccount"]))
         all_seen_wallets.append(temp_wallet)
     print("for token " + str(token_d) + " dev sold: " + str(total_sold / token_supply * 100))

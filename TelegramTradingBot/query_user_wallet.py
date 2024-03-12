@@ -26,7 +26,6 @@ def return_token_balances(wallet_address):  # up to 25 addresses return a string
 
 
 def return_specific_balance(spl_token, wallet_address):
-    print(wallet_address)
     spl_balances = balances_api.get_balances(wallet_address)
     tokens = spl_balances["tokens"]
     for token in tokens:
