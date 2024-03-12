@@ -62,13 +62,13 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             decentralisation = str(data[4])
             whale_holders = str(data[5])
             token_ca = str(data[6])
-            temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
-            past_token_list = temp_dev_info[0]
-            deployer = temp_dev_info[1]
             advnaced_rug = check_advanced_rug.check(token_ca)  # add this to the refresh (query token code)
             if advnaced_rug == "Extremely High":
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
+            temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
+            past_token_list = temp_dev_info[0]
+            deployer = temp_dev_info[1]
             past_tokens_string = ""
             iterator = 0
             if len(past_token_list) > 0:

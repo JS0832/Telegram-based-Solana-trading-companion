@@ -896,7 +896,6 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                 "sent token for further checks (pre ping - DO NOT "
                                                                 "BUY!): " + str(
                                                                     token[0]))
-                                                            sell_amount = 0
                                                             temp = 0
                                                             for item in large_holder_check_queue:  # remove it from the check queue
                                                                 if item[0] == token[0]:

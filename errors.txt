@@ -5849,3 +5849,5 @@
 ['error fetching burn tx...most likely removed liquidty ', 'F8HWn9XwQyaac1p66qHdPErscdyEMePPDcbU78ZeWC2K']
 ["removed token since it's expiration time has passed ", 'ErzZQKbdZXTZjSD9NEb66zPddX7D9utV1Pefx2fdJHmL']
 ['removed token due to low token ratio added to the lp pool:  ', '5hSWFWMyMkVgqpbWa3QKuccHD26YmuAqWjawPw7ABifc']
+['removed token due to low token ratio added to the lp pool:  ', '3LTD63X2g9JUCd86hp4v5vMPrt2U1pB9v26yN3UkEP9a']
+['removed token due to low initial liquidity :  ', 'Hxuc3SEMHSWd2mNzEbqk1Qsv9G2rkU9WZaLynp9wjYAy']
