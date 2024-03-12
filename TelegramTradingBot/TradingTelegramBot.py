@@ -1003,7 +1003,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                                                      f"that do not change have been omitted\n\n💳 "
                                                      f"Decentralisation :  "
                                                      f"*{decentralisation}*\n🐳 Number of whale "
-                                                     f"holders : *{whale_holders}*\n💁🏽 Dev Balance: {str_dev_sell} Percent\n💸 Dev's balance change: {percent_sold}",
+                                                     f"holders : *{whale_holders}*\n💁🏽 Dev Balance: *{str_dev_sell}* Percent\n💸 Dev's balance change: *{percent_sold}*",
                                parse_mode='MarkdownV2',
                                reply_markup=refreshed_info)
     elif response_value.split()[0] == "hide_refreshed_info":

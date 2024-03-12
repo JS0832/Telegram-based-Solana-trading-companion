@@ -33,7 +33,7 @@ def check_previous_project(txn_hash,
 
     res = solana_client.get_signatures_for_address(
         Pubkey.from_string(dev_wallet),
-        limit=30  # Specify how much last transactions to fetch
+        limit=25  # Specify how much last transactions to fetch
     )
     transactions = json.loads(str(res.to_json()))["result"]
     token_list = []

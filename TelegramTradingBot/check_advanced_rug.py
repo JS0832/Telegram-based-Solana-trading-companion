@@ -54,7 +54,7 @@ def check(token_address):
     balance_sum = 0
     try:
         for holder in holder_list["data"]:
-            if str(holder["owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # ignore raydium
+            if str(holder["owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # ignore radium
                 spl_balance = query_user_wallet.return_specific_balance(token_address, str(holder["owner"]))
                 try:
                     tx_count = 18

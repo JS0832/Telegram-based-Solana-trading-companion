@@ -36,6 +36,11 @@ def process_risk(advanced_rug, lcm, dev_sold, tokens_to_lp, decent):
     elif decent == "Poor":
         risk = risk * 1.2
     if risk > 10:
-        return 10
-    return int(risk)
-# let's say each step lower is a importance of 10% lower than previous point
+        return "10 Extreme"
+    elif risk < 4:
+        return str(int(risk)) + " Low"
+    elif 6 > risk > 4:
+        return str(int(risk)) + " Moderate"
+    elif risk > 6:
+        return str(int(risk)) + " High"
+

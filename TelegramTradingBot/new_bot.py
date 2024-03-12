@@ -903,14 +903,12 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                     large_holder_check_queue.pop(temp)
                                                                     break
                                                                 temp += 1
-                                                            token_queue.pop(index)
                                                             raise TokenError
                                                         elif token_checked and not passed:
                                                             print(
                                                                 "token was most likely sniped by dev: " + str(token[0]))
                                                             token_remove_errors.append(
                                                                 ["token sniped by dev: ", token[0]])
-                                                            token_queue.pop(index)
                                                             raise TokenError
                                                     else:
                                                         print(
