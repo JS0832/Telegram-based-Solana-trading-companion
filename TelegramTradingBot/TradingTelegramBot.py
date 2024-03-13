@@ -993,8 +993,11 @@ async def help_func_callback(callback_query: types.CallbackQuery):
         if temp_val > 0:
             # dev is selling
             percent_sold = "Reduced by " + str(temp_val) + " percent"
-        else:
+        elif temp_val < 0:
             percent_sold = "Increased by " + str(-1*temp_val) + " percent"
+            # dev is buying
+        else:
+            percent_sold = "unchanged " + str(temp_val) + " percent"
             # dev is buying
         refreshed_info = types.InlineKeyboardMarkup(row_width=1)
         hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")

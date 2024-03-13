@@ -27,7 +27,7 @@ def check_previous_project(txn_hash,
                                 headers=solscan_header)
 
     liquidity_tx_info_json = liquidity_tx_info.json()
-
+    print(liquidity_tx_info_json)
     # check for signer
     dev_wallet = str(liquidity_tx_info_json["signer"][0])
     return [], dev_wallet  # for now
@@ -52,3 +52,4 @@ def check_previous_project(txn_hash,
             token_list = token_list + temp_token_list
     return token_list, dev_wallet
 
+check_previous_project("GvHFmjyEZXTeHRYuFfX3hDYFryWpXTPcVdfNZ8nSszEpt7LirGiX5r6ZbZMSPw5bioyLrZC3sPJnFFnScwCvDQc","")
