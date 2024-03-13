@@ -444,7 +444,7 @@ def check_mint_wallet(liquidty_add_txn_hash, token_supp, token_add):
 #  [[token_address,checked=true/flase,passed=true or false,supply]]
 large_holder_check_queue = []
 
-removed_tokens_queue = []  # here i will jsut place any token that has very bad results
+removed_tokens_queue = []  # here I will just place any token that has very bad results
 
 
 class StopSniperCheck(Exception):
@@ -583,6 +583,12 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                         print("one wallet tied to many other wallets stopping reading....")
                     if len(true_supply_held_by_top_twenty) == 0:
                         large_holder_check_queue.pop(index)
+                    elif len(
+                            true_supply_held_by_top_twenty) == 1:  # only dev holding means this is a pre-launch
+                        # token(timed token) so we will add more time to its expiration time (1h)
+                        for token in token_queue:
+                            if token[0] == token_address:
+                                token[1] += 3600  # adding an hour to the epoch
                     else:
                         max_val = 70  # this is the danger zone of very high odds snipe
                         if any(val >= max_val for val in true_supply_held_by_top_twenty):
@@ -701,7 +707,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                             token_amount_sent_to_lp_pool = \
                                                 int(int(tx['extra']['amount']) / 10 ** token[11])
                                 except Exception as e:
-                                    print(e)
+                                    print("error " + str(e))
                         except IndexError:
                             print("error retrying....")
                             token_remove_errors.append(
