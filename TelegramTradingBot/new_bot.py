@@ -49,7 +49,6 @@ balances_api = BalancesAPI(helius_key)  # my private key to the api
 # from jsonrpcclient import request, parse, Ok
 import solana.transaction
 
-special_token_queue = []  # special discarded tokens are placed here for another round of checking timed release tokens)
 token_queue = []  # [token addy,epoch time,verified previously? (bool)]
 past_tokens = []  # all tokens (to not allow replicate)
 token_remove_errors = []  # [[token,reason],...]
@@ -452,6 +451,7 @@ class StopSniperCheck(Exception):
 
 
 bots_wallet_balcklist = []
+special_token_queue = []  # special discarded tokens are placed here for another round of checking timed release tokens)
 
 
 # large_holder_check_queue.append([token[0],False,False,token[10],True])
@@ -592,7 +592,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                         item[1] = True  # set as checked
                         if len(true_supply_held_by_top_twenty) == 0:
                             large_holder_check_queue.pop(index)
-                        elif len(true_supply_held_by_top_twenty) == 1:  # only dev holding means this is a pre-launch
+                        elif len(true_supply_held_by_top_twenty) == 1 and token_address not in special_token_queue:  # only dev holding means this is a pre-launch,if token adress is in the list we know its been checked no again so can be processed as normal coin
                             # token(timed token) so we will add more time to its expiration time (1h)
                             for token in token_queue:
                                 if token[0] == token_address:
@@ -883,6 +883,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                         if not found:
                                                             print(
                                                                 "re-checking sniper status for token: " + str(token[0]))
+                                                            special_token_queue.append(token[0])#place in this list so it signifies no need to re check the token after this final check check
                                                             token_checked = False  # token was not checked yet
                                                             large_holder_check_queue.append(
                                                                 [token[0], False, False, token[10], "True", 0])
