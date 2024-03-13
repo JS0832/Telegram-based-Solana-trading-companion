@@ -85,6 +85,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                 continue
             risk_level = calcualte_risk_level.process_risk(advnaced_rug, largest_holder, result[0],
                                                            tokens_to_lp_percent, decentralisation)
+            number_of_dev_wallets = len(result[1])
             if not wb.check_token(token_ca):  # if toke has not been saved in database
                 wb.add_dev_wallets(token_ca, ','.join(result[1]))
             percent_amount = str(result[0]).replace('.', ',')
@@ -125,7 +126,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                                           f"token summary : *Coming Soon* \n🐋 "
                                                                           f"Largest Cumulative "
                                                                           f"holder : *{
-                                                                          largest_holder}*\n🎗 Dev sold : {percent_amount} percent so far\n🎉 Initial Liquidity :"
+                                                                          largest_holder}*\n🎗 Dev sold : {percent_amount} percent so far\n🗂 Number of Dev's Wallets : *{number_of_dev_wallets}*\n🎉 Initial Liquidity :"
                                                                           f" *{inital_liq}*\n🔥 Liquidity Burned : "
                                                                           f"*{liq_burned}*\n🌊 Tokens sent to LP : "
                                                                           f"*{tokens_to_lp_percent}*\n💳 "

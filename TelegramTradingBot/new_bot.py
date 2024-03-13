@@ -49,6 +49,7 @@ balances_api = BalancesAPI(helius_key)  # my private key to the api
 # from jsonrpcclient import request, parse, Ok
 import solana.transaction
 
+special_token_queue = []  # special discarded tokens are placed here for another round of checking timed release tokens)
 token_queue = []  # [token addy,epoch time,verified previously? (bool)]
 past_tokens = []  # all tokens (to not allow replicate)
 token_remove_errors = []  # [[token,reason],...]
@@ -466,19 +467,19 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                                                 token_address) + "&limit=13&offset=0",
                                             headers=solscan_header)
                     holder_list = holder_result.json()
-                    if "total" in holder_list:
-                        if int(holder_list["total"]) > 10:
-                            iterator = 0
-                            for holder in holder_list["data"]:
-                                if iterator > 10:
-                                    break
-                                if str(holder[
-                                           "owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # radium pool
-                                    holders.append(str(holder["owner"]))
-                                iterator += 1
-                        else:
-                            item[2] = False  # fail it as there is very little holders
+                    # if "total" in holder_list: #removed this as it missed good tokens by sometimes ignoring a low holder count
+                    # if int(holder_list["total"]) > 10:
+                    iterator = 0
+                    for holder in holder_list["data"]:
+                        if iterator > 10:
                             break
+                        if str(holder[
+                                   "owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # radium pool
+                            holders.append(str(holder["owner"]))
+                        iterator += 1
+                    # else:
+                    # item[2] = False  # fail it as there is very little holders
+                    # break
                     all_seen_wallets = []  # helps to avoid double seen wallets
                     token_addy = token_address
                     token_supply = token_supp
@@ -541,7 +542,8 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                                         transactions = json.loads(str(res.to_json()))["result"]
                                         for spl_transfer in transactions:  # loop over all transaction per give wallet
                                             try:
-                                                parsed_transactions = transactions_api.get_parsed_transactions( ##some  issue here
+                                                parsed_transactions = transactions_api.get_parsed_transactions(
+                                                    ##some  issue here
                                                     transactions=[spl_transfer["signature"]])
                                             except ValueError:
                                                 print(spl_transfer)
@@ -594,7 +596,7 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
         await asyncio.sleep(1)
 
 
-class TokenError(Exception):
+class TokenError(Exception):  # helps to exist deeply nested loops
     pass
 
 
@@ -691,7 +693,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                         if str(tx['extra'][
                                                    'tokenAddress']) == "So11111111111111111111111111111111111111112" and str(
                                             tx['extra'][
-                                                'destinationOwner']) == "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  #raydium authority
+                                                'destinationOwner']) == "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # raydium authority
                                             initial_sol_amount = int(int(tx['extra']['amount']) / 1000000000)
                                         if str(tx['extra'][
                                                    'tokenAddress']) == str(
