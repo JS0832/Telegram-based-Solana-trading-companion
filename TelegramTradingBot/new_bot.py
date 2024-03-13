@@ -569,32 +569,37 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                         break  # done
                     except StopSniperCheck:
                         print("one wallet tied to many other wallets stopping reading....")
-                    item[1] = True #set as checked
-                    if len(true_supply_held_by_top_twenty) == 0:
-                        large_holder_check_queue.pop(index)
-                    elif len(true_supply_held_by_top_twenty) == 1:  # only dev holding means this is a pre-launch
-                        # token(timed token) so we will add more time to its expiration time (1h)
-                        for token in token_queue:
-                            if token[0] == token_address:
-                                print("Added a time extension to token: " + str(token_address))
-                                token[1] += 3600  # adding an hour to the epoch
-                                temp_counter = 0
-                                for temp_item in large_holder_check_queue:
-                                    if temp_item[0] == token_address:
-                                        large_holder_check_queue.pop(temp_counter)
-                                        break
-                                    temp_counter += 1
-                                # we remove it from the sniper checker queue and will will re check the token one liquidty is burned.
-                                # need to add one more position int eh token ququ list to say thsi token has received special treatment and need to be re- checked
-                    else:
-                        max_val = 70  # this is the danger zone of very high odds snipe
-                        if any(val >= max_val for val in true_supply_held_by_top_twenty):
-                            item[2] = False  # failed
-                            removed_tokens_queue.append(item[0])  # add address
+                    still_in_queue = False
+                    for temp_item in large_holder_check_queue:
+                        if temp_item[0] == token_address:
+                            still_in_queue = True
+                    if still_in_queue:
+                        item[1] = True  # set as checked
+                        if len(true_supply_held_by_top_twenty) == 0:
+                            large_holder_check_queue.pop(index)
+                        elif len(true_supply_held_by_top_twenty) == 1:  # only dev holding means this is a pre-launch
+                            # token(timed token) so we will add more time to its expiration time (1h)
+                            for token in token_queue:
+                                if token[0] == token_address:
+                                    print("Added a time extension to token: " + str(token_address))
+                                    token[1] += 3600  # adding an hour to the epoch
+                                    temp_counter = 0
+                                    for temp_item in large_holder_check_queue:
+                                        if temp_item[0] == token_address:
+                                            large_holder_check_queue.pop(temp_counter)
+                                            break
+                                        temp_counter += 1
+                                    # we remove it from the sniper checker queue and will will re check the token one liquidty is burned.
+                                    # need to add one more position int eh token ququ list to say thsi token has received special treatment and need to be re- checked
                         else:
-                            item[2] = True  # passed
-                            item[5] = max(true_supply_held_by_top_twenty)
-                        print("for token: " + str(token_address) + " " + str(true_supply_held_by_top_twenty))
+                            max_val = 70  # this is the danger zone of very high odds snipe
+                            if any(val >= max_val for val in true_supply_held_by_top_twenty):
+                                item[2] = False  # failed
+                                removed_tokens_queue.append(item[0])  # add address
+                            else:
+                                item[2] = True  # passed
+                                item[5] = max(true_supply_held_by_top_twenty)
+                            print("for token: " + str(token_address) + " " + str(true_supply_held_by_top_twenty))
                 index += 1
         time.sleep(0.2)
 
@@ -664,6 +669,12 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                             token_remove_errors.append(
                                 ["Command failed 2 ", token[0]])
                             print("error2 " + str(result.stderr))
+                            temp = 0
+                            for item in large_holder_check_queue:
+                                if item[0] == token[0]:
+                                    large_holder_check_queue.pop(temp)
+                                    break
+                                temp += 1
                             token_queue.pop(index)
                             continue
 
@@ -789,12 +800,24 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                     print("error more than lp one Holder " + str(token[0]))
                                     token_remove_errors.append(
                                         ["error more than lp one Holder ....", token[0]])
+                                    temp = 0
+                                    for item in large_holder_check_queue:
+                                        if item[0] == token[0]:
+                                            large_holder_check_queue.pop(temp)
+                                            break
+                                        temp += 1
                                     token_queue.pop(index)
                                     continue
                             else:
                                 print("error fetching lp token holder data " + str(token[0]))
                                 token_remove_errors.append(
                                     ["error fetching lp token holder data ", token[0]])
+                                temp = 0
+                                for item in large_holder_check_queue:
+                                    if item[0] == token[0]:
+                                        large_holder_check_queue.pop(temp)
+                                        break
+                                    temp += 1
                                 token_queue.pop(index)
                                 continue
                         tx_result = request('GET',
@@ -933,6 +956,12 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                         token_remove_errors.append(
                                                             ["low amount of liquidty burned..removing token ",
                                                              token[0]])
+                                                        temp = 0
+                                                        for item in large_holder_check_queue:
+                                                            if item[0] == token[0]:
+                                                                large_holder_check_queue.pop(temp)
+                                                                break
+                                                            temp += 1
                                                         token_queue.pop(index)
                                                         continue
                                                 else:
@@ -947,16 +976,34 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                 token_remove_errors.append(
                                     ["liquidty removed", token[0]])
                                 print("liquidty removed...." + str(token[0]))
+                                temp = 0
+                                for item in large_holder_check_queue:
+                                    if item[0] == token[0]:
+                                        large_holder_check_queue.pop(temp)
+                                        break
+                                    temp += 1
                                 token_queue.pop(index)
                                 continue
                         except TokenError:
                             print("token removed!")
+                            temp = 0
+                            for item in large_holder_check_queue:
+                                if item[0] == token[0]:
+                                    large_holder_check_queue.pop(temp)
+                                    break
+                                temp += 1
                             token_queue.pop(index)
                             continue
                 else:
                     token_remove_errors.append(
                         ["Removed a token due to token errors", token[0]])
                     print("Removed a token due to token errors " + str(token[0]))
+                    temp = 0
+                    for item in large_holder_check_queue:
+                        if item[0] == token[0]:
+                            large_holder_check_queue.pop(temp)
+                            break
+                        temp += 1
                     token_queue.pop(index)
                     continue
             index += 1
