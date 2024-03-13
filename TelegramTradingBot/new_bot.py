@@ -450,9 +450,9 @@ removed_tokens_queue = []  # here I will just place any token that has very bad 
 class StopSniperCheck(Exception):
     pass
 
-
+bots_wallet_balcklist = []
 # large_holder_check_queue.append([token[0],False,False,token[10],True])
-async def check_for_large_holder():  # here maybe mostly focus on wallets with a low tx count too?
+def check_for_large_holder():  # here maybe mostly focus on wallets with a low tx count too?
     while True:
         if len(large_holder_check_queue) > 0:
             index = 0
@@ -486,7 +486,7 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                     true_supply_held_by_top_twenty = []  # this list will show true token holdings by the top 20 holders
                     try:
                         for holder in holders:
-                            if holder not in all_seen_wallets:
+                            if holder not in all_seen_wallets and holder not in bots_wallet_balcklist:
                                 print("checking holder: " + str(holder))
                                 temp_associated_wallets = []  # for each holder checked (stack)
                                 root = holder
@@ -503,6 +503,7 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                                         try:
                                             balances = balances_api.get_balances(temp_wallet)
                                         except ValueError:
+                                            bots_wallet_balcklist.append(temp_wallet) #to ignore solana bots that have insane amount of shitcoins in them
                                             print("error reading address...ignoring the wallet: " + str(temp_wallet))
                                             continue
                                         spl_balance = balances["tokens"]
@@ -590,7 +591,7 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                             item[5] = max(true_supply_held_by_top_twenty)
                         print("for token: " + str(token_address) + " " + str(true_supply_held_by_top_twenty))
                 index += 1
-        await asyncio.sleep(1)
+        time.sleep(0.2)
 
 
 class TokenError(Exception):  # helps to exist deeply nested loops
@@ -957,11 +958,11 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
 
 
 def run():
-    # th = threading.Thread(target=check_for_large_holder)
-    # th.start()
+    th = threading.Thread(target=check_for_large_holder)
+    th.start()
     print("Running Bot....")
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     coros = [verify_token(), main(), append_past_tokens_to_file(), process_queue(),
-             token_report(), check_for_large_holder()]  # poll_dev_wallet_activity()]
+             token_report()]#, check_for_large_holder()]  # poll_dev_wallet_activity()]
     loop.run_until_complete(asyncio.gather(*coros))
