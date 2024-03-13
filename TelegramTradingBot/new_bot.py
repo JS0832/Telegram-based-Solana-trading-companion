@@ -455,13 +455,13 @@ bots_wallet_balcklist = []
 
 
 # large_holder_check_queue.append([token[0],False,False,token[10],True])
-def check_for_large_holder():  # here maybe mostly focus on wallets with a low tx count too?
+async def check_for_large_holder():  # here maybe mostly focus on wallets with a low tx count too?
     while True:
         if len(large_holder_check_queue) > 0:
             index = 0
             for item in large_holder_check_queue:
-                print("checking token for large cumulative holder: " + str(item[0]))
                 if not item[1]:  # not checked yet
+                    print("checking token for large cumulative holder: " + str(item[0]))
                     token_address = item[0]
                     token_supp = item[3]
                     holders = []
@@ -470,11 +470,11 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                                 token_address) + "&limit=13&offset=0",
                                             headers=solscan_header)
                     holder_list = holder_result.json()
-                    # if "total" in holder_list: #removed this as it missed good tokens by sometimes ignoring a low holder count
-                    # if int(holder_list["total"]) > 10:
+                    # if "total" in holder_list: #removed this as it missed good tokens by sometimes ignoring a low
+                    # holder count if int(holder_list["total"]) > 10:
                     iterator = 0
                     for holder in holder_list["data"]:
-                        if iterator > 10:
+                        if iterator > 7:
                             break
                         if str(holder[
                                    "owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # radium pool
@@ -483,18 +483,23 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                     # else:
                     # item[2] = False  # fail it as there is very little holders
                     # break
-                    all_seen_wallets = []  # helps to avoid double seen wallets when some holder is actually linked to another holder
+                    all_seen_wallets = []  # helps to avoid double seen wallets when some holder is actually linked
+                    # to another holder
                     token_addy = token_address
                     token_supply = token_supp
                     true_supply_held_by_top_twenty = []  # this list will show true token holdings by the top 20 holders
                     try:
                         for holder in holders:
                             still_in_queue = False
-                            for temp_item in large_holder_check_queue: #check if it was removed
+                            for temp_item in large_holder_check_queue:  # check if it was removed
                                 if temp_item[0] == token_address:
                                     still_in_queue = True
                                     break
                             if not still_in_queue:
+                                print("Token removed....halting sniper check")
+                                raise StopSniperCheck  # stop as not queue
+                            max_val = 70  # this is the danger zone of very high odds snipe
+                            if any(val >= max_val for val in true_supply_held_by_top_twenty):#stoping search prematurely
                                 print("Token removed....halting sniper check")
                                 raise StopSniperCheck  # stop as not queue
                             if holder not in all_seen_wallets and holder not in bots_wallet_balcklist:
@@ -505,7 +510,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                 all_seen_wallets.append(root)
                                 temp_total_spl_balance = 0
                                 while True:  # here traverse all wallets connected to one wallet and count the total
-                                    if len(temp_associated_wallets) > 15:  # not good
+                                    if len(temp_associated_wallets) > 11:  # not good
                                         true_supply_held_by_top_twenty.append(100)  # we don't want this token
                                         raise StopSniperCheck  # too many
                                     # supply holding.
@@ -598,8 +603,6 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                             large_holder_check_queue.pop(temp_counter)
                                             break
                                         temp_counter += 1
-                                    # we remove it from the sniper checker queue and will will re check the token one liquidty is burned.
-                                    # need to add one more position int eh token ququ list to say thsi token has received special treatment and need to be re- checked
                         else:
                             max_val = 70  # this is the danger zone of very high odds snipe
                             if any(val >= max_val for val in true_supply_held_by_top_twenty):
@@ -610,7 +613,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                 item[5] = max(true_supply_held_by_top_twenty)
                             print("for token: " + str(token_address) + " " + str(true_supply_held_by_top_twenty))
                 index += 1
-        time.sleep(0.2)
+        await asyncio.sleep(0.2)
 
 
 class TokenError(Exception):  # helps to exist deeply nested loops
@@ -621,7 +624,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
     print("Executing token verification thread....")
     token_expiration_time = 2400  # 40 minutes in seconds
     inital_checks_expiration_time = 900  # 15 minutes for initial checks
-    minimum_token_sent_to_lp_percent = 60
+    minimum_token_sent_to_lp_percent = 80
     decimals = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}  # a list of allowable decimal amount
     rpc_url = "https://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
     spl_executable = r'C:\\Users\MEMEdev\.local\share\solana\install\active_release\bin\spl-token.exe'  # for
@@ -1020,11 +1023,11 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
 
 
 def run():
-    th = threading.Thread(target=check_for_large_holder)
-    th.start()
+    #th = threading.Thread(target=check_for_large_holder)
+    #th.start()
     print("Running Bot....")
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     coros = [verify_token(), main(), append_past_tokens_to_file(), process_queue(),
-             token_report()]  # , check_for_large_holder()]  # poll_dev_wallet_activity()]
+             token_report(), check_for_large_holder()]  # poll_dev_wallet_activity()]
     loop.run_until_complete(asyncio.gather(*coros))

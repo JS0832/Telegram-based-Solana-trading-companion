@@ -123,7 +123,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                             sol_amount = float(full_configuration[3])
                             ekey = full_configuration[2]
                             buy_queue.append([token_ca, sol_amount, slippage, ekey, int(user[0])])
-                        await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token : `{token_ca}`\n🎂 Name and "
+                        await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token : `{token_ca}`\n\n🎂 Name and "
                                                                           f"Ticker: *{token_name}* , *{token_ticker}*\n\n🤝 "
                                                                           f"Basics"
                                                                           f": "
