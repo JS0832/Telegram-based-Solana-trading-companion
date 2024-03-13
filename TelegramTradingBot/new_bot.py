@@ -450,15 +450,18 @@ removed_tokens_queue = []  # here I will just place any token that has very bad 
 class StopSniperCheck(Exception):
     pass
 
+
 bots_wallet_balcklist = []
+
+
 # large_holder_check_queue.append([token[0],False,False,token[10],True])
 def check_for_large_holder():  # here maybe mostly focus on wallets with a low tx count too?
     while True:
         if len(large_holder_check_queue) > 0:
             index = 0
             for item in large_holder_check_queue:
+                print("checking token for large cumulative holder: " + str(item[0]))
                 if not item[1]:  # not checked yet
-                    item[1] = True
                     token_address = item[0]
                     token_supp = item[3]
                     holders = []
@@ -503,7 +506,8 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                         try:
                                             balances = balances_api.get_balances(temp_wallet)
                                         except ValueError:
-                                            bots_wallet_balcklist.append(temp_wallet) #to ignore solana bots that have insane amount of shitcoins in them
+                                            bots_wallet_balcklist.append(
+                                                temp_wallet)  # to ignore solana bots that have insane amount of shitcoins in them
                                             print("error reading address...ignoring the wallet: " + str(temp_wallet))
                                             continue
                                         spl_balance = balances["tokens"]
@@ -565,6 +569,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                         break  # done
                     except StopSniperCheck:
                         print("one wallet tied to many other wallets stopping reading....")
+                    item[1] = True #set as checked
                     if len(true_supply_held_by_top_twenty) == 0:
                         large_holder_check_queue.pop(index)
                     elif len(true_supply_held_by_top_twenty) == 1:  # only dev holding means this is a pre-launch
@@ -840,7 +845,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                     if int(math.floor(float(meta_burn_tx["params"]["amount"]) / float(
                                                             token[5]) * float(100))) > 95:
                                                         if not found:
-                                                            print("re-checking sniper status for token: "+str(token[0]))
+                                                            print(
+                                                                "re-checking sniper status for token: " + str(token[0]))
                                                             token_checked = False  # token was not checked yet
                                                             large_holder_check_queue.append(
                                                                 [token[0], False, False, token[10], "True", 0])
@@ -964,5 +970,5 @@ def run():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     coros = [verify_token(), main(), append_past_tokens_to_file(), process_queue(),
-             token_report()]#, check_for_large_holder()]  # poll_dev_wallet_activity()]
+             token_report()]  # , check_for_large_holder()]  # poll_dev_wallet_activity()]
     loop.run_until_complete(asyncio.gather(*coros))
