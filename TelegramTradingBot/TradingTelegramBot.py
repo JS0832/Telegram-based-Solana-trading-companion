@@ -13,7 +13,7 @@ import dev_sold_so_far
 import calcualte_risk_level
 import DevWalletDatabase
 import Ratings_database
-
+import get_token_name_ticker
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
 db = dataBase.DataBase()  # initialise
@@ -86,6 +86,10 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             risk_level = calcualte_risk_level.process_risk(advnaced_rug, largest_holder, result[0],
                                                            tokens_to_lp_percent, decentralisation)
             number_of_dev_wallets = len(result[1])
+            #name and ticker
+            token_meta = get_token_name_ticker.get_name_ticker(txn_hash)
+            token_name = token_meta[0]
+            token_ticker = token_meta[1]
             if not wb.check_token(token_ca):  # if toke has not been saved in database
                 wb.add_dev_wallets(token_ca, ','.join(result[1]))
             percent_amount = str(result[0]).replace('.', ',')
@@ -119,7 +123,9 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                             sol_amount = float(full_configuration[3])
                             ekey = full_configuration[2]
                             buy_queue.append([token_ca, sol_amount, slippage, ekey, int(user[0])])
-                        await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token : `{token_ca}`\n\n🤝 Basics "
+                        await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token : `{token_ca}`\n🎂 Name and "
+                                                                          f"Ticker: *{token_name}* , *{token_ticker}*\n\n🤝 "
+                                                                          f"Basics"
                                                                           f": "
                                                                           f"Liquidty Burned and Mint Disabled 🍀"
                                                                           f"\n🤖 AI "
@@ -997,7 +1003,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             percent_sold = "Increased by " + str(-1*temp_val) + " percent"
             # dev is buying
         else:
-            percent_sold = "unchanged " + str(temp_val) + " percent"
+            percent_sold = "Unchanged"
             # dev is buying
         refreshed_info = types.InlineKeyboardMarkup(row_width=1)
         hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
