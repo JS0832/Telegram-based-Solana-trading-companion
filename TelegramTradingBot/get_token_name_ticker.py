@@ -23,5 +23,3 @@ def get_name_ticker(txn_hash):
         if token["token"]["tokenAddress"] != "So11111111111111111111111111111111111111112":
             return token["token"]["name"], token["token"]["symbol"]
 
-
-print(get_name_ticker("GvHFmjyEZXTeHRYuFfX3hDYFryWpXTPcVdfNZ8nSszEpt7LirGiX5r6ZbZMSPw5bioyLrZC3sPJnFFnScwCvDQc"))

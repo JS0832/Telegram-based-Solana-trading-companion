@@ -489,6 +489,14 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                     true_supply_held_by_top_twenty = []  # this list will show true token holdings by the top 20 holders
                     try:
                         for holder in holders:
+                            still_in_queue = False
+                            for temp_item in large_holder_check_queue: #check if it was removed
+                                if temp_item[0] == token_address:
+                                    still_in_queue = True
+                                    break
+                            if not still_in_queue:
+                                print("Token removed....halting sniper check")
+                                raise StopSniperCheck  # stop as not queue
                             if holder not in all_seen_wallets and holder not in bots_wallet_balcklist:
                                 print("checking holder: " + str(holder))
                                 temp_associated_wallets = []  # for each holder checked (stack)
@@ -570,9 +578,10 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                     except StopSniperCheck:
                         print("one wallet tied to many other wallets stopping reading....")
                     still_in_queue = False
-                    for temp_item in large_holder_check_queue:
+                    for temp_item in large_holder_check_queue:  # check if it was removed
                         if temp_item[0] == token_address:
                             still_in_queue = True
+                            break
                     if still_in_queue:
                         item[1] = True  # set as checked
                         if len(true_supply_held_by_top_twenty) == 0:
