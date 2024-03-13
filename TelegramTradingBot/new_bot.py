@@ -480,27 +480,12 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                     # else:
                     # item[2] = False  # fail it as there is very little holders
                     # break
-                    all_seen_wallets = []  # helps to avoid double seen wallets
+                    all_seen_wallets = []  # helps to avoid double seen wallets when some holder is actually linked to another holder
                     token_addy = token_address
                     token_supply = token_supp
                     true_supply_held_by_top_twenty = []  # this list will show true token holdings by the top 20 holders
                     try:
                         for holder in holders:
-                            '''
-                            try:
-                                res = solana_client.get_signatures_for_address(
-                                    Pubkey.from_string(str(holder)),
-                                    limit=25  # Specify how much last transactions to fetch
-                                )
-                                transactions = json.loads(str(res.to_json()))["result"]
-                                temp_count = 0
-                                for tx in transactions:
-                                    temp_count += 1
-                                if temp_count > 20:  # this wallet is probably safe ( no need to compute it)
-                                    continue
-                            except ValueError:
-                                continue
-                            '''
                             if holder not in all_seen_wallets:
                                 print("checking holder: " + str(holder))
                                 temp_associated_wallets = []  # for each holder checked (stack)
@@ -514,7 +499,7 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                                         raise StopSniperCheck  # too many
                                     # supply holding.
                                     if len(temp_associated_wallets) > 0:  # means there is more to check
-                                        temp_wallet = str(temp_associated_wallets.pop())
+                                        temp_wallet = temp_associated_wallets.pop()
                                         try:
                                             balances = balances_api.get_balances(temp_wallet)
                                         except ValueError:
@@ -543,10 +528,9 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                                         for spl_transfer in transactions:  # loop over all transaction per give wallet
                                             try:
                                                 parsed_transactions = transactions_api.get_parsed_transactions(
-                                                    ##some  issue here
                                                     transactions=[spl_transfer["signature"]])
                                             except ValueError:
-                                                print(spl_transfer)
+                                                print("error reading a spl transfer: " + str(spl_transfer))
                                                 break
                                             if len(parsed_transactions) > 0:
                                                 if "tokenTransfers" in parsed_transactions[0]:
@@ -555,26 +539,25 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                                                             if str(tx_items["mint"]) == token_addy:
                                                                 if str(tx_items["toUserAccount"]) == temp_wallet:
                                                                     if str(tx_items[
-                                                                               "fromUserAccount"]) not in all_seen_wallets:
+                                                                               "fromUserAccount"]) not in all_seen_wallets and str(
+                                                                        tx_items["fromUserAccount"]) != "":
                                                                         if str(tx_items[
-                                                                                   "fromUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1" and str(
-                                                                            tx_items[
-                                                                                "fromUserAccount"]) != "":
+                                                                                   "fromUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":
                                                                             temp_associated_wallets.append(
-                                                                                str(tx_items["fromUserAccount"]))
-                                                                            all_seen_wallets.append(
                                                                                 str(tx_items["fromUserAccount"]))
                                                                 elif str(tx_items["fromUserAccount"]) == temp_wallet:
                                                                     if str(tx_items[
-                                                                               "toUserAccount"]) not in all_seen_wallets:
+                                                                               "toUserAccount"]) not in all_seen_wallets and str(
+                                                                        tx_items["toUserAccount"]) != "":
                                                                         if str(tx_items[
                                                                                    "toUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":
                                                                             temp_associated_wallets.append(
                                                                                 str(tx_items["toUserAccount"]))
-                                                                            all_seen_wallets.append(
-                                                                                str(tx_items["toUserAccount"]))
                                                 else:
                                                     print("strange error wallet: " + str(temp_wallet))
+                                        all_seen_wallets.append(
+                                            temp_wallet)  # add the traversed wallet to all see wallets
+
                                     else:
                                         percentage = float(temp_total_spl_balance) / float(token_supply) * float(100)
                                         true_supply_held_by_top_twenty.append(percentage)  # convert it as a percentage
@@ -583,12 +566,20 @@ async def check_for_large_holder():  # here maybe mostly focus on wallets with a
                         print("one wallet tied to many other wallets stopping reading....")
                     if len(true_supply_held_by_top_twenty) == 0:
                         large_holder_check_queue.pop(index)
-                    elif len(
-                            true_supply_held_by_top_twenty) == 1:  # only dev holding means this is a pre-launch
+                    elif len(true_supply_held_by_top_twenty) == 1:  # only dev holding means this is a pre-launch
                         # token(timed token) so we will add more time to its expiration time (1h)
                         for token in token_queue:
                             if token[0] == token_address:
+                                print("Added a time extension to token: " + str(token_address))
                                 token[1] += 3600  # adding an hour to the epoch
+                                temp_counter = 0
+                                for temp_item in large_holder_check_queue:
+                                    if temp_item[0] == token_address:
+                                        large_holder_check_queue.pop(temp_counter)
+                                        break
+                                    temp_counter += 1
+                                # we remove it from the sniper checker queue and will will re check the token one liquidty is burned.
+                                # need to add one more position int eh token ququ list to say thsi token has received special treatment and need to be re- checked
                     else:
                         max_val = 70  # this is the danger zone of very high odds snipe
                         if any(val >= max_val for val in true_supply_held_by_top_twenty):
@@ -823,10 +814,12 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                     token_checked = True
                                                     on_time = ""
                                                     largest_holder = 0
+                                                    found = False
                                                     for item in large_holder_check_queue:
                                                         # [[token_address,checked=true/false,passed=true or false,supply,
                                                         # checked on time?]]
                                                         if item[0] == token[0]:
+                                                            found = True  # this is simply used for special tokens
                                                             if not item[1]:  # if not checked
                                                                 item[4] = "False"  # true default
                                                                 token_checked = False
@@ -845,6 +838,12 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                     passed = True
                                                     if int(math.floor(float(meta_burn_tx["params"]["amount"]) / float(
                                                             token[5]) * float(100))) > 95:
+                                                        if not found:
+                                                            print("re-checking sniper status for token: "+str(token[0]))
+                                                            token_checked = False  # token was not checked yet
+                                                            large_holder_check_queue.append(
+                                                                [token[0], False, False, token[10], "True", 0])
+                                                            print(large_holder_check_queue)
                                                         if passed and token_checked:
                                                             holder_result = request('GET',
                                                                                     "https://pro-api.solscan.io/v1.0/token/holders?tokenAddress=" + str(
@@ -905,7 +904,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                 "BUY!): " + str(
                                                                     token[0]))
                                                             temp = 0
-                                                            for item in large_holder_check_queue:  # remove it from the check queue
+                                                            for item in large_holder_check_queue:  # remove it from
+                                                                # the check queue
                                                                 if item[0] == token[0]:
                                                                     large_holder_check_queue.pop(temp)
                                                                     break
