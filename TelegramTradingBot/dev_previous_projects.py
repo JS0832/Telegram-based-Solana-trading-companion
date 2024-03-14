@@ -29,7 +29,6 @@ def check_previous_project(txn_hash,
     liquidity_tx_info_json = liquidity_tx_info.json()
     # check for signer
     dev_wallet = str(liquidity_tx_info_json["signer"][0])
-    return [], dev_wallet  # for now
     res = solana_client.get_signatures_for_address(
         Pubkey.from_string(dev_wallet),
         limit=25  # Specify how much last transactions to fetch

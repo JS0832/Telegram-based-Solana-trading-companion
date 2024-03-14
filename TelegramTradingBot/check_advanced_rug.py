@@ -7,8 +7,10 @@ from helius import BalancesAPI
 import query_user_wallet
 import helius_api_key
 from solana.exceptions import SolanaRpcException
+from helius import TransactionsAPI
 
 helius_key = helius_api_key.hel_api_key
+transactions_api = TransactionsAPI(helius_key)
 balances_api = BalancesAPI(helius_key)
 URI = "https://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
 from requests import request
@@ -52,13 +54,24 @@ def check(token_address):
                             headers=solscan_header)
     holder_list = holder_result.json()
     holder_tx_per_wallet_list = []
+    incoming_transfer_count_list = []
     balance_sum = 0
     try:
         for holder in holder_list["data"]:
             if str(holder["owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # ignore radium
                 spl_balance = query_user_wallet.return_specific_balance(token_address, str(holder["owner"]))
+
+                spl_transfers = request('GET',
+                                        "https://pro-api.solscan.io/v1.0/account/splTransfers?account=" + str(
+                                            holder["owner"]) + "&limit=16&offset=0",
+                                        headers=solscan_header).json()
+                incoming_transfer_count = 0
+                for spl_transfer in spl_transfers["data"]:
+                    if spl_transfer["tokenAddress"] == token_address and spl_transfer["changeType"] == "inc":
+                        incoming_transfer_count = incoming_transfer_count + 1
+                incoming_transfer_count_list.append(incoming_transfer_count)
                 try:
-                    tx_count = 10
+                    tx_count = 12
                     while True:
                         try:
                             res = solana_client.get_signatures_for_address(
@@ -72,7 +85,7 @@ def check(token_address):
                         continue
                     transactions = json.loads(str(res.to_json()))["result"]
                     temp_count = 0
-                    for tx in transactions:
+                    for tx in transactions:  # here I will also check for a new version of rug where the dev buys up
                         temp_count += 1
                     holder_tx_per_wallet_list.append(temp_count)
                     if temp_count < 6:
@@ -84,6 +97,9 @@ def check(token_address):
     low_tx_count_sum = sum(i <= 6 for i in holder_tx_per_wallet_list)
     supply_percent_held_by_low_tx_wallets = int(balance_sum / get_total_supply * 100)
     print("advanced rug check complete.")
+    if len(incoming_transfer_count_list) > 0:
+        if max(incoming_transfer_count_list) > 12:
+            return "High"
     if low_tx_count_sum <= 3:
         return "Low"
     elif 3 < low_tx_count_sum < 6:

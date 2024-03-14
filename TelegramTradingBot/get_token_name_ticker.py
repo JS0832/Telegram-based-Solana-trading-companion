@@ -28,6 +28,8 @@ def get_name_ticker(txn_hash):
                     symbol = token["token"]["symbol"]
                     return name, symbol
                 else:
+                    if 'symbol' in token["token"]:
+                        return "NOT FOUND", token["token"]["symbol"]
                     continue
     return "NOT FOUND", "NOT FOUND"
 

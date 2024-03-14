@@ -23,6 +23,7 @@ wb = DevWalletDatabase.DevWalletDataBase()
 rd = Ratings_database.TokenRateDataBase()
 buy_queue = []  # will feed the buy engine so each user purchases a token (each user who selected auto buy
 
+#add user scam reports
 
 # [token_ca,amount,slippage,e_private_key,user_id]
 
@@ -65,7 +66,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             whale_holders = str(data[5])
             token_ca = str(data[6])
             advnaced_rug = check_advanced_rug.check(token_ca)  # add this to the refresh (query token code)
-            if advnaced_rug == "Extremely High":
+            if advnaced_rug == "High":  # make cusomisable pings for thsi option and set it to filter extremely high mayeb but for now it wills et thigh
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
             temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
@@ -99,7 +100,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             markup = types.InlineKeyboardMarkup()
             t_settings = types.InlineKeyboardButton("Settings", callback_data="trading_settings")
             buy = types.InlineKeyboardButton("Buy", callback_data="trigger_buy " + str(data[6]))
-            sell = types.InlineKeyboardButton("Sell", callback_data="trigger_sell " + str(data[6])+" "+str(decimals))
+            sell = types.InlineKeyboardButton("Sell",
+                                              callback_data="trigger_sell " + str(data[6]) + " " + str(decimals))
             refresh = types.InlineKeyboardButton("Refresh Info",
                                                  callback_data="refresh " + str(data[6]) + " " + tokens_to_lp_percent)
             positions = types.InlineKeyboardButton("Check all positions", callback_data="positions")
@@ -1021,12 +1023,26 @@ async def help_func_callback(callback_query: types.CallbackQuery):
     elif response_value.split()[0] == "hide_refreshed_info":
         await bot.delete_message(user_id, msg_to_remove)
     elif response_value.split()[0] == "trigger_buy":  # needs user wallet private key
+        # here I will add a quick customisable amount to buy the token with
+        buy_amount_keyboard = types.InlineKeyboardMarkup(row_width=6)
+        buy_point_two_five = types.InlineKeyboardButton("0.25 SOLL", callback_data="025SOL " + str(token_ca))
+        buy_point_five = types.InlineKeyboardButton("0.5 SOL", callback_data="05SOL " + str(token_ca))
+        buy_one = types.InlineKeyboardButton("1 SOL", callback_data="1SOL " + str(token_ca))
+        buy_one_point_five = types.InlineKeyboardButton("1.5 SOL", callback_data="15SOL " + str(token_ca))
+        buy_two = types.InlineKeyboardButton("2 SOL", callback_data="2SOL " + str(token_ca))
+        hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
+        buy_amount_keyboard.add(buy_point_two_five, buy_point_five, buy_one, buy_one_point_five, buy_two,
+                                hide_refreshed_info)
+        await bot.send_message(chat_id=user_id, text="💸 Please Select the amount of SOL",
+                               reply_markup=buy_amount_keyboard)
+        '''
         # check user trading settings
         all_settings = trading_db.return_all_settings(user_id)
         sol_amount = float(str(all_settings[3]))
         slippage = int(float(all_settings[12]))
         ekey = all_settings[2]
         await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey, user_id)
+        '''
     elif response_value.split()[0] == "trigger_sell":  # for now sell the whole position
         all_user_info = trading_db.return_all_settings(user_id)
         wallet_address = all_user_info[1]
@@ -1035,7 +1051,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             slippage = int(float(all_user_info[12]))
             ekey = all_user_info[2]
             token_decimals = response_value.split()[2]
-            await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey, user_id,token_decimals)
+            await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey, user_id, token_decimals)
     elif response_value.split()[0] == "rate":
         score = types.InlineKeyboardMarkup(row_width=6)
         score_one = types.InlineKeyboardButton("1", callback_data="sore_one " + str(token_ca))
@@ -1093,8 +1109,16 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             rd.add_token(token_ca)
             rd.add_rating(token_ca, str(user_id), score)
         await bot.send_message(chat_id=user_id, text="Thank you for rating!")
-
-
+    elif response_value.split()[0] == "025SOL":
+        pass
+    elif response_value.split()[0] == "05SOL":
+        pass
+    elif response_value.split()[0] == "1SOL":
+        pass
+    elif response_value.split()[0] == "15SOL":
+        pass
+    elif response_value.split()[0] == "2SOL":
+        pass
 def subscription():
     pass
 
