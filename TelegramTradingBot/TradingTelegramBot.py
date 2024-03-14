@@ -89,6 +89,9 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             risk_level = calcualte_risk_level.process_risk(advnaced_rug, largest_holder, result[0],
                                                            tokens_to_lp_percent, decentralisation)
             number_of_dev_wallets = len(result[1])
+            if number_of_dev_wallets > 8:
+                new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
+                continue
             # name and ticker
             token_meta = get_token_name_ticker.get_name_ticker(txn_hash)
             token_name = token_meta[0]

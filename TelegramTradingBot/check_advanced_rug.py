@@ -60,7 +60,6 @@ def check(token_address):
         for holder in holder_list["data"]:
             if str(holder["owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # ignore radium
                 spl_balance = query_user_wallet.return_specific_balance(token_address, str(holder["owner"]))
-
                 spl_transfers = request('GET',
                                         "https://pro-api.solscan.io/v1.0/account/splTransfers?account=" + str(
                                             holder["owner"]) + "&limit=16&offset=0",
@@ -99,6 +98,7 @@ def check(token_address):
     print("advanced rug check complete.")
     if len(incoming_transfer_count_list) > 0:
         if max(incoming_transfer_count_list) > 12:
+            print("Rug 2.0 likely! for token: "+str(token_address))
             return "High"
     if low_tx_count_sum <= 3:
         return "Low"
@@ -115,4 +115,3 @@ def check(token_address):
             return "Extremely High"
         else:
             return "High"
-
