@@ -1,4 +1,3 @@
-import json
 from requests import request
 
 solscan_header = {
@@ -13,7 +12,6 @@ solscan_header = {
 def get_name_ticker(txn_hash):
     name = ""
     symbol = ""
-    # here check for dev wallet
     tries = 2
     for x in range(tries):
         liquidity_tx_info = request('GET',
@@ -32,3 +30,4 @@ def get_name_ticker(txn_hash):
                 else:
                     continue
     return "NOT FOUND", "NOT FOUND"
+

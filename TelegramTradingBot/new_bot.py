@@ -499,7 +499,8 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                 print("Token removed....halting sniper check")
                                 raise StopSniperCheck  # stop as not queue
                             max_val = 70  # this is the danger zone of very high odds snipe
-                            if any(val >= max_val for val in true_supply_held_by_top_twenty):#stoping search prematurely
+                            if any(val >= max_val for val in
+                                   true_supply_held_by_top_twenty):  # stoping search prematurely
                                 print("Token removed....halting sniper check")
                                 raise StopSniperCheck  # stop as not queue
                             if holder not in all_seen_wallets and holder not in bots_wallet_balcklist:
@@ -592,7 +593,8 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                         item[1] = True  # set as checked
                         if len(true_supply_held_by_top_twenty) == 0:
                             large_holder_check_queue.pop(index)
-                        elif len(true_supply_held_by_top_twenty) == 1 and token_address not in special_token_queue:  # only dev holding means this is a pre-launch,if token adress is in the list we know its been checked no again so can be processed as normal coin
+                        elif len(
+                                true_supply_held_by_top_twenty) == 1 and token_address not in special_token_queue:  # only dev holding means this is a pre-launch,if token adress is in the list we know its been checked no again so can be processed as normal coin
                             # token(timed token) so we will add more time to its expiration time (1h)
                             for token in token_queue:
                                 if token[0] == token_address:
@@ -883,7 +885,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                         if not found:
                                                             print(
                                                                 "re-checking sniper status for token: " + str(token[0]))
-                                                            special_token_queue.append(token[0])#place in this list so it signifies no need to re check the token after this final check check
+                                                            special_token_queue.append(token[
+                                                                                           0])  # place in this list so it signifies no need to re check the token after this final check check
                                                             token_checked = False  # token was not checked yet
                                                             large_holder_check_queue.append(
                                                                 [token[0], False, False, token[10], "True", 0])
@@ -942,7 +945,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                     token[5]) * float(
                                                                     100))), token[
                                                                      8], total_held_string, five_above_string, token[0],
-                                                                 token[3]])
+                                                                 token[3], token[11]])
                                                             print(
                                                                 "sent token for further checks (pre ping - DO NOT "
                                                                 "BUY!): " + str(
@@ -1031,5 +1034,5 @@ def run():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     coros = [verify_token(), main(), append_past_tokens_to_file(), process_queue(),
-             token_report()]#, check_for_large_holder()]  # poll_dev_wallet_activity()]
+             token_report()]  # , check_for_large_holder()]  # poll_dev_wallet_activity()]
     loop.run_until_complete(asyncio.gather(*coros))

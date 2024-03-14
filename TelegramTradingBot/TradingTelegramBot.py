@@ -14,6 +14,7 @@ import calcualte_risk_level
 import DevWalletDatabase
 import Ratings_database
 import get_token_name_ticker
+
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
 db = dataBase.DataBase()  # initialise
@@ -54,6 +55,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             list_of_users = db.return_all_activated_users()
             data = new_bot.ping_queue[0]  # grabs the first in queue
             txn_hash = data[7]
+            decimals = data[8]
             # also grab the token name from the bot.
             largest_holder = str(data[0])  # 1
             inital_liq = str(data[1])  # 2
@@ -86,7 +88,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             risk_level = calcualte_risk_level.process_risk(advnaced_rug, largest_holder, result[0],
                                                            tokens_to_lp_percent, decentralisation)
             number_of_dev_wallets = len(result[1])
-            #name and ticker
+            # name and ticker
             token_meta = get_token_name_ticker.get_name_ticker(txn_hash)
             token_name = token_meta[0]
             token_ticker = token_meta[1]
@@ -97,7 +99,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             markup = types.InlineKeyboardMarkup()
             t_settings = types.InlineKeyboardButton("Settings", callback_data="trading_settings")
             buy = types.InlineKeyboardButton("Buy", callback_data="trigger_buy " + str(data[6]))
-            sell = types.InlineKeyboardButton("Sell", callback_data="trigger_sell " + str(data[6]))
+            sell = types.InlineKeyboardButton("Sell", callback_data="trigger_sell " + str(data[6])+" "+str(decimals))
             refresh = types.InlineKeyboardButton("Refresh Info",
                                                  callback_data="refresh " + str(data[6]) + " " + tokens_to_lp_percent)
             positions = types.InlineKeyboardButton("Check all positions", callback_data="positions")
@@ -1000,7 +1002,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             # dev is selling
             percent_sold = "Reduced by " + str(temp_val) + " percent"
         elif temp_val < 0:
-            percent_sold = "Increased by " + str(-1*temp_val) + " percent"
+            percent_sold = "Increased by " + str(-1 * temp_val) + " percent"
             # dev is buying
         else:
             percent_sold = "Unchanged"
@@ -1022,18 +1024,18 @@ async def help_func_callback(callback_query: types.CallbackQuery):
         # check user trading settings
         all_settings = trading_db.return_all_settings(user_id)
         sol_amount = float(str(all_settings[3]))
-        slippage = float(str(all_settings[12]))
+        slippage = int(float(all_settings[12]))
         ekey = all_settings[2]
-        result = str(await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey))
-        await bot.send_message(chat_id=callback_query.from_user.id, text=f"Token Purchased tx:\n{result}")
+        await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey, user_id)
     elif response_value.split()[0] == "trigger_sell":  # for now sell the whole position
         all_user_info = trading_db.return_all_settings(user_id)
         wallet_address = all_user_info[1]
-        token_balance = query_user_wallet.return_specific_balance(token_ca, wallet_address)
+        token_balance = int(float(query_user_wallet.return_specific_balance(token_ca, wallet_address)))
         if token_balance > 0:
-            slippage = all_user_info[12]
+            slippage = int(float(all_user_info[12]))
             ekey = all_user_info[2]
-            await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey)
+            token_decimals = response_value.split()[2]
+            await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey, user_id,token_decimals)
     elif response_value.split()[0] == "rate":
         score = types.InlineKeyboardMarkup(row_width=6)
         score_one = types.InlineKeyboardButton("1", callback_data="sore_one " + str(token_ca))
