@@ -8052,3 +8052,6 @@
 ['error fetching burn tx...most likely removed liquidty ', 'rMcLKUywD6CyDsnpjRYRixdB7MqKP9qCnTd754ckC77']
 ['removed token due to low initial liquidity :  ', '8ASMu5CETDwtwXRVFeJScwVSCVjpumk5pugq8WBfjVsq']
 ['error retrying....', '4kup7v3FaSiUtbjsxL7SR5baXZ3FFFBw5zUcKYKbeZAv']
+['removed token due to low token ratio added to the lp pool:  ', 'FkAG1AriKQEhr78q67eFh1HksRuFeiyckK59epQTKF4z']
+['removed token due to low token ratio added to the lp pool:  ', '4UtKkQoBhKPsgwcFMBhbqJ4YiM8BAir7819JoMDVs7V2']
+['removed token due to low token ratio added to the lp pool:  ', 'qtd1TQyZDvacUtQDH11d3aVE3R9ejJLEC5X5gWRTNDV']

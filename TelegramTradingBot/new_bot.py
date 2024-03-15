@@ -593,7 +593,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                             still_in_queue = True
                             break
                     if still_in_queue:
-                        item[1] = True  # set as checked
+                        #item[1] = True  # set as checked
                         if len(true_supply_held_by_top_twenty) == 0:
                             large_holder_check_queue.pop(index)
                         elif len(
@@ -610,6 +610,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                             break
                                         temp_counter += 1
                         else:
+                            item[1] = True  # set as checked
                             max_val = 70  # this is the danger zone of very high odds snipe
                             if any(val >= max_val for val in true_supply_held_by_top_twenty):
                                 item[2] = False  # failed
@@ -887,8 +888,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                             token[5]) * float(100))) > 95:
                                                         if not found:
                                                             print("re-checking sniper status for the timed release token: " + str(token[0]))
-                                                            special_token_queue.append(token[
-                                                                                           0])  # place in this list so it signifies no need to re check the token after this final check check
+                                                            special_token_queue.append(token[0])  # place in this list so it signifies no need to re check the token after this final check
                                                             token_checked = False  # token was not checked yet
                                                             large_holder_check_queue.append(
                                                                 [token[0], False, False, token[10], "True", 0])
