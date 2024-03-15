@@ -136,20 +136,24 @@ def get_msg_value(msg: List[LogsNotification]) -> RpcLogsResponse:
 
 
 def get_tokens(signature: Signature, RaydiumLPV4: Pubkey) -> None:
-    transaction = solana_client.get_transaction(
-        signature,
-        encoding="jsonParsed",
-        max_supported_transaction_version=0
-    )
-    if str(transaction) == "GetTransactionResp(None)":
-        pass
-    else:
-        tx_signature = str(json.loads(str(transaction.to_json()))['result']['transaction']['signatures'][0])
-        instructions = get_instructions(transaction)
-        filtred_instuctions = instructions_with_program_id(instructions, RaydiumLPV4)
-        for instruction in filtred_instuctions:
-            tokens = get_tokens_info(instruction)
-            append_to_queue(tokens, tx_signature)  # pass the tokens transaction has for adding liquidty event
+    try:
+        transaction = solana_client.get_transaction(
+            signature,
+            encoding="jsonParsed",
+            max_supported_transaction_version=0
+        )
+        if str(transaction) == "GetTransactionResp(None)":
+            pass
+        else:
+            tx_signature = str(json.loads(str(transaction.to_json()))['result']['transaction']['signatures'][0])
+            instructions = get_instructions(transaction)
+            filtred_instuctions = instructions_with_program_id(instructions, RaydiumLPV4)
+            for instruction in filtred_instuctions:
+                tokens = get_tokens_info(instruction)
+                append_to_queue(tokens, tx_signature)  # pass the tokens transaction has for adding liquidty event
+    except solana.exceptions.SolanaRpcException:
+        print("error reading token")
+
 
 
 def get_instructions(

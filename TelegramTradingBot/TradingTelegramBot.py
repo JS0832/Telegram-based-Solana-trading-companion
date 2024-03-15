@@ -23,7 +23,8 @@ wb = DevWalletDatabase.DevWalletDataBase()
 rd = Ratings_database.TokenRateDataBase()
 buy_queue = []  # will feed the buy engine so each user purchases a token (each user who selected auto buy
 
-#add user scam reports
+
+# add user scam reports
 
 # [token_ca,amount,slippage,e_private_key,user_id]
 
@@ -59,14 +60,14 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             decimals = data[8]
             # also grab the token name from the bot.
             largest_holder = str(data[0])  # 1
-            inital_liq = str(data[1])  # 2
-            liq_burned = str(data[2])  # 3
-            tokens_to_lp_percent = str(data[3])
+            inital_liq = str(data[1]).replace('.', ',')  # 2
+            liq_burned = str(data[2]).replace('.', ',')  # 3
+            tokens_to_lp_percent = str(data[3]).replace('.', ',')
             decentralisation = str(data[4])
             whale_holders = str(data[5])
             token_ca = str(data[6])
             advnaced_rug = check_advanced_rug.check(token_ca)  # add this to the refresh (query token code)
-            if advnaced_rug == "High":  # make cusomisable pings for thsi option and set it to filter extremely high mayeb but for now it wills et thigh
+            if advnaced_rug == "High" or advnaced_rug == "Extremely High":  # make cusomisable pings for thsi option and set it to filter extremely high mayeb but for now it wills et thigh
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
             temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
@@ -94,11 +95,11 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                 continue
             # name and ticker
             token_meta = get_token_name_ticker.get_name_ticker(txn_hash)
-            token_name = token_meta[0]
-            token_ticker = token_meta[1]
+            token_name = str(token_meta[0])
+            token_ticker = str(token_meta[1])
             if not wb.check_token(token_ca):  # if toke has not been saved in database
                 wb.add_dev_wallets(token_ca, ','.join(result[1]))
-            percent_amount = str(result[0]).replace('.', ',')
+            percent_amount = str(result[0]).replace('.', ',')  # names can contain illegal chars so sort it out
             # extract data from the ping queue
             markup = types.InlineKeyboardMarkup()
             t_settings = types.InlineKeyboardButton("Settings", callback_data="trading_settings")
@@ -1122,6 +1123,8 @@ async def help_func_callback(callback_query: types.CallbackQuery):
         pass
     elif response_value.split()[0] == "2SOL":
         pass
+
+
 def subscription():
     pass
 
