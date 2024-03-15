@@ -29,24 +29,21 @@ def check_previous_project(txn_hash,
     liquidity_tx_info_json = liquidity_tx_info.json()
     # check for signer
     dev_wallet = str(liquidity_tx_info_json["signer"][0])
-    return [], dev_wallet
     res = solana_client.get_signatures_for_address(
         Pubkey.from_string(dev_wallet),
-        limit=25  # Specify how much last transactions to fetch
+        limit=50  # Specify how much last transactions to fetch
     )
-    transactions = json.loads(str(res.to_json()))["result"]
+
+    spl_transfers = request('GET',
+                            "https://pro-api.solscan.io/v1.0/account/splTransfers?account=" + str(
+                                dev_wallet) + "&limit=50&offset=0",
+                            headers=solscan_header).json()
+
     token_list = []
-    tokens_count = 0
-    for spl_transfer in transactions:  # loop over all transaction per give wallet
-        parsed_transactions = transactions_api.get_parsed_transactions(transactions=[spl_transfer["signature"]])
-        if parsed_transactions[0]["type"] == "TOKEN_MINT":
-            temp_token_list = []
-            for token_transfer in parsed_transactions[0]["tokenTransfers"]:
-                if token_transfer["fromUserAccount"] == "":
-                    if token_transfer["mint"] != token_pinged:
-                        temp_token_list.append(token_transfer["mint"])
-                        tokens_count += 1
-                        if tokens_count > 3:
-                            return token_list + temp_token_list
-            token_list = token_list + temp_token_list
+
+    for spl_transfer in spl_transfers["data"]:
+        if spl_transfer["changeType"] == "inc" and spl_transfer["tokenAddress"] != token_pinged:
+            token_list.append(spl_transfer["tokenAddress"])
     return token_list, dev_wallet
+
+

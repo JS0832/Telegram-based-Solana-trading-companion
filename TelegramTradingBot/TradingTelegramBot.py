@@ -57,7 +57,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             list_of_users = db.return_all_activated_users()
             data = new_bot.ping_queue[0]  # grabs the first in queue
             if data[9]:
-                timed_launch = "@TIMED LAUNCH@"
+                timed_launch = " ⏲ TIMED LAUNCH ⏲ "
             else:
                 timed_launch = ""
             txn_hash = data[7]

@@ -886,8 +886,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                     if int(math.floor(float(meta_burn_tx["params"]["amount"]) / float(
                                                             token[5]) * float(100))) > 95:
                                                         if not found:
-                                                            print(
-                                                                "re-checking sniper status for token: " + str(token[0]))
+                                                            print("re-checking sniper status for the timed release token: " + str(token[0]))
                                                             special_token_queue.append(token[
                                                                                            0])  # place in this list so it signifies no need to re check the token after this final check check
                                                             token_checked = False  # token was not checked yet
@@ -902,7 +901,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                                     headers=solscan_header)
                                                             holder_list = holder_result.json()
                                                             five_or_above = 0  # number of holders that have 5%+
-                                                            total_supply_held = 0  # amount fo supply top 10 holders hold
+                                                            total_supply_held = 0  # amount fo supply top 10 holders
+                                                            # hold
                                                             amount_of_coins_for_five_percent = \
                                                                 int(float(token[10]) * float(0.05))
                                                             # total supply * 0.05 then convert to int
@@ -967,13 +967,6 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                 "sent token for further checks (pre ping - DO NOT "
                                                                 "BUY!): " + str(
                                                                     token[0]))
-                                                            temp = 0
-                                                            for item in large_holder_check_queue:  # remove it from
-                                                                # the check queue
-                                                                if item[0] == token[0]:
-                                                                    large_holder_check_queue.pop(temp)
-                                                                    break
-                                                                temp += 1
                                                             raise TokenError
                                                         elif token_checked and not passed:
                                                             print(
@@ -1019,7 +1012,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                 token_queue.pop(index)
                                 continue
                         except TokenError:
-                            print("token removed!")
+                            print("token removed fom queue :"+str(token[0]))
                             temp = 0
                             for item in large_holder_check_queue:
                                 if item[0] == token[0]:
