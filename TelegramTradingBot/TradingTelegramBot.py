@@ -56,6 +56,10 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
         if len(new_bot.ping_queue) > 0:  # if there is a token to be pinged
             list_of_users = db.return_all_activated_users()
             data = new_bot.ping_queue[0]  # grabs the first in queue
+            if data[9]:
+                timed_launch = "@TIMED LAUNCH@"
+            else:
+                timed_launch = ""
             txn_hash = data[7]
             decimals = data[8]
             # also grab the token name from the bot.
@@ -67,7 +71,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             whale_holders = str(data[5])
             token_ca = str(data[6])
             advnaced_rug = check_advanced_rug.check(token_ca)  # add this to the refresh (query token code)
-            if advnaced_rug == "High" or advnaced_rug == "Extremely High":  # make cusomisable pings for thsi option and set it to filter extremely high mayeb but for now it wills et thigh
+            if advnaced_rug == "High" or advnaced_rug == "Extremely High":  # make cusomisable pings for this option and set it to filter extremely high mayeb but for now it wills et thigh
+                print("Removed token due to a high risk of advanced rug.")
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
             temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
@@ -131,7 +136,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                             sol_amount = float(full_configuration[3])
                             ekey = full_configuration[2]
                             buy_queue.append([token_ca, sol_amount, slippage, ekey, int(user[0])])
-                        await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token : `{token_ca}`\n\n🎂 Name and "
+                        await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token *{timed_launch}* : `{token_ca}`\n\n🎂 Name and "
                                                                           f"Ticker: *{token_name}* , *{token_ticker}*\n\n🤝 "
                                                                           f"Basics"
                                                                           f": "

@@ -155,7 +155,6 @@ def get_tokens(signature: Signature, RaydiumLPV4: Pubkey) -> None:
         print("error reading token")
 
 
-
 def get_instructions(
         transaction: GetTransactionResp
 ):
@@ -942,14 +941,28 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                                             100)))
                                                                 five_above_string = str(
                                                                     five_or_above)
-                                                            ping_queue.append(
-                                                                [int(largest_holder), token[6], int(math.floor(float(
-                                                                    meta_burn_tx["params"][
-                                                                        "amount"]) / float(
-                                                                    token[5]) * float(
-                                                                    100))), token[
-                                                                     8], total_held_string, five_above_string, token[0],
-                                                                 token[3], token[11]])
+                                                            if token[0] in special_token_queue:  # timed launch
+                                                                ping_queue.append(
+                                                                    [int(largest_holder), token[6],
+                                                                     int(math.floor(float(
+                                                                         meta_burn_tx["params"][
+                                                                             "amount"]) / float(
+                                                                         token[5]) * float(
+                                                                         100))), token[
+                                                                         8], total_held_string, five_above_string,
+                                                                     token[0],
+                                                                     token[3], token[11], True])
+                                                            else:
+                                                                ping_queue.append(
+                                                                    [int(largest_holder), token[6],
+                                                                     int(math.floor(float(
+                                                                         meta_burn_tx["params"][
+                                                                             "amount"]) / float(
+                                                                         token[5]) * float(
+                                                                         100))), token[
+                                                                         8], total_held_string, five_above_string,
+                                                                     token[0],
+                                                                     token[3], token[11], False])
                                                             print(
                                                                 "sent token for further checks (pre ping - DO NOT "
                                                                 "BUY!): " + str(

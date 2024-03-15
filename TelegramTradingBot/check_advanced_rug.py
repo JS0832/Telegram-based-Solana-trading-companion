@@ -115,3 +115,5 @@ def check(token_address):
             return "Extremely High"
         else:
             return "High"
+
+print(check("3UtWUcwFdtaMePFURciSvqyR3QqEmMJnjpmj8oX21gCs"))
