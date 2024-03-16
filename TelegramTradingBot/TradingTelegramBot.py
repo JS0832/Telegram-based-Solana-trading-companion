@@ -79,6 +79,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
             past_token_list = temp_dev_info[0]
             deployer = temp_dev_info[1]
+            # deployer info :
+            deployer_balances = query_user_wallet.return_token_balances(deployer)  # balance in the deployer
             past_tokens_string = "\n"
             if len(past_token_list) > 0:
                 for token in past_token_list:
@@ -158,7 +160,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"https://dexscreener.com/solana/{token_ca})"
                                                     f"\n📱 [Telegram]("
                                                     f"http://www.example.com/)\n\n👝 [Deployer]("
-                                                    f"https://solscan.io/account/{deployer})\n 📚 "
+                                                    f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances : *{deployer_balances}*\n\n 📚"
                                                     f"Dev's Previous"
                                                     f"Projects: {past_tokens_string}",
                                                reply_markup=markup, parse_mode='MarkdownV2',
@@ -1159,9 +1161,11 @@ async def help_func_callback(callback_query: types.CallbackQuery):
         wallet_list = wb.return_dev_wallets(token_ca).split(",")
         response = check_dev_wallet_recent_tx.check_activity(wallet_list)
         time_ago = response[0]
-        desc = response[1]
+        desc = response[1].replace(".", ",")
         await bot.send_message(chat_id=user_id,
-                               text=f"💁🏽 Showing Dev's most recent activity:\n\n⌛️ Time ago : {time_ago}\n📚 Description : {desc}", parse_mode='MarkdownV2')
+                               text=f"🟣 For token : *{token_ca}*\n\n💁🏽 Showing Dev's most recent activity:\n\n⌛️ "
+                                    f"Time ago : {time_ago}\n📚"
+                                    f"Description : {desc}", parse_mode='MarkdownV2')
 
 
 def subscription():

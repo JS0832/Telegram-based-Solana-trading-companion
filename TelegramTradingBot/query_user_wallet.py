@@ -14,12 +14,16 @@ def return_token_balances(wallet_address):  # up to 25 addresses return a string
     token_count = 0
     for token in tokens:
         token_ca = token["mint"]
+        if token_ca == "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB":
+            token_ca = "USDT"
+        elif token_ca == "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v":
+            token_ca = "USDC"
         token_amount = str((float(token["amount"]) / float(10 ** int(token["decimals"]))))
         if token["amount"] > 0:
             balances_string += f"Spl Token: `{token_ca}` {token_amount}\n".replace(".", ",")
             token_list.append([token_ca, token_amount])
             token_count += 1
-        if token_count > 20:
+        if token_count > 3:
             break
 
     return balances_string

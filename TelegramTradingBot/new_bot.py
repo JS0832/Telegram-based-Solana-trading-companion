@@ -603,7 +603,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                             for token in token_queue:
                                 if token[0] == token_address:
                                     print("Added a time extension to token: " + str(token_address))
-                                    token[1] += 3600  # adding an hour to the epoch
+                                    token[1] += 5000  # adding an hour to the epoch
                                     temp_counter = 0
                                     for temp_item in large_holder_check_queue:
                                         if temp_item[0] == token_address:
