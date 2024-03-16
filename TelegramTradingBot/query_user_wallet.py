@@ -1,12 +1,12 @@
 from helius import BalancesAPI
 import helius_api_key
-
+import get_token_name_ticker
 helius_key = helius_api_key.hel_api_key
 balances_api = BalancesAPI(helius_key)
 
 
 def return_token_balances(wallet_address):  # up to 25 addresses return a string
-    balances_string = "🟣 Solana Balance: "
+    balances_string = "🟣 Solana Balance : "
     spl_balances = balances_api.get_balances(wallet_address)
     sol_balance = str(spl_balances["nativeBalance"] / 10 ** 9).replace(".", ",") + " SOL"
     balances_string += sol_balance + "\n"

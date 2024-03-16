@@ -172,7 +172,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"https://dexscreener.com/solana/{token_ca})"
                                                     f"\n📱 [Telegram]("
                                                     f"http://www.example.com/)\n\n😁 *Funding wallet :* \n*{fund_wallet}*\n\n👝 [Deployer]("
-                                                    f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances :\n*{deployer_balances}*\n\n 📚"
+                                                    f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances : *{deployer_balances}*\n\n 📚"
                                                     f"Dev's Previous"
                                                     f" Projects: {past_tokens_string}",
                                                reply_markup=markup, parse_mode='MarkdownV2',
@@ -1174,10 +1174,13 @@ async def help_func_callback(callback_query: types.CallbackQuery):
         response = check_dev_wallet_recent_tx.check_activity(wallet_list)
         time_ago = response[0]
         desc = response[1].replace(".", ",")
+        hide = types.InlineKeyboardMarkup(row_width=1)
+        hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
+        hide.add(hide_refreshed_info)
         await bot.send_message(chat_id=user_id,
-                               text=f"🟣 For token : *{token_ca}*\n\n💁🏽 Showing Dev's most recent activity:\n\n⌛️ "
-                                    f"Time ago : {time_ago}\n📚"
-                                    f"Description : {desc}", parse_mode='MarkdownV2')
+                               text=f"🟣 For Token : *{token_ca}*\n\n💁🏽 Showing Dev's most recent activity:\n\n⌛️ "
+                                    f"Time ago : *{time_ago}*\n📚"
+                                    f"Description : *{desc}*", parse_mode='MarkdownV2', reply_markup=hide)
 
 
 def subscription():
