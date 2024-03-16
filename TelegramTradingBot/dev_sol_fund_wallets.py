@@ -1,0 +1,1 @@
+#will check the wallet dev got sol funding from (can be multiple) and show if thet wallet balance is over 50 sol

@@ -14,6 +14,7 @@ import calcualte_risk_level
 import DevWalletDatabase
 import Ratings_database
 import get_token_name_ticker
+import check_dev_wallet_recent_tx
 
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
@@ -78,13 +79,11 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
             past_token_list = temp_dev_info[0]
             deployer = temp_dev_info[1]
-            past_tokens_string = ""
-            iterator = 0
+            past_tokens_string = "\n"
             if len(past_token_list) > 0:
                 for token in past_token_list:
                     temp_string = "https://dexscreener.com/solana/" + str(token)
-                    past_tokens_string += f"📈 [Previous Project {iterator}]({temp_string})\n"
-                    iterator += 1
+                    past_tokens_string += f"📈 [Previous Project]({temp_string})\n"
             else:
                 past_tokens_string = " *None 😇*"
             # dev selling report:
@@ -117,8 +116,9 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             info = types.InlineKeyboardButton("Info", callback_data="info")
             share = types.InlineKeyboardButton("Share PNL", callback_data="pnl")
             rate = types.InlineKeyboardButton("Rate This Ping", callback_data="rate " + str(data[6]))
+            check_dev_activity = types.InlineKeyboardButton("Check activity", callback_data="check_dev " + str(data[6]))
             markup.row(t_settings, buy, sell)
-            markup.row(refresh, positions)
+            markup.row(refresh, check_dev_activity, positions)
             markup.row(share, info, rate)
             for user in list_of_users:  # just so I can debug
                 full_configuration = trading_db.return_all_settings(user[0])
@@ -136,30 +136,31 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                             sol_amount = float(full_configuration[3])
                             ekey = full_configuration[2]
                             buy_queue.append([token_ca, sol_amount, slippage, ekey, int(user[0])])
-                        await bot.send_message(chat_id=int(user[0]), text=f"🤑 New Token *{timed_launch}* : `{token_ca}`\n\n🎂 Name and "
-                                                                          f"Ticker: *{token_name}* , *{token_ticker}*\n\n🤝 "
-                                                                          f"Basics"
-                                                                          f": "
-                                                                          f"Liquidty Burned and Mint Disabled 🍀"
-                                                                          f"\n🤖 AI "
-                                                                          f"token summary : *Coming Soon* \n🐋 "
-                                                                          f"Largest Cumulative "
-                                                                          f"holder : *{
-                                                                          largest_holder}*\n🎗 Dev sold : {percent_amount} percent so far\n🗂 Number of Dev's Wallets : *{number_of_dev_wallets}*\n🎉 Initial Liquidity :"
-                                                                          f" *{inital_liq}*\n🔥 Liquidity Burned : "
-                                                                          f"*{liq_burned}*\n🌊 Tokens sent to LP : "
-                                                                          f"*{tokens_to_lp_percent}*\n💳 "
-                                                                          f"Decentralisation :  "
-                                                                          f"*{decentralisation}*\n🐳 Number of whale "
-                                                                          f"holders : *{whale_holders}*\n⚰️ Advanced "
-                                                                          f"Rug : *{advnaced_rug}*\n🩸 Risk "
-                                                                          f"Level : *{risk_level}*\n\n📈 [Token Chart]("
-                                                                          f"https://dexscreener.com/solana/{token_ca})"
-                                                                          f"\n📱 [Telegram]("
-                                                                          f"http://www.example.com/)\n\n👝 [Deployer]("
-                                                                          f"https://solscan.io/account/{deployer})\n 📚 "
-                                                                          f"Dev's Previous"
-                                                                          f"Projects: {past_tokens_string}",
+                        await bot.send_message(chat_id=int(user[0]),
+                                               text=f"🤑 New Token *{timed_launch}* : `{token_ca}`\n\n🎂 Name and "
+                                                    f"Ticker: *{token_name}* , *{token_ticker}*\n\n🤝 "
+                                                    f"Basics"
+                                                    f": "
+                                                    f"Liquidty Burned and Mint Disabled 🍀"
+                                                    f"\n🤖 AI "
+                                                    f"token summary : *Coming Soon* \n🐋 "
+                                                    f"Largest Cumulative "
+                                                    f"holder : *{
+                                                    largest_holder}*\n🎗 Dev sold : {percent_amount} percent so far\n🗂 Number of Dev's Wallets : *{number_of_dev_wallets}*\n🎉 Initial Liquidity :"
+                                                    f" *{inital_liq}*\n🔥 Liquidity Burned : "
+                                                    f"*{liq_burned}*\n🌊 Tokens sent to LP : "
+                                                    f"*{tokens_to_lp_percent}*\n💳 "
+                                                    f"Decentralisation :  "
+                                                    f"*{decentralisation}*\n🐳 Number of whale "
+                                                    f"holders : *{whale_holders}*\n⚰️ Advanced "
+                                                    f"Rug : *{advnaced_rug}*\n🩸 Risk "
+                                                    f"Level : *{risk_level}*\n\n📈 [Token Chart]("
+                                                    f"https://dexscreener.com/solana/{token_ca})"
+                                                    f"\n📱 [Telegram]("
+                                                    f"http://www.example.com/)\n\n👝 [Deployer]("
+                                                    f"https://solscan.io/account/{deployer})\n 📚 "
+                                                    f"Dev's Previous"
+                                                    f"Projects: {past_tokens_string}",
                                                reply_markup=markup, parse_mode='MarkdownV2',
                                                disable_web_page_preview=True)  # CHECK IS IT WORKS
             new_bot.ping_queue.pop(0)  # remove from the queue (FIFO)
@@ -1057,7 +1058,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
         wallet_address = all_user_info[1]
         token_balance = int(float(query_user_wallet.return_specific_balance(token_ca, wallet_address)))
         if token_balance > 0:
-            slippage = int(float(all_user_info[12]))
+            slippage = int(str((all_user_info[12])).replace(".", ""))
             ekey = all_user_info[2]
             token_decimals = response_value.split()[2]
             await buy_jupiter.sell_token(token_ca, token_balance, slippage, ekey, user_id, token_decimals)
@@ -1119,15 +1120,48 @@ async def help_func_callback(callback_query: types.CallbackQuery):
             rd.add_rating(token_ca, str(user_id), score)
         await bot.send_message(chat_id=user_id, text="Thank you for rating!")
     elif response_value.split()[0] == "025SOL":
-        pass
+        # check user trading settings
+        all_settings = trading_db.return_all_settings(user_id)
+        sol_amount = float(0.25)
+        slippage = int(float(all_settings[12]))
+        ekey = all_settings[2]
+        await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey, user_id)
     elif response_value.split()[0] == "05SOL":
-        pass
+        # check user trading settings
+        all_settings = trading_db.return_all_settings(user_id)
+        sol_amount = float(0.5)
+        slippage = int(float(all_settings[12]))
+        ekey = all_settings[2]
+        await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey, user_id)
     elif response_value.split()[0] == "1SOL":
-        pass
+        # check user trading settings
+        all_settings = trading_db.return_all_settings(user_id)
+        sol_amount = float(1.0)
+        slippage = int(float(all_settings[12]))
+        ekey = all_settings[2]
+        await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey, user_id)
     elif response_value.split()[0] == "15SOL":
-        pass
+        # check user trading settings
+        all_settings = trading_db.return_all_settings(user_id)
+        sol_amount = float(1.5)
+        slippage = int(float(all_settings[12]))
+        ekey = all_settings[2]
+        await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey, user_id)
     elif response_value.split()[0] == "2SOL":
-        pass
+        # check user trading settings
+        all_settings = trading_db.return_all_settings(user_id)
+        sol_amount = float(2)
+        slippage = int(float(all_settings[12]))
+        ekey = all_settings[2]
+        await buy_jupiter.buy_token(token_ca, sol_amount, slippage, ekey, user_id)
+    elif response_value.split()[0] == "check_dev":
+        # ADD A DATABASE FOR DEV WALLETS
+        wallet_list = wb.return_dev_wallets(token_ca).split(",")
+        response = check_dev_wallet_recent_tx.check_activity(wallet_list)
+        time_ago = response[0]
+        desc = response[1]
+        await bot.send_message(chat_id=user_id,
+                               text=f"Showing Dev's most recent activity:\n\n⌛️ Time ago : {time_ago}\n📚 Description : {desc}", parse_mode='MarkdownV2')
 
 
 def subscription():

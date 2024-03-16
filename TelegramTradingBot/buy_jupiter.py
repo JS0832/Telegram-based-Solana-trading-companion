@@ -57,7 +57,7 @@ async def sell_token(token_ca, token_amount, slippage, e_private_key, user_id, t
         transaction_data = await jupiter.swap(
             input_mint=token_ca,
             output_mint="So11111111111111111111111111111111111111112",
-            amount=token_amount * 10 ** token_decimals,  # this is the amount of sol used ? ( 0.5 sol each time for now)
+            amount=token_amount * 10 ** token_decimals,
             slippage_bps=slippage,
         )
         # Returns str: serialized transactions to execute the swap.
