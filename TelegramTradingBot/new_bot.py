@@ -106,6 +106,7 @@ async def main():
                 await websocket.logs_unsubscribe(subscription_id)
 
 
+# the websocet probelms becomes after some time which makes me this the log file get too large
 async def subscribe_to_logs(websocket: SolanaWsClientProtocol,
                             mentions: RpcTransactionLogsFilterMentions,
                             commitment: Commitment) -> int:
@@ -123,7 +124,7 @@ def get_subscription_id(response: SubscriptionResult) -> int:
 async def process_messages(websocket: SolanaWsClientProtocol,
                            instruction: str) -> AsyncIterator[Signature]:
     """Async generator, main websocket's loop"""
-    async for idx, msg in enumerate(websocket):
+    async for idx, msg in enumerate(websocket):#maybe here i can add soemthign
         value = get_msg_value(msg)
         for log in value.logs:
             if instruction not in log:
@@ -477,7 +478,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                     # holder count if int(holder_list["total"]) > 10:
                     iterator = 0
                     for holder in holder_list["data"]:
-                        if iterator > 4:
+                        if iterator > 5:
                             break
                         if str(holder[
                                    "owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # radium pool
@@ -593,7 +594,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                             still_in_queue = True
                             break
                     if still_in_queue:
-                        #item[1] = True  # set as checked
+                        # item[1] = True  # set as checked
                         if len(true_supply_held_by_top_twenty) == 0:
                             large_holder_check_queue.pop(index)
                         elif len(
@@ -887,8 +888,11 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                                     if int(math.floor(float(meta_burn_tx["params"]["amount"]) / float(
                                                             token[5]) * float(100))) > 95:
                                                         if not found:
-                                                            print("re-checking sniper status for the timed release token: " + str(token[0]))
-                                                            special_token_queue.append(token[0])  # place in this list so it signifies no need to re check the token after this final check
+                                                            print(
+                                                                "re-checking sniper status for the timed release token: " + str(
+                                                                    token[0]))
+                                                            special_token_queue.append(token[
+                                                                                           0])  # place in this list so it signifies no need to re check the token after this final check
                                                             token_checked = False  # token was not checked yet
                                                             large_holder_check_queue.append(
                                                                 [token[0], False, False, token[10], "True", 0])
@@ -1012,7 +1016,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                 token_queue.pop(index)
                                 continue
                         except TokenError:
-                            print("token removed fom queue :"+str(token[0]))
+                            print("token removed fom queue :" + str(token[0]))
                             temp = 0
                             for item in large_holder_check_queue:
                                 if item[0] == token[0]:

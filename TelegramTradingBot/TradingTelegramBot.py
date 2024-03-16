@@ -1161,7 +1161,7 @@ async def help_func_callback(callback_query: types.CallbackQuery):
         time_ago = response[0]
         desc = response[1]
         await bot.send_message(chat_id=user_id,
-                               text=f"Showing Dev's most recent activity:\n\n⌛️ Time ago : {time_ago}\n📚 Description : {desc}", parse_mode='MarkdownV2')
+                               text=f"💁🏽 Showing Dev's most recent activity:\n\n⌛️ Time ago : {time_ago}\n📚 Description : {desc}", parse_mode='MarkdownV2')
 
 
 def subscription():
