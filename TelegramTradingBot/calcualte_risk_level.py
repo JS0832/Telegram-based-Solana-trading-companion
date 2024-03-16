@@ -8,7 +8,7 @@
 # decentralisation low +5%,med+2%,highi+0%
 
 def process_risk(advanced_rug, lcm, dev_sold, tokens_to_lp, decent):
-    risk = 1
+    risk = 1.5
     if advanced_rug == "Moderate":  # advanced rug is the most important metric
         risk += 2
     elif advanced_rug == "High":

@@ -15,6 +15,7 @@ import DevWalletDatabase
 import Ratings_database
 import get_token_name_ticker
 import check_dev_wallet_recent_tx
+import check_first_layer_sol_transfers
 
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
@@ -81,6 +82,12 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             deployer = temp_dev_info[1]
             # deployer info :
             deployer_balances = query_user_wallet.return_token_balances(deployer)  # balance in the deployer
+            # here make a function to return the funding wallet and plug that into the query user wallet
+            funding_wallet_info = check_first_layer_sol_transfers.get_funding_wallet(deployer, inital_liq)
+            if funding_wallet_info != "":
+                fund_wallet = query_user_wallet.return_token_balances(funding_wallet_info)
+            else:
+                fund_wallet = "NOT TRACKABLE"
             past_tokens_string = "\n"
             if len(past_token_list) > 0:
                 for token in past_token_list:
@@ -159,10 +166,10 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"Level : *{risk_level}*\n\n📈 [Token Chart]("
                                                     f"https://dexscreener.com/solana/{token_ca})"
                                                     f"\n📱 [Telegram]("
-                                                    f"http://www.example.com/)\n\n👝 [Deployer]("
+                                                    f"http://www.example.com/)\n\nFunding wallet info : \n{fund_wallet}\n\n👝 [Deployer]("
                                                     f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances : *{deployer_balances}*\n\n 📚"
                                                     f"Dev's Previous"
-                                                    f"Projects: {past_tokens_string}",
+                                                    f" Projects: {past_tokens_string}",
                                                reply_markup=markup, parse_mode='MarkdownV2',
                                                disable_web_page_preview=True)  # CHECK IS IT WORKS
             new_bot.ping_queue.pop(0)  # remove from the queue (FIFO)
