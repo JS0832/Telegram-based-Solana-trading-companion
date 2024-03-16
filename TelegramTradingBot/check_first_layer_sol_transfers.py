@@ -12,15 +12,13 @@ solscan_header = {
 
 def get_funding_wallet(deployer_wallet, inital_liquidty):  # only a guesstimate
     # need to exclude exchanges
-    sol_transfers = request('GET',"https://pro-api.solscan.io/v1.0/account/solTransfers?account="+str(deployer_wallet)+"&limit=20&offset=0",
+    sol_transfers = request('GET', "https://pro-api.solscan.io/v1.0/account/solTransfers?account=" + str(
+        deployer_wallet) + "&limit=20&offset=0",
                             headers=solscan_header)
     sol_transfers_json = sol_transfers.json()["data"]
     for sol_transfer in sol_transfers_json:
         sol_amount = float(sol_transfer["lamport"] / 10 ** 9)
-        print(sol_amount)
-        if sol_amount >= int(inital_liquidty)-1:
+        if sol_amount >= int(inital_liquidty) - 1:  # need to exclude exchanges
             if str(sol_transfer["src"]) != deployer_wallet:
                 return sol_transfer["src"]
     return ""
-
-

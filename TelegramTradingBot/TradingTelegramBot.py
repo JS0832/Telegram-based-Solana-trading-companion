@@ -90,6 +90,10 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                 fund_wallet = "NOT TRACKABLE"
             past_tokens_string = "\n"
             if len(past_token_list) > 0:
+                if len(past_token_list) > 8:
+                    print("removed due to too many past tokens")
+                    new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
+                    continue
                 for token in past_token_list:
                     temp_string = "https://dexscreener.com/solana/" + str(token)
                     past_tokens_string += f"📈 [Previous Project]({temp_string})\n"
@@ -103,7 +107,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             risk_level = calcualte_risk_level.process_risk(advnaced_rug, largest_holder, result[0],
                                                            tokens_to_lp_percent, decentralisation)
             number_of_dev_wallets = len(result[1])
-            if number_of_dev_wallets > 8:
+            if number_of_dev_wallets >= 8:
+                print("dev wallets number exceeded risk level")
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
             # name and ticker
@@ -166,8 +171,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"Level : *{risk_level}*\n\n📈 [Token Chart]("
                                                     f"https://dexscreener.com/solana/{token_ca})"
                                                     f"\n📱 [Telegram]("
-                                                    f"http://www.example.com/)\n\nFunding wallet info : \n{fund_wallet}\n\n👝 [Deployer]("
-                                                    f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances : *{deployer_balances}*\n\n 📚"
+                                                    f"http://www.example.com/)\n\n😁 *Funding wallet :* \n*{fund_wallet}*\n\n👝 [Deployer]("
+                                                    f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances :\n*{deployer_balances}*\n\n 📚"
                                                     f"Dev's Previous"
                                                     f" Projects: {past_tokens_string}",
                                                reply_markup=markup, parse_mode='MarkdownV2',

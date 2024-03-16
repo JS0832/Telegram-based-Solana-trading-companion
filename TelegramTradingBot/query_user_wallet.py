@@ -1,16 +1,19 @@
 from helius import BalancesAPI
 import helius_api_key
+
 helius_key = helius_api_key.hel_api_key
 balances_api = BalancesAPI(helius_key)
 
 
 def return_token_balances(wallet_address):  # up to 25 addresses return a string
-    balances_string = "Solana Balance: "
+    balances_string = "🟣 Solana Balance: "
     spl_balances = balances_api.get_balances(wallet_address)
     sol_balance = str(spl_balances["nativeBalance"] / 10 ** 9).replace(".", ",") + " SOL"
     balances_string += sol_balance + "\n"
     token_list = []
     tokens = spl_balances["tokens"]
+    token_count = 0
+    balances_string += "\n"
     token_count = 0
     for token in tokens:
         token_ca = token["mint"]
@@ -20,12 +23,17 @@ def return_token_balances(wallet_address):  # up to 25 addresses return a string
             token_ca = "USDC"
         token_amount = str((float(token["amount"]) / float(10 ** int(token["decimals"]))))
         if token["amount"] > 0:
-            balances_string += f"\nSpl Token: `{token_ca}` {token_amount}\n".replace(".", ",")
+            if token_ca != "USCD" and token_ca != "USDT":
+                balances_string += f"🟡 [Token](https://dexscreener.com/solana/{token_ca})\n"
+            else:
+                balances_string += f"🟡 {token_ca}\n"
             token_list.append([token_ca, token_amount])
             token_count += 1
         if token_count > 3:
             break
-
+        token_count += 1
+    if token_count == 0:
+        balances_string += " None Found"
     return balances_string
 
 
