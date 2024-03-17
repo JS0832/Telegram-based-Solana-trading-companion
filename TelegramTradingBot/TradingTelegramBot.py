@@ -16,6 +16,7 @@ import Ratings_database
 import get_token_name_ticker
 import check_dev_wallet_recent_tx
 import check_first_layer_sol_transfers
+import check_mint_time
 
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
@@ -111,6 +112,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                 print("dev wallets number exceeded risk level")
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
+            token_ui_supply = result[2]
+            get_mint_epoch = check_mint_time.check_mint_epoch(txn_hash, token_ca, token_ui_supply)
             # name and ticker
             token_meta = get_token_name_ticker.get_name_ticker(txn_hash)
             token_name = str(token_meta[0])

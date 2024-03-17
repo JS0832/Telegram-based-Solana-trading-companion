@@ -25,7 +25,7 @@ def return_token_balances(wallet_address):  # up to 25 addresses return a string
     spl_balances = balances_api.get_balances(wallet_address)
     sol_balance = str(int(spl_balances["nativeBalance"] / 10 ** 9)).replace(".", ",") + " SOL"
     if wallet_address in exchange_wallets:
-        balances_string += sol_balance + " 🟨" + str(exchange_wallets[wallet_address]) + "🟨 \n"
+        balances_string += sol_balance + " '" + str(exchange_wallets[wallet_address]) + "' \n"
     else:
         balances_string += sol_balance + "\n"
     token_list = []
@@ -66,3 +66,6 @@ def return_specific_balance(spl_token, wallet_address):
         if spl_token == str(token_ca):
             return float(token["amount"]) / float(10 ** int(token["decimals"]))  # will return 0.0 if its empty anyway
         return 0.0  # if not found
+
+
+print(return_token_balances("2ojv9BAiHUrvsm9gxDe7fJSzbNZSJcxZvf8dqmWGHG8S"))

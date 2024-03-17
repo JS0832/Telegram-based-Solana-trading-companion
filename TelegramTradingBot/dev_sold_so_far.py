@@ -81,19 +81,23 @@ def check_dev(txn_hash, token_d):  # instead of recomputing how about tracking t
                     for tx_items in parsed_transactions[0]["tokenTransfers"]:
                         if str(tx_items["mint"]) == token_address:
                             if str(tx_items["fromUserAccount"]) == temp_wallet:  # current user sending to another user
-                                if str(tx_items["toUserAccount"]) not in all_seen_wallets and str(tx_items["toUserAccount"]) != "":
+                                if str(tx_items["toUserAccount"]) not in all_seen_wallets and str(
+                                        tx_items["toUserAccount"]) != "":
                                     if str(tx_items["toUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":
                                         temp_associated_wallets.append(str(tx_items["toUserAccount"]))
                                         # print("sent " + str(tx_items["toUserAccount"]))
                                     else:
                                         total_sold = total_sold + int(tx_items["tokenAmount"])
                             elif str(tx_items["toUserAccount"]) == temp_wallet:  # sends tokens from current wallet
-                                if str(tx_items["fromUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1" and str(tx_items["fromUserAccount"]) not in all_seen_wallets and str(tx_items["fromUserAccount"]) != "":
+                                if str(tx_items[
+                                           "fromUserAccount"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1" and str(
+                                        tx_items["fromUserAccount"]) not in all_seen_wallets and str(
+                                        tx_items["fromUserAccount"]) != "":
                                     # print("received from wallet " + str(tx_items["toUserAccount"]))
                                     temp_associated_wallets.append(str(tx_items["fromUserAccount"]))
         all_seen_wallets.append(temp_wallet)
     print("for token " + str(token_d) + " dev sold: " + str(total_sold / token_supply * 100))
-    return total_sold / token_supply * 100, all_seen_wallets  # dev selling amount in relation to the total supply
+    return total_sold / token_supply * 100, all_seen_wallets, token_supply  # dev selling amount in relation to the total supply
 
 
 def check_wallet_balance(list_of_wallets, spl_token):

@@ -6,6 +6,7 @@ import requests
 import json
 from solana.rpc.api import Client, Pubkey
 import helius_api_key
+
 helius_key = helius_api_key.hel_api_key
 solscan_header = {
     'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkQXQiOjE3MDY3NTM5ODAzOTQsImVtYWlsIjoic29sYmFieTMyNUBnbWFpbC5jb20iLCJhY3Rpb24iOiJ0b2tlbi1hcGkiLCJpYXQiOjE3MDY3NTM5ODB9.Lp77APFLV-rOnNbDzc1ob43Vp-9-KpeMe_b-fiOQrr0',
@@ -42,7 +43,7 @@ def main_query(token_ca):
     decentralisation = temp[0]
     whale_holders = temp[1]
     # largest_holder = check_for_large_holder(token_ca, token_supply)
-    return ["UPDATE SOON", decentralisation, whale_holders]
+    return ["UPDATE SOON", decentralisation, whale_holders, token_supply]
 
 
 def check_holders(token_address, token_supply):
@@ -97,7 +98,7 @@ def check_holders(token_address, token_supply):
 def check_for_large_holder(token_address, token_supp):  # instead of recomputing how about tracking the wallets
     # associated to largest holder
     holders = []
-    URI = "https://mainnet.helius-rpc.com/?api-key="+str(helius_key)
+    URI = "https://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
     solana_client = Client(URI)
     holder_result = request('GET',
                             "https://pro-api.solscan.io/v1.0/token/holders?tokenAddress=" + str(
@@ -133,7 +134,7 @@ def check_for_large_holder(token_address, token_supp):  # instead of recomputing
                         if str(token["mint"]) == token_addy:
                             temp_total_spl_balance += int(float(token["amount"]) / 10 ** float(token["decimals"]))
                     res = solana_client.get_signatures_for_address(
-                        Pubkey.from_string('459JAd5ibXmNdAZTUEPQ5uC9wCWBaJ1stpqunfQy96gc'),#SHOUDLTN BE THIS WALLET
+                        Pubkey.from_string('459JAd5ibXmNdAZTUEPQ5uC9wCWBaJ1stpqunfQy96gc'),  # SHOUDLTN BE THIS WALLET
                         limit=5  # Specify how much last transactions to fetch
                     )
                     transactions = json.loads(str(res.to_json()))["result"]
