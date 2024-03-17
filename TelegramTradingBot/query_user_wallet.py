@@ -24,9 +24,9 @@ def return_token_balances(wallet_address):  # up to 25 addresses return a string
         token_amount = str((float(token["amount"]) / float(10 ** int(token["decimals"]))))
         if token["amount"] > 0:
             if token_ca != "USCD" and token_ca != "USDT":
-                balances_string += f"🟡 [Token](https://dexscreener.com/solana/{token_ca})\n"
+                balances_string += f"🖤 [Token](https://dexscreener.com/solana/{token_ca})\n"
             else:
-                balances_string += f"🟡 {token_ca}\n"
+                balances_string += f"🖤 {token_ca}\n"
             token_list.append([token_ca, token_amount])
             token_count += 1
         if token_count > 3:
