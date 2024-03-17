@@ -21,7 +21,7 @@ exchange_wallets = {  # add more later
 }
 
 black_list = ["FLiPggWYQyKVTULFWMQjAk26JfK5XRCajfyTmD5weaZ7",
-              "Habp5bncMSsBC3vkChyebepym5dcTNRYeg2LVG464E96"]  # soem bots?
+              "Habp5bncMSsBC3vkChyebepym5dcTNRYeg2LVG464E96"]  # some bots?
 
 
 def check_for_common_funding_wallets(token_ca):  # advanced rug 2.0 #need to exclude exchanges
@@ -48,12 +48,10 @@ def check_for_common_funding_wallets(token_ca):  # advanced rug 2.0 #need to exc
             holder_tx_list.append(sub_list_builder)
     common_wallet_count = 0
     wallet_index_one = 0
-    # print(holder_tx_list)
     for holder_associated_wallets in holder_tx_list:
         for index in range(wallet_index_one + 1, len(holder_tx_list)):
             # print(wallet_index_one, index)
             if len(list(set(holder_associated_wallets).intersection(holder_tx_list[index]))) > 0:
-                print(list(set(holder_associated_wallets).intersection(holder_tx_list[index])))
                 common_wallet_count += 1
         wallet_index_one += 1
     return common_wallet_count / 20 * 100
