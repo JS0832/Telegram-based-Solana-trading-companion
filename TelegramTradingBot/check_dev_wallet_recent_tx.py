@@ -31,9 +31,11 @@ def check_activity(dev_wallets):
     description_with_link = temp_description.split()
     for index, word in enumerate(description_with_link, start=0):
         if len(word) > 30:  # this is an address
-            description_with_link[index] = f"[Wallet](https://solscan.io/account/{word})"
+            if word in dev_wallets:
+                description_with_link[index] = "Dev Wallet"
+            else:
+                description_with_link[index] = "Another Wallet"
     final_description = " ".join(description_with_link)
-
     time_string = time_ago + " Minutes Ago"
     return time_string, final_description
 
