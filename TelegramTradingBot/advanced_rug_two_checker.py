@@ -56,7 +56,5 @@ def check_for_common_funding_wallets(token_ca):  # advanced rug 2.0 #need to exc
                 print(list(set(holder_associated_wallets).intersection(holder_tx_list[index])))
                 common_wallet_count += 1
         wallet_index_one += 1
-    if common_wallet_count / 20 * 100 > 30:
-        return True
-    else:
-        return False
+    return common_wallet_count / 20 * 100
+

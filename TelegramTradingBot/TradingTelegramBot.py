@@ -80,11 +80,13 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
             print("checking for advanced rug 2.0")
-            if advanced_rug_two_checker.check_for_common_funding_wallets(token_ca):
+            rug_two = advanced_rug_two_checker.check_for_common_funding_wallets(token_ca)
+            if rug_two > 30:
                 print("Removed token due to a high risk of advanced rug 2.0 .")
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
             print("passed rug 2.0 checks!")
+            rug_two = str(rug_two).replace(".",",")
             temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
             past_token_list = temp_dev_info[0]
             deployer = temp_dev_info[1]
@@ -181,7 +183,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"Decentralisation :  "
                                                     f"*{decentralisation}*\n🐳 Number of whale "
                                                     f"holders : *{whale_holders}*\n⚰️ Advanced "
-                                                    f"Rug : *{advnaced_rug}*\n🩸 Risk "
+                                                    f"Rug : *{advnaced_rug}*\n📎 Associated Wallets in percent : {rug_two}\n🩸 Risk"
                                                     f"Level : *{risk_level}*\n🍬 Minted : *{get_mint_epoch}*\n\n📈 [Token Chart]("
                                                     f"https://dexscreener.com/solana/{token_ca})"
                                                     f"\n📱 [Telegram]("

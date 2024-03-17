@@ -35,5 +35,3 @@ def check_mint_epoch(txn_hash, token_pinged, token_supply):
             if int(float(spl_transfer["changeAmount"])/10**float(spl_transfer["decimals"])) == token_supply:
                 return int(spl_transfer["blockTime"])
     return 0
-
-
