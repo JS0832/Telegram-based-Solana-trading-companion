@@ -1,3 +1,4 @@
+import time
 from time import strftime, localtime
 import dataBase
 import asyncio
@@ -17,7 +18,7 @@ import get_token_name_ticker
 import check_dev_wallet_recent_tx
 import check_first_layer_sol_transfers
 import check_mint_time
-
+import advanced_rug_two_checker
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
 db = dataBase.DataBase()  # initialise
@@ -78,6 +79,12 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                 print("Removed token due to a high risk of advanced rug.")
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
+            print("checking for advanced rug 2.0")
+            if advanced_rug_two_checker.check_for_common_funding_wallets(token_ca):
+                print("Removed token due to a high risk of advanced rug 2.0 .")
+                new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
+                continue
+            print("passed rug 2.0 checks!")
             temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
             past_token_list = temp_dev_info[0]
             deployer = temp_dev_info[1]
@@ -112,8 +119,12 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                 print("dev wallets number exceeded risk level")
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
-            token_ui_supply = result[2]
+            token_ui_supply = int(result[2])
             get_mint_epoch = check_mint_time.check_mint_epoch(txn_hash, token_ca, token_ui_supply)
+            if get_mint_epoch == 0:
+                get_mint_epoch = "Not Found"
+            else:
+                get_mint_epoch = str(int((time.time()-get_mint_epoch)/60)) + " Minutes Ago"
             # name and ticker
             token_meta = get_token_name_ticker.get_name_ticker(txn_hash)
             token_name = str(token_meta[0])
@@ -171,7 +182,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"*{decentralisation}*\n🐳 Number of whale "
                                                     f"holders : *{whale_holders}*\n⚰️ Advanced "
                                                     f"Rug : *{advnaced_rug}*\n🩸 Risk "
-                                                    f"Level : *{risk_level}*\n\n📈 [Token Chart]("
+                                                    f"Level : *{risk_level}*\n🍬 Minted : *{get_mint_epoch}*\n\n📈 [Token Chart]("
                                                     f"https://dexscreener.com/solana/{token_ca})"
                                                     f"\n📱 [Telegram]("
                                                     f"http://www.example.com/)\n\n😁 *Funding Wallet :* \n*{fund_wallet}\n*👝 [Deployer]("

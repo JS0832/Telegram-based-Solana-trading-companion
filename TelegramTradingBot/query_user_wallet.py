@@ -16,7 +16,8 @@ exchange_wallets = {  # add more later
     "GJRs4FwHtemZ5ZE9x3FNvJ8TMwitKTh21yxdRPqn7npE": "Coinbase 2",
     "FWznbcNXWQuHTawe9RxvQ2LdCENssh12dsznf4RiouN5": "Kraken",
     "ASTyfSima4LLAdDgoFGkgqoKowG1LZFDr9fAQrg7iaJZ": "MEXC",
-    "AC5RDfQFmDS1deWZos921JfqscXdByf8BKHs5ACWjtW2": "Bybit"
+    "AC5RDfQFmDS1deWZos921JfqscXdByf8BKHs5ACWjtW2": "Bybit",
+    "BmFdpraQhkiDQE6SnfG5omcA1VwzqfXrwtNYBwWTymy6": "Kucoin"
 }
 
 
@@ -32,7 +33,7 @@ def return_token_balances(wallet_address):  # up to 25 addresses return a string
     tokens = spl_balances["tokens"]
     token_count = 0
     # balances_string += "\n"
-    '''
+    '''# use this later 
     token_count = 0
     for token in tokens:
         token_ca = token["mint"]
@@ -66,6 +67,3 @@ def return_specific_balance(spl_token, wallet_address):
         if spl_token == str(token_ca):
             return float(token["amount"]) / float(10 ** int(token["decimals"]))  # will return 0.0 if its empty anyway
         return 0.0  # if not found
-
-
-print(return_token_balances("2ojv9BAiHUrvsm9gxDe7fJSzbNZSJcxZvf8dqmWGHG8S"))

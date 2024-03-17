@@ -37,5 +37,3 @@ def check_mint_epoch(txn_hash, token_pinged, token_supply):
     return 0
 
 
-check_mint_epoch("43D7uBvaoDMPy2iQnuKxNAkdWRugyGXGQJRT3u5SdRXDrQqCGWArb5ayVYF9Gk6VnWEqWAGG8Kcm3rwFziezoXrH",
-                 "539xJaEwNkSm42ia6U2LnSDAAWH1QJSsynn1vMb7KRkF", "")
