@@ -17,7 +17,8 @@ exchange_wallets = {  # add more later
     "FWznbcNXWQuHTawe9RxvQ2LdCENssh12dsznf4RiouN5": "Kraken",
     "ASTyfSima4LLAdDgoFGkgqoKowG1LZFDr9fAQrg7iaJZ": "MEXC",
     "AC5RDfQFmDS1deWZos921JfqscXdByf8BKHs5ACWjtW2": "Bybit",
-    "BmFdpraQhkiDQE6SnfG5omcA1VwzqfXrwtNYBwWTymy6": "Kucoin"
+    "BmFdpraQhkiDQE6SnfG5omcA1VwzqfXrwtNYBwWTymy6": "Kucoin",
+    "BY4StcU9Y2BpgH8quZzorg31EGE4L1rjomN8FNsCBEcx": "Unknown Exchange"
 }
 
 
