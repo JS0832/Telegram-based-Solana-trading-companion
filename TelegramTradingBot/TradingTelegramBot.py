@@ -171,8 +171,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"Level : *{risk_level}*\n\n📈 [Token Chart]("
                                                     f"https://dexscreener.com/solana/{token_ca})"
                                                     f"\n📱 [Telegram]("
-                                                    f"http://www.example.com/)\n\n😁 *Funding Wallet :* \n*{fund_wallet}*👝 [Deployer]("
-                                                    f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances : \n*{deployer_balances}* 📚"
+                                                    f"http://www.example.com/)\n\n😁 *Funding Wallet :* \n*{fund_wallet}\n*👝 [Deployer]("
+                                                    f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances : \n*{deployer_balances}* \n📚"
                                                     f"Dev's Previous"
                                                     f" Projects: {past_tokens_string}",
                                                reply_markup=markup, parse_mode='MarkdownV2',
@@ -292,7 +292,8 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                            f"Tokens sent to LP : {ping_tokens_to_lp}\n🩸 Risk Level : {ping_risk_level}\n🐋 Largest "
                            f"Cumulative holder : < {lch}\n👝 Wallet Balances : \n\n📍 My Address : *`{wallet_address}`*\n{balances_string}"
                            f"\n\n__Select the setting you wish to"
-                           f" modify:__", reply_markup=help_markup, parse_mode='MarkdownV2')
+                           f" modify:__", reply_markup=help_markup, parse_mode='MarkdownV2',
+                           disable_web_page_preview=True)
 
 
 # trading settings clone (till i figure out how to not delete the buy notification
@@ -339,7 +340,8 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                            f"Tokens sent to LP : {ping_tokens_to_lp}\n🩸 Risk Level : {ping_risk_level}\n🐋 Largest "
                            f"Cumulative holder : < {lch}\n👝 Wallet Balances : \n\n📍 My Address : *`{wallet_address}`*\n{balances_string}"
                            f"\n\n__Select the setting you wish to"
-                           f" modify:__", reply_markup=help_markup2, parse_mode='MarkdownV2')
+                           f" modify:__", reply_markup=help_markup2, parse_mode='MarkdownV2',
+                           disable_web_page_preview=True)
 
 
 @bot.callback_query_handler(func=lambda query: query.data == "hide")  # hiding the settings menu
