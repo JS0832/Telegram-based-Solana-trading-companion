@@ -471,24 +471,17 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                     holders = []
                     holder_result = request('GET',
                                             "https://pro-api.solscan.io/v1.0/token/holders?tokenAddress=" + str(
-                                                token_address) + "&limit=13&offset=0",
+                                                token_address) + "&limit=10&offset=0",
                                             headers=solscan_header)
                     holder_list = holder_result.json()
-                    # if "total" in holder_list: #removed this as it missed good tokens by sometimes ignoring a low
-                    # holder count if int(holder_list["total"]) > 10:
                     iterator = 0
                     for holder in holder_list["data"]:
                         if iterator > 5:
                             break
-                        if str(holder[
-                                   "owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # radium pool
+                        if str(holder["owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # radium pool
                             holders.append(str(holder["owner"]))
                         iterator += 1
-                    # else:
-                    # item[2] = False  # fail it as there is very little holders
-                    # break
                     all_seen_wallets = []  # helps to avoid double seen wallets when some holder is actually linked
-                    # to another holder
                     token_addy = token_address
                     token_supply = token_supp
                     true_supply_held_by_top_twenty = []  # this list will show true token holdings by the top 20 holders
@@ -581,7 +574,6 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                                     print("strange error wallet: " + str(temp_wallet))
                                         all_seen_wallets.append(
                                             temp_wallet)  # add the traversed wallet to all see wallets
-
                                     else:
                                         percentage = float(temp_total_spl_balance) / float(token_supply) * float(100)
                                         true_supply_held_by_top_twenty.append(percentage)  # convert it as a percentage

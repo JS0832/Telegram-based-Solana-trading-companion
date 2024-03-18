@@ -11,6 +11,9 @@ solscan_header = {
 
 
 def get_telegram(token_ca):
+    tele = ""
+    web = ""
+    twitter = ""
     metadata = request('GET',
                        "https://pro-api.solscan.io/v1.0/account/" + str(
                            token_ca),
@@ -19,11 +22,20 @@ def get_telegram(token_ca):
     if "metadata" in metadata_json:
         token_info = metadata_json["metadata"]
         if "data" in token_info:
+            if "extensions" in token_info["data"]:
+                extensions = token_info["data"]["extensions"]
+                if "telegram" in extensions:
+                    tele = extensions["telegram"]
+                if "website" in extensions:
+                    web = extensions["website"]
+                if "twitter" in extensions:
+                    twitter = extensions["twitter"]
+                return tele, web, twitter
             token_info_data = token_info["data"]
             if "telegram" in token_info_data:
                 if token_info_data["telegram"] != "None":
-                    return token_info_data["telegram"]
+                    return token_info_data["telegram"], "", ""
                 else:
-                    return ""
+                    return "", "", ""
             else:
-                return ""
+                return "", "", ""

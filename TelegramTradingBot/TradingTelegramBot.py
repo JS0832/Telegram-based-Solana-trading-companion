@@ -134,7 +134,10 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             token_ticker = str(token_meta[1])
             if not wb.check_token(token_ca):  # if toke has not been saved in database
                 wb.add_dev_wallets(token_ca, ','.join(result[1]))
-            telegram = get_telegram.get_telegram(token_ca)
+            meta_info = get_telegram.get_telegram(token_ca)
+            telegram = meta_info[0]
+            website = meta_info[1]
+            twitter = meta_info[2]
             if telegram != "":
                 telegram = f"📱 [Telegram]({telegram})"
             percent_amount = str(result[0]).replace('.', ',')  # names can contain illegal chars so sort it out
@@ -190,7 +193,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"Rug : *{advnaced_rug}*\n📎 Associated Wallets in percent : *{rug_two}*\n🩸 Risk"
                                                     f"Level : *{risk_level}*\n🍬 Minted : *{get_mint_epoch}*\n\n📈 [Token Chart]("
                                                     f"https://dexscreener.com/solana/{token_ca})"
-                                                    f"\n{telegram}\n\n💧 [Funding Wallet :]("
+                                                    f"\n{telegram}\n[Website]({website})\n[Twitter]({twitter})\n\n💧 [Funding Wallet :]("
                                                     f"https://solscan.io/account/{funding_wallet_info})*"
                                                     f"\n{fund_wallet}\n*👝 [Deployer]("
                                                     f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances : \n*{deployer_balances}* \n📚"
