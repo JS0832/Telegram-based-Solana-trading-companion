@@ -586,8 +586,11 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                         percentage = float(temp_total_spl_balance) / float(token_supply) * float(100)
                                         true_supply_held_by_top_twenty.append(percentage)  # convert it as a percentage
                                         break  # done
-                    except StopSniperCheck:
+                    except StopSniperCheck:#might work for adressing the looping issues
+                        item[1] = True  # set as checked
+                        item[2] = False  # failed
                         print("one wallet tied to many other wallets stopping reading....")
+                        continue
                     still_in_queue = False
                     for temp_item in large_holder_check_queue:  # check if it was removed
                         if temp_item[0] == token_address:
@@ -597,8 +600,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                         # item[1] = True  # set as checked
                         if len(true_supply_held_by_top_twenty) == 0:
                             large_holder_check_queue.pop(index)
-                        elif len(
-                                true_supply_held_by_top_twenty) == 1 and token_address not in special_token_queue:  # only dev holding means this is a pre-launch,if token adress is in the list we know its been checked no again so can be processed as normal coin
+                        elif len(true_supply_held_by_top_twenty) == 1 and token_address not in special_token_queue:  # only dev holding means this is a pre-launch,if token adress is in the list we know its been checked no again so can be processed as normal coin
                             # token(timed token) so we will add more time to its expiration time (1h)
                             for token in token_queue:
                                 if token[0] == token_address:

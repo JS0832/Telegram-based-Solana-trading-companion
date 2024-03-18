@@ -19,6 +19,7 @@ import check_dev_wallet_recent_tx
 import check_first_layer_sol_transfers
 import check_mint_time
 import advanced_rug_two_checker
+
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
 db = dataBase.DataBase()  # initialise
@@ -86,7 +87,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
             print("passed rug 2.0 checks!")
-            rug_two = str(rug_two).replace(".",",")
+            rug_two = str(rug_two).replace(".", ",")
             temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
             past_token_list = temp_dev_info[0]
             deployer = temp_dev_info[1]
@@ -126,7 +127,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             if get_mint_epoch == 0:
                 get_mint_epoch = "Not Found"
             else:
-                get_mint_epoch = str(int((time.time()-get_mint_epoch)/60)) + " Minutes Ago"
+                get_mint_epoch = str(int((time.time() - get_mint_epoch) / 60)) + " Minutes Ago"
             # name and ticker
             token_meta = get_token_name_ticker.get_name_ticker(txn_hash)
             token_name = str(token_meta[0])
@@ -1197,10 +1198,12 @@ async def help_func_callback(callback_query: types.CallbackQuery):
         hide = types.InlineKeyboardMarkup(row_width=1)
         hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
         hide.add(hide_refreshed_info)
+        rug_two = str(advanced_rug_two_checker.check_for_common_funding_wallets(token_ca)).replace(".", ",")
         await bot.send_message(chat_id=user_id,
                                text=f"🟣 For Token : *{token_ca}*\n\n💁🏽 Showing Dev's most recent activity:\n\n⌛️ "
                                     f"Time ago : *{time_ago}*\n📚"
-                                    f"Description : *{desc}*", parse_mode='MarkdownV2', reply_markup=hide)
+                                    f"Description : *{desc}*\n📎 Associated Wallets in percent : {rug_two}",
+                               parse_mode='MarkdownV2', reply_markup=hide)
 
 
 def subscription():
