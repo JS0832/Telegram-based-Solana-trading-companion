@@ -633,13 +633,12 @@ class TokenError(Exception):  # helps to exist deeply nested loops
 async def verify_token():  # figure out how to make this async (needs to be async) ( for now concurrent)
     print("Executing token verification thread....")
     token_expiration_time = 2400  # 40 minutes in seconds
-    inital_checks_expiration_time = 900  # 15 minutes for initial checks
-    minimum_token_sent_to_lp_percent = 80
+    inital_checks_expiration_time = 1000  # 15 minutes for initial checks
+    minimum_token_sent_to_lp_percent = 70
     decimals = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}  # a list of allowable decimal amount
     rpc_url = "https://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
     spl_executable = r'C:\\Users\MEMEdev\.local\share\solana\install\active_release\bin\spl-token.exe'  # for
     # checking mint
-    special_meta_key = ["bafkrei", "mypinata", "ipfs.nftstorage.link"]  # for now, it will use this
     minimum_initial_liquidty = 5  # most good coins have 10
     while True:  # infinite loop to keep checking
         index = 0
@@ -737,7 +736,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                             token_amount_sent_to_lp_pool = \
                                                 int(int(tx['extra']['amount']) / 10 ** token[11])
                                 except Exception as e:
-                                    print("error " + str(e))
+                                    print("error " + str(e),token[0])
                         except IndexError:
                             print("error retrying....")
                             token_remove_errors.append(

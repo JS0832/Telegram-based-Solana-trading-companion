@@ -19,7 +19,7 @@ import check_dev_wallet_recent_tx
 import check_first_layer_sol_transfers
 import check_mint_time
 import advanced_rug_two_checker
-
+import get_telegram
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
 db = dataBase.DataBase()  # initialise
@@ -83,7 +83,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             print("checking for advanced rug 2.0")
             rug_two = advanced_rug_two_checker.check_for_common_funding_wallets(token_ca)
             if rug_two > 30:
-                print("Removed token due to a high risk of advanced rug 2.0 .")
+                print("Removed token due to a high risk of advanced rug 2.0 ,"+"wallet percent match: "+str(rug_two))
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
             print("passed rug 2.0 checks!")
@@ -134,6 +134,9 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             token_ticker = str(token_meta[1])
             if not wb.check_token(token_ca):  # if toke has not been saved in database
                 wb.add_dev_wallets(token_ca, ','.join(result[1]))
+            telegram = get_telegram.get_telegram(token_ca)
+            if telegram != "":
+                telegram = f"📱 [Telegram]({telegram})"
             percent_amount = str(result[0]).replace('.', ',')  # names can contain illegal chars so sort it out
             # extract data from the ping queue
             markup = types.InlineKeyboardMarkup()
@@ -187,8 +190,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"Rug : *{advnaced_rug}*\n📎 Associated Wallets in percent : *{rug_two}*\n🩸 Risk"
                                                     f"Level : *{risk_level}*\n🍬 Minted : *{get_mint_epoch}*\n\n📈 [Token Chart]("
                                                     f"https://dexscreener.com/solana/{token_ca})"
-                                                    f"\n📱 [Telegram]("
-                                                    f"http://www.example.com/)\n\n💧 [Funding Wallet :]("
+                                                    f"\n{telegram}\n\n💧 [Funding Wallet :]("
                                                     f"https://solscan.io/account/{funding_wallet_info})*"
                                                     f"\n{fund_wallet}\n*👝 [Deployer]("
                                                     f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances : \n*{deployer_balances}* \n📚"
@@ -646,7 +648,7 @@ async def liquity_burned_ping(callback_query: types.CallbackQuery):
     user_ping_settings = str(trading_db.return_all_settings(user_id)[10])
     if user_ping_settings != "DEFAULT":
         temp = user_ping_settings.split(",")  # converts the comma separated string to a aray
-        temp[2] = "98"
+        temp[2] = "70"
         trading_db.update_ping_settings(user_id, ','.join(temp))  # adds it back as a comma separated list of items
     else:
         trading_db.update_ping_settings(user_id, "5,98,70,6,20")
