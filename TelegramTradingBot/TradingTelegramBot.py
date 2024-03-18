@@ -20,6 +20,7 @@ import check_first_layer_sol_transfers
 import check_mint_time
 import advanced_rug_two_checker
 import get_telegram
+
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
 db = dataBase.DataBase()  # initialise
@@ -83,7 +84,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             print("checking for advanced rug 2.0")
             rug_two = advanced_rug_two_checker.check_for_common_funding_wallets(token_ca)
             if rug_two > 30:
-                print("Removed token due to a high risk of advanced rug 2.0 ,"+"wallet percent match: "+str(rug_two))
+                print(
+                    "Removed token due to a high risk of advanced rug 2.0 ," + "wallet percent match: " + str(rug_two))
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
             print("passed rug 2.0 checks!")
@@ -129,7 +131,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             else:
                 get_mint_epoch = str(int((time.time() - get_mint_epoch) / 60)) + " Minutes Ago"
             # name and ticker
-            token_meta = get_token_name_ticker.get_name_ticker(txn_hash)
+            token_meta = get_telegram.get_name_ticker(token_ca)
             token_name = str(token_meta[0])
             token_ticker = str(token_meta[1])
             if not wb.check_token(token_ca):  # if toke has not been saved in database
@@ -140,6 +142,10 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             twitter = meta_info[2]
             if telegram != "":
                 telegram = f"📱 [Telegram]({telegram})"
+            if website != "":
+                website = f"📱 [Telegram]({website})"
+            if twitter != "":
+                twitter = f"📱 [Telegram]({twitter})"
             percent_amount = str(result[0]).replace('.', ',')  # names can contain illegal chars so sort it out
             # extract data from the ping queue
             markup = types.InlineKeyboardMarkup()
@@ -157,6 +163,9 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             markup.row(t_settings, buy, sell)
             markup.row(refresh, check_dev_activity, positions)
             markup.row(share, info, rate)
+            print(timed_launch, token_ca, token_name, token_ticker, largest_holder, percent_amount,
+                  number_of_dev_wallets, inital_liq, liq_burned, tokens_to_lp_percent, decentralisation,
+                  whale_holders, advnaced_rug, risk_level)  # for debug and refinement
             for user in list_of_users:  # just so I can debug
                 full_configuration = trading_db.return_all_settings(user[0])
                 if full_configuration[9] == "True":  # if active trading user
@@ -193,7 +202,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"Rug : *{advnaced_rug}*\n📎 Associated Wallets in percent : *{rug_two}*\n🩸 Risk"
                                                     f"Level : *{risk_level}*\n🍬 Minted : *{get_mint_epoch}*\n\n📈 [Token Chart]("
                                                     f"https://dexscreener.com/solana/{token_ca})"
-                                                    f"\n{telegram}\n[Website]({website})\n[Twitter]({twitter})\n\n💧 [Funding Wallet :]("
+                                                    f"\n{telegram}\n{website}\n{twitter}\n\n💧 [Funding Wallet :]("
                                                     f"https://solscan.io/account/{funding_wallet_info})*"
                                                     f"\n{fund_wallet}\n*👝 [Deployer]("
                                                     f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances : \n*{deployer_balances}* \n📚"
@@ -1203,8 +1212,8 @@ async def help_func_callback(callback_query: types.CallbackQuery):
         hide = types.InlineKeyboardMarkup(row_width=1)
         hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
         hide.add(hide_refreshed_info)
-        #rug_two = str(advanced_rug_two_checker.check_for_common_funding_wallets(token_ca)).replace(".", ",")#threading issues
-        rug_two =  "FEATURE DISABLED"
+        # rug_two = str(advanced_rug_two_checker.check_for_common_funding_wallets(token_ca)).replace(".", ",")#threading issues
+        rug_two = "FEATURE DISABLED"
         await bot.send_message(chat_id=user_id,
                                text=f"🟣 For Token : *{token_ca}*\n\n💁🏽 Showing Dev's most recent activity:\n\n⌛️ "
                                     f"Time ago : *{time_ago}*\n📚"

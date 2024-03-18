@@ -39,3 +39,19 @@ def get_telegram(token_ca):
                     return "", "", ""
             else:
                 return "", "", ""
+
+
+def get_name_ticker(token_ca):
+    name = ""
+    ticker = ""
+    metadata = request('GET',
+                       "https://pro-api.solscan.io/v1.0/account/" + str(
+                           token_ca),
+                       headers=solscan_header)
+    metadata_json = metadata.json()
+    if "metadata" in metadata_json:
+        token_info = metadata_json["metadata"]
+        if "data" in token_info:
+            info = token_info["data"]
+            return info["name"], info["symbol"]
+    return "Error", "Error"
