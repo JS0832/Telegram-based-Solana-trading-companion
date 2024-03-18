@@ -76,20 +76,6 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             decentralisation = str(data[4])
             whale_holders = str(data[5])
             token_ca = str(data[6])
-            advnaced_rug = check_advanced_rug.check(token_ca)  # add this to the refresh (query token code)
-            if advnaced_rug == "High" or advnaced_rug == "Extremely High":  # make cusomisable pings for this option and set it to filter extremely high mayeb but for now it wills et thigh
-                print("Removed token due to a high risk of advanced rug.")
-                new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
-                continue
-            print("checking for advanced rug 2.0")
-            rug_two = advanced_rug_two_checker.check_for_common_funding_wallets(token_ca)
-            if rug_two > 30:
-                print(
-                    "Removed token due to a high risk of advanced rug 2.0 ," + "wallet percent match: " + str(rug_two))
-                new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
-                continue
-            print("passed rug 2.0 checks!")
-            rug_two = str(rug_two).replace(".", ",")
             temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
             past_token_list = temp_dev_info[0]
             deployer = temp_dev_info[1]
@@ -112,6 +98,42 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                     past_tokens_string += f"📈 [Previous Project]({temp_string})\n"
             else:
                 past_tokens_string = " *None 😇*"
+            advnaced_rug = check_advanced_rug.check(token_ca)  # add this to the refresh (query token code)
+            if advnaced_rug == "High" or advnaced_rug == "Extremely High":  # make cusomisable pings for this option and set it to filter extremely high mayeb but for now it wills et thigh
+                print("Removed token due to a high risk of advanced rug.")
+                new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
+                continue
+            print("checking for advanced rug 2.0")
+            rug_two = advanced_rug_two_checker.check_for_common_funding_wallets(token_ca)
+            if rug_two > 30:
+                print(
+                    "Removed token due to a high risk of advanced rug 2.0 ," + "wallet percent match: " + str(rug_two))
+                new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
+                continue
+            print("passed rug 2.0 checks!")
+            rug_two = str(rug_two).replace(".", ",")
+            '''temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
+            past_token_list = temp_dev_info[0]
+            deployer = temp_dev_info[1]
+            # deployer info :
+            deployer_balances = query_user_wallet.return_token_balances(deployer)  # balance in the deployer
+            # here make a function to return the funding wallet and plug that into the query user wallet
+            funding_wallet_info = check_first_layer_sol_transfers.get_funding_wallet(deployer, inital_liq)
+            if funding_wallet_info != "":
+                fund_wallet = query_user_wallet.return_token_balances(funding_wallet_info)
+            else:
+                fund_wallet = "⚠️ NOT TRACKABLE"
+            past_tokens_string = "\n"
+            if len(past_token_list) > 0:
+                if len(past_token_list) > 8:
+                    print("removed due to too many past tokens")
+                    new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
+                    continue
+                for token in past_token_list:
+                    temp_string = "https://dexscreener.com/solana/" + str(token)
+                    past_tokens_string += f"📈 [Previous Project]({temp_string})\n"
+            else:
+                past_tokens_string = " *None 😇*"'''
             # dev selling report:
             result = dev_sold_so_far.check_dev(txn_hash, token_ca)
             if int(result[0]) > 2:  # dev selling early is bearish
@@ -141,11 +163,11 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             website = meta_info[1]
             twitter = meta_info[2]
             if telegram != "":
-                telegram = f"📱 [Telegram]({telegram})"
+                telegram = f"📱 [Telegram]({telegram})\n"
             if website != "":
-                website = f"📱 [Telegram]({website})"
+                website = f"🖥 [Website]({website})\n"
             if twitter != "":
-                twitter = f"📱 [Telegram]({twitter})"
+                twitter = f"✖️ [Twitter]({twitter})\n"
             percent_amount = str(result[0]).replace('.', ',')  # names can contain illegal chars so sort it out
             # extract data from the ping queue
             markup = types.InlineKeyboardMarkup()
@@ -202,7 +224,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"Rug : *{advnaced_rug}*\n📎 Associated Wallets in percent : *{rug_two}*\n🩸 Risk"
                                                     f"Level : *{risk_level}*\n🍬 Minted : *{get_mint_epoch}*\n\n📈 [Token Chart]("
                                                     f"https://dexscreener.com/solana/{token_ca})"
-                                                    f"\n{telegram}\n{website}\n{twitter}\n\n💧 [Funding Wallet :]("
+                                                    f"\n\n{telegram}{website}{twitter}\n💧 [Funding Wallet :]("
                                                     f"https://solscan.io/account/{funding_wallet_info})*"
                                                     f"\n{fund_wallet}\n*👝 [Deployer]("
                                                     f"https://solscan.io/account/{deployer})\n🗃 Deployer Balances : \n*{deployer_balances}* \n📚"

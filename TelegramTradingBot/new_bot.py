@@ -837,7 +837,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                             "https://pro-api.solscan.io/v1.0/account/splTransfers?account=" + str(
                                                 token[7]) + "&limit=10&offset=0",
                                             headers=solscan_header)
-                        tx_list = tx_result.json()
+                        tx_list = tx_result.json()#fix later
                         try:
                             if "data" in tx_list:
                                 for user_tx in tx_list["data"]:
