@@ -1198,11 +1198,12 @@ async def help_func_callback(callback_query: types.CallbackQuery):
         hide = types.InlineKeyboardMarkup(row_width=1)
         hide_refreshed_info = types.InlineKeyboardButton("Hide", callback_data="hide_refreshed_info g")
         hide.add(hide_refreshed_info)
-        rug_two = str(advanced_rug_two_checker.check_for_common_funding_wallets(token_ca)).replace(".", ",")
+        #rug_two = str(advanced_rug_two_checker.check_for_common_funding_wallets(token_ca)).replace(".", ",")#threading issues
+        rug_two =  "FEATURE DISABLED"
         await bot.send_message(chat_id=user_id,
                                text=f"🟣 For Token : *{token_ca}*\n\n💁🏽 Showing Dev's most recent activity:\n\n⌛️ "
                                     f"Time ago : *{time_ago}*\n📚"
-                                    f"Description : *{desc}*\n📎 Associated Wallets in percent : {rug_two}",
+                                    f"Description : *{desc}*\n📎 Associated Wallets : *{rug_two} Percent*",
                                parse_mode='MarkdownV2', reply_markup=hide)
 
 

@@ -21,41 +21,44 @@ exchange_wallets = {  # add more later
 }
 
 black_list = ["FLiPggWYQyKVTULFWMQjAk26JfK5XRCajfyTmD5weaZ7",
-              "Habp5bncMSsBC3vkChyebepym5dcTNRYeg2LVG464E96"]  # some bots?
+              "Habp5bncMSsBC3vkChyebepym5dcTNRYeg2LVG464E96",
+              "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1"]  # some bots? and raydium lp
 
 
 def check_for_common_funding_wallets(token_ca):  # advanced rug 2.0 #need to exclude exchanges
     holder_tx_list = []
     holder_result = request('GET',
                             "https://pro-api.solscan.io/v1.0/token/holders?tokenAddress=" + str(
-                                token_ca) + "&limit=18&offset=0",
+                                token_ca) + "&limit=15&offset=0",
                             headers=solscan_header)
     holder_list = holder_result.json()
     for holder in holder_list["data"]:
         sub_list_builder = []
         if str(holder["owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # (ignore raydium)
             sol_transfers = request('GET', "https://pro-api.solscan.io/v1.0/account/solTransfers?account=" + str(
-                holder["owner"]) + "&limit=6&offset=0",
+                holder["owner"]) + "&limit=5&offset=0",
                                     headers=solscan_header)
             sol_transfers_json = sol_transfers.json()["data"]
             tx_count = 0
             for sol_transfer in sol_transfers_json:
-                if str(sol_transfer["src"]) not in exchange_wallets and str(sol_transfer["src"]) not in black_list:
+                if str(sol_transfer["src"]) not in exchange_wallets and str(
+                        sol_transfer["src"]) not in black_list and str(sol_transfer["src"]) not in sub_list_builder:
                     sub_list_builder.append(sol_transfer["src"])
-                if tx_count > 6:
+                if tx_count > 4:
                     break
                 tx_count += 1
             # adding another layer 2:
-            for address in sub_list_builder:
+            for address in sub_list_builder:  # only one extra layer 2 due to speed
                 sol_transfers = request('GET', "https://pro-api.solscan.io/v1.0/account/solTransfers?account=" + str(
                     address) + "&limit=4&offset=0",
                                         headers=solscan_header)
                 sol_transfers_json = sol_transfers.json()["data"]
                 tx_count = 0
                 for sol_transfer in sol_transfers_json:
-                    if str(sol_transfer["src"]) not in exchange_wallets and str(sol_transfer["src"]) not in black_list:
+                    if str(sol_transfer["src"]) not in exchange_wallets and str(
+                            sol_transfer["src"]) not in black_list and str(sol_transfer["src"]) not in sub_list_builder:
                         sub_list_builder.append(sol_transfer["src"])
-                    if tx_count > 3:
+                    if tx_count > 1:
                         break
                     tx_count += 1
             holder_tx_list.append(sub_list_builder)
@@ -68,4 +71,3 @@ def check_for_common_funding_wallets(token_ca):  # advanced rug 2.0 #need to exc
                 common_wallet_count += 1
         wallet_index_one += 1
     return common_wallet_count / 20 * 100
-
