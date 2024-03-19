@@ -20,7 +20,7 @@ import check_first_layer_sol_transfers
 import check_mint_time
 import advanced_rug_two_checker
 import get_telegram
-
+import requests
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
 db = dataBase.DataBase()  # initialise
@@ -235,6 +235,29 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                disable_web_page_preview=True)  # CHECK IS IT WORKS
             new_bot.ping_queue.pop(0)  # remove from the queue (FIFO)
         await asyncio.sleep(1)
+
+
+@bot.message_handler(commands=['market'])  # show market conditions
+async def check_open_positions(message):
+    user_id = int(message.chat.id)
+    tokens_per_minute = new_bot.tokens_created_per_minute * 2
+    optimism_string = ""
+    if tokens_per_minute < 5:
+        optimism_string = "(Bearish)"
+    elif 5 <= tokens_per_minute <= 10:
+        optimism_string = "(Neutral)"
+    else:
+        optimism_string = "(Bullish)"
+    url = ("https://public-api.birdeye.so/public/multi_price?list_address=So11111111111111111111111111111111111111112"
+           "%2CmSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So")
+    headers = {
+        "x-chain": "solana",
+        "X-API-KEY": "282e76c342a649ad945dd16cff76d00a"
+    }
+    response = requests.get(url, headers=headers)
+    sol_price = int(response.json()["data"]["So11111111111111111111111111111111111111112"]["value"])
+    sol_price_change = int(response.json()["data"]["So11111111111111111111111111111111111111112"]["priceChange24h"])
+    await bot.send_message(user_id, f"〽️ Market infomration:\n\n🤑 Tokens created per minute : {tokens_per_minute} {optimism_string}\n🟣 SOL price: {sol_price} $ (24h change: {sol_price_change} %)")
 
 
 # add scoails commands

@@ -124,7 +124,7 @@ def get_subscription_id(response: SubscriptionResult) -> int:
 async def process_messages(websocket: SolanaWsClientProtocol,
                            instruction: str) -> AsyncIterator[Signature]:
     """Async generator, main websocket's loop"""
-    async for idx, msg in enumerate(websocket):#maybe here i can add soemthign
+    async for idx, msg in enumerate(websocket):  # maybe here i can add soemthign
         value = get_msg_value(msg)
         for log in value.logs:
             if instruction not in log:
@@ -209,6 +209,9 @@ async def token_report():
         await asyncio.sleep(300)
 
 
+tokens_created_per_minute = 3  #use to track how many tokens are made per 30 min
+
+
 async def append_past_tokens_to_file():
     while True:
         # dump tokens to file
@@ -218,10 +221,14 @@ async def append_past_tokens_to_file():
                 token = str(line).strip()
                 temp_array.append(token)  # add the already checked token to the list to not give a false alarm
                 # this may be changed depending on how I fetch the api data in the future
+        temp_tokens_created = 0
         with open('../past_tokens.txt', 'a') as file:
             for item in past_tokens:
                 if item not in temp_array:
+                    temp_tokens_created += 1
                     file.write(str(item) + '\n')
+        global tokens_created_per_minute
+        tokens_created_per_minute = temp_tokens_created
         await asyncio.sleep(30)
 
 
@@ -578,7 +585,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                         percentage = float(temp_total_spl_balance) / float(token_supply) * float(100)
                                         true_supply_held_by_top_twenty.append(percentage)  # convert it as a percentage
                                         break  # done
-                    except StopSniperCheck:#might work for adressing the looping issues
+                    except StopSniperCheck:  # might work for adressing the looping issues
                         item[1] = True  # set as checked
                         item[2] = False  # failed
                         print("one wallet tied to many other wallets stopping reading....")
@@ -592,7 +599,8 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                         # item[1] = True  # set as checked
                         if len(true_supply_held_by_top_twenty) == 0:
                             large_holder_check_queue.pop(index)
-                        elif len(true_supply_held_by_top_twenty) == 1 and token_address not in special_token_queue:  # only dev holding means this is a pre-launch,if token adress is in the list we know its been checked no again so can be processed as normal coin
+                        elif len(
+                                true_supply_held_by_top_twenty) == 1 and token_address not in special_token_queue:  # only dev holding means this is a pre-launch,if token adress is in the list we know its been checked no again so can be processed as normal coin
                             # token(timed token) so we will add more time to its expiration time (1h)
                             for token in token_queue:
                                 if token[0] == token_address:
@@ -726,7 +734,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                             token_amount_sent_to_lp_pool = \
                                                 int(int(tx['extra']['amount']) / 10 ** token[11])
                                 except Exception as e:
-                                    print("error " + str(e),token[0])
+                                    print("error " + str(e), token[0])
                         except IndexError:
                             print("error retrying....")
                             token_remove_errors.append(
@@ -835,9 +843,9 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                             "https://pro-api.solscan.io/v1.0/account/splTransfers?account=" + str(
                                                 token[7]) + "&limit=10&offset=0",
                                             headers=solscan_header)
-                        tx_list = tx_result.json()#fix later
+                        tx_list = tx_result.json()  # fix later
                         try:
-                            if "data" in tx_list:#change this to rpc not solscan
+                            if "data" in tx_list:  # change this to rpc not solscan
                                 for user_tx in tx_list["data"]:
                                     if str(user_tx['changeType']) == "closedAccount":
                                         # check the tx hash

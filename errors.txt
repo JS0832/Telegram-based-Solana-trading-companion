@@ -10904,3 +10904,8 @@
 ["removed token since it's expiration time has passed ", 'J6HFghWbxmrP213gsR91A4pLhiaffjbghQ5TV1Jg1omr']
 ['liquidty removed', 'EEtLeKUs7ZuLvCs6dWvG5a7HKgV7VaZ8VcRUee19Ke9k']
 ['liquidty removed', 'EEtLeKUs7ZuLvCs6dWvG5a7HKgV7VaZ8VcRUee19Ke9k']
+['removed token due to low token ratio added to the lp pool:  ', 'HosP2gP3m6DdP6bmwAboavpUgrofdzgsaboiRhHwcSGs']
+['removed token due to low initial liquidity :  ', 'J8E9DguC95NotRc7etTE33ooHZPtKdCqD8JffSxJDdrf']
+['removed token due to low token ratio added to the lp pool:  ', '7mfZtj9evja5kndTYsQ8XMUJQVHSCLVLwpq6EELjXhBT']
+['removed token due to low initial liquidity :  ', 'HTWmDM2eycKgVE2d6JRx8FxDaUKfDSVQdxmfNcron59q']
+['removed token due to low token ratio added to the lp pool:  ', '8c9e8FyYJbzb2FKdaBkcKzR8h7wQZU141KHRdqTwtzbe']
