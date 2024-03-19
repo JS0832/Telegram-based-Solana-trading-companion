@@ -209,7 +209,7 @@ async def token_report():
         await asyncio.sleep(300)
 
 
-tokens_created_per_minute = 3  #use to track how many tokens are made per 30 min
+tokens_created_per_minute = 3  # use to track how many tokens are made per 30 min
 
 
 async def append_past_tokens_to_file():
@@ -229,7 +229,7 @@ async def append_past_tokens_to_file():
                     file.write(str(item) + '\n')
         global tokens_created_per_minute
         tokens_created_per_minute = temp_tokens_created
-        await asyncio.sleep(30)
+        await asyncio.sleep(60)
 
 
 async def tokenomics_followup():
@@ -515,7 +515,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                 all_seen_wallets.append(root)
                                 temp_total_spl_balance = 0
                                 while True:  # here traverse all wallets connected to one wallet and count the total
-                                    if len(temp_associated_wallets) > 11:  # not good
+                                    if len(temp_associated_wallets) > 15:  # not good
                                         true_supply_held_by_top_twenty.append(100)  # we don't want this token
                                         raise StopSniperCheck  # too many
                                     # supply holding.
@@ -585,7 +585,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                         percentage = float(temp_total_spl_balance) / float(token_supply) * float(100)
                                         true_supply_held_by_top_twenty.append(percentage)  # convert it as a percentage
                                         break  # done
-                    except StopSniperCheck:  # might work for adressing the looping issues
+                    except StopSniperCheck:  # might work for addressing the looping issues
                         item[1] = True  # set as checked
                         item[2] = False  # failed
                         print("one wallet tied to many other wallets stopping reading....")
@@ -596,20 +596,18 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                             still_in_queue = True
                             break
                     if still_in_queue:
-                        # item[1] = True  # set as checked
                         if len(true_supply_held_by_top_twenty) == 0:
                             large_holder_check_queue.pop(index)
-                        elif len(
-                                true_supply_held_by_top_twenty) == 1 and token_address not in special_token_queue:  # only dev holding means this is a pre-launch,if token adress is in the list we know its been checked no again so can be processed as normal coin
+                        elif len(true_supply_held_by_top_twenty) == 1 and token_address not in special_token_queue:
                             # token(timed token) so we will add more time to its expiration time (1h)
                             for token in token_queue:
                                 if token[0] == token_address:
                                     print("Added a time extension to token: " + str(token_address))
-                                    token[1] += 5000  # adding an hour to the epoch
+                                    token[1] += 5000  # adding over an hour to the epoch
                                     temp_counter = 0
                                     for temp_item in large_holder_check_queue:
                                         if temp_item[0] == token_address:
-                                            large_holder_check_queue.pop(temp_counter)
+                                            large_holder_check_queue.pop(temp_counter)#remove to be added again
                                             break
                                         temp_counter += 1
                         else:
@@ -678,14 +676,21 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                     if token[10] == 0:  # (used to wait for image uri to update)
                         token_amount_sent_to_lp_pool = 0  # to keep track how many tokens are sent to the pool
                         # check if mintable:
-                        contract_address = token[0]
-                        command = [spl_executable, "display", contract_address, "-u", rpc_url]
-                        result = subprocess.run(command, capture_output=True, text=True, shell=True)
-                        # Output the result
-                        if result.returncode == 0:
-                            if "Mint authority: (not set)" in str(result.stdout):
-                                token[9] = True  # confirms that mint authority set to none
-                        else:
+                        tries = 0
+                        while tries <= 3:  # tries it 3 times before giving up
+                            contract_address = token[0]
+                            command = [spl_executable, "display", contract_address, "-u", rpc_url]
+                            result = subprocess.run(command, capture_output=True, text=True, shell=True)
+                            # Output the result
+                            if result.returncode == 0:
+                                if "Mint authority: (not set)" in str(result.stdout):
+                                    token[9] = True  # confirms that mint authority set to none
+                                break
+                            else:
+                                await asyncio.sleep(0.2)
+                                tries += 1
+                                # add more retry
+                        if tries > 3:
                             token_remove_errors.append(
                                 ["Command failed 2 ", token[0]])
                             print("error2 " + str(result.stderr))
@@ -777,8 +782,8 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                     else:  # failed probably
                         # error try again
                         print("error retrying....")
-                        token_remove_errors.append(
-                            ["error retrying....", token[0]])
+                        token_remove_errors.append(["error retrying....", token[0]])
+                        continue  # move on
                     #  [[token_address,checked=true/false,passed=true or false,supply,checked on time?]]
                     found = False
                     for item in large_holder_check_queue:
@@ -801,8 +806,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                 token[9] = True  # confirms that mint authority set to none
                                 print("token mint has been disabled. " + str(token[0]))
                         else:
-                            print("Command failed.")
-                            print("Error:", result.stderr)
+                            print("Command Error....will retry :", result.stderr)
                     if token[9]:  # if mint disabled
                         # check if the lp token has been burned
                         if token[7] == "":  # means if the owner of the lp token has not been found yet
@@ -816,9 +820,9 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                 if str(lp_holder["total"]) == "1":
                                     token[7] = str(lp_holder["data"][0]["owner"])
                                 elif int(lp_holder["total"]) > 1:
-                                    print("error more than lp one Holder " + str(token[0]))
+                                    print("error more than one lp Holder " + str(token[0]))
                                     token_remove_errors.append(
-                                        ["error more than lp one Holder ....", token[0]])
+                                        ["error more than one lp Holder ....", token[0]])
                                     temp = 0
                                     for item in large_holder_check_queue:
                                         if item[0] == token[0]:

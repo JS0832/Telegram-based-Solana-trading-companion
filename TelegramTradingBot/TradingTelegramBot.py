@@ -21,6 +21,7 @@ import check_mint_time
 import advanced_rug_two_checker
 import get_telegram
 import requests
+
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
 db = dataBase.DataBase()  # initialise
@@ -157,6 +158,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             token_name = str(token_meta[0])
             token_ticker = str(token_meta[1])
             creator = str(token_meta[2])
+            if creator == "DEXLAB MINTING LAB":
+                creator += " ⚠️"
             if not wb.check_token(token_ca):  # if toke has not been saved in database
                 wb.add_dev_wallets(token_ca, ','.join(result[1]))
             meta_info = get_telegram.get_telegram(token_ca)
@@ -240,7 +243,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
 @bot.message_handler(commands=['market'])  # show market conditions
 async def check_open_positions(message):
     user_id = int(message.chat.id)
-    tokens_per_minute = new_bot.tokens_created_per_minute * 2
+    tokens_per_minute = new_bot.tokens_created_per_minute
     optimism_string = ""
     if tokens_per_minute < 5:
         optimism_string = "(Bearish)"
@@ -257,7 +260,8 @@ async def check_open_positions(message):
     response = requests.get(url, headers=headers)
     sol_price = int(response.json()["data"]["So11111111111111111111111111111111111111112"]["value"])
     sol_price_change = int(response.json()["data"]["So11111111111111111111111111111111111111112"]["priceChange24h"])
-    await bot.send_message(user_id, f"〽️ Market infomration:\n\n🤑 Tokens created per minute : {tokens_per_minute} {optimism_string}\n🟣 SOL price: {sol_price} $ (24h change: {sol_price_change} %)")
+    await bot.send_message(user_id,
+                           f"〽️ Market infomration:\n\n🤑 Tokens created per minute : {tokens_per_minute} {optimism_string}\n🟣 SOL price: {sol_price} $ (24h change: {sol_price_change} %)")
 
 
 # add scoails commands
