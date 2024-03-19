@@ -607,7 +607,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                     temp_counter = 0
                                     for temp_item in large_holder_check_queue:
                                         if temp_item[0] == token_address:
-                                            large_holder_check_queue.pop(temp_counter)#remove to be added again
+                                            large_holder_check_queue.pop(temp_counter)  # remove to be added again
                                             break
                                         temp_counter += 1
                         else:
@@ -781,7 +781,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                         # no data regarding the token meaning liquidty removed
                     else:  # failed probably
                         # error try again
-                        print("error retrying....")
+                        print("error retrying....", token[0])
                         token_remove_errors.append(["error retrying....", token[0]])
                         continue  # move on
                     #  [[token_address,checked=true/false,passed=true or false,supply,checked on time?]]
