@@ -1,6 +1,6 @@
 import math
 from time import sleep
-
+import query_token
 import asyncio
 from typing import List, AsyncIterator, Tuple
 from asyncstdlib import enumerate
@@ -504,7 +504,7 @@ def check_for_large_holder():  # here maybe mostly focus on wallets with a low t
                                 raise StopSniperCheck  # stop as not queue
                             max_val = 70  # this is the danger zone of very high odds snipe
                             if any(val >= max_val for val in
-                                   true_supply_held_by_top_twenty):  # stoping search prematurely
+                                   true_supply_held_by_top_twenty):  # stopping search prematurely
                                 print("Token removed....halting sniper check")
                                 raise StopSniperCheck  # stop as not queue
                             if holder not in all_seen_wallets and holder not in bots_wallet_balcklist:
@@ -688,6 +688,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                 break
                             else:
                                 await asyncio.sleep(0.2)
+                                print("retrying CLI commands")
                                 tries += 1
                                 # add more retry
                         if tries > 3:
@@ -778,7 +779,6 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                     amount = int(tx['params']['amount'])
                         token[4] = mint
                         token[5] = amount
-                        # no data regarding the token meaning liquidty removed
                     else:  # failed probably
                         # error try again
                         print("error retrying....", token[0])
@@ -793,14 +793,11 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                         large_holder_check_queue.append([token[0], False, False, token[10], "True", 0])
                         print(large_holder_check_queue)
                 if token[11] in decimals or token[2]:
-                    # i can check if dev removed liquidity too then I removed the token from queue
                     token[2] = True  # sets to true in case it is its first run
                     if not token[9]:  # if mint hasn't been disabled then check again if the dev disabled it
-                        # check if mintable:
                         contract_address = token[0]
                         command = [spl_executable, "display", contract_address, "-u", rpc_url]
                         result = subprocess.run(command, capture_output=True, text=True, shell=True)
-                        # Output the result
                         if result.returncode == 0:
                             if "Mint authority: (not set)" in str(result.stdout):
                                 token[9] = True  # confirms that mint authority set to none
@@ -808,216 +805,78 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                         else:
                             print("Command Error....will retry :", result.stderr)
                     if token[9]:  # if mint disabled
-                        # check if the lp token has been burned
-                        if token[7] == "":  # means if the owner of the lp token has not been found yet
-                            lq_token = str(token[4])
-                            result_holder_list = request('GET',
-                                                         "https://pro-api.solscan.io/v1.0/token/holders?tokenAddress=" +
-                                                         lq_token + "&limit=10&offset=0",
-                                                         headers=solscan_header)
-                            lp_holder = result_holder_list.json()
-                            if "data" in lp_holder:
-                                if str(lp_holder["total"]) == "1":
-                                    token[7] = str(lp_holder["data"][0]["owner"])
-                                elif int(lp_holder["total"]) > 1:
-                                    print("error more than one lp Holder " + str(token[0]))
-                                    token_remove_errors.append(
-                                        ["error more than one lp Holder ....", token[0]])
-                                    temp = 0
-                                    for item in large_holder_check_queue:
-                                        if item[0] == token[0]:
-                                            large_holder_check_queue.pop(temp)
-                                            break
-                                        temp += 1
-                                    token_queue.pop(index)
-                                    continue
-                            else:
-                                print("error fetching lp token holder data " + str(token[0]))
-                                token_remove_errors.append(
-                                    ["error fetching lp token holder data ", token[0]])
-                                temp = 0
-                                for item in large_holder_check_queue:
-                                    if item[0] == token[0]:
-                                        large_holder_check_queue.pop(temp)
-                                        break
-                                    temp += 1
-                                token_queue.pop(index)
-                                continue
-                        tx_result = request('GET',
-                                            "https://pro-api.solscan.io/v1.0/account/splTransfers?account=" + str(
-                                                token[7]) + "&limit=10&offset=0",
-                                            headers=solscan_header)
-                        tx_list = tx_result.json()  # fix later
                         try:
-                            if "data" in tx_list:  # change this to rpc not solscan
-                                for user_tx in tx_list["data"]:
-                                    if str(user_tx['changeType']) == "closedAccount":
-                                        # check the tx hash
-                                        signature = str(user_tx["signature"][0])
-                                        burn_tx = request('GET',
-                                                          "https://pro-api.solscan.io/v1.0/transaction/" + signature,
-                                                          headers=solscan_header)
-                                        json_burn_tx = burn_tx.json()
-                                        for meta_burn_tx in json_burn_tx[
-                                            "parsedInstruction"]:  # confirm burn and the amount
-                                            if meta_burn_tx["type"] == "burn":
-                                                if meta_burn_tx["params"]["mint"] == str(token[4]):
-                                                    passed = False
-                                                    token_checked = True
-                                                    on_time = ""
-                                                    largest_holder = 0
-                                                    found = False
-                                                    for item in large_holder_check_queue:
-                                                        # [[token_address,checked=true/false,passed=true or false,supply,
-                                                        # checked on time?]]
-                                                        if item[0] == token[0]:
-                                                            found = True  # this is simply used for special tokens
-                                                            if not item[1]:  # if not checked
-                                                                item[4] = "False"  # true default
-                                                                token_checked = False
-                                                            else:
-                                                                if not item[2]:
-                                                                    passed = False  # just for clarity(token failed test)
-                                                                else:
-                                                                    on_time = item[4]
-                                                                    largest_holder = item[5]
-                                                                    temp = 0
-                                                                    for item2 in large_holder_check_queue:  # remove as done
-                                                                        if item2[0] == token[0]:
-                                                                            large_holder_check_queue.pop(temp)
-                                                                            break
-                                                                        temp += 1
-                                                                    passed = True
-                                                    if int(math.floor(float(meta_burn_tx["params"]["amount"]) / float(
-                                                            token[5]) * float(100))) > 95:
-                                                        if not found:
-                                                            print(
-                                                                "re-checking sniper status for the timed release token: " + str(
-                                                                    token[0]))
-                                                            special_token_queue.append(token[
-                                                                                           0])  # place in this list so it signifies no need to re check the token after this final check
-                                                            token_checked = False  # token was not checked yet
-                                                            large_holder_check_queue.append(
-                                                                [token[0], False, False, token[10], "True", 0])
-                                                            print(large_holder_check_queue)
-                                                        if passed and token_checked:
-                                                            holder_result = request('GET',
-                                                                                    "https://pro-api.solscan.io/v1.0/token/holders?tokenAddress=" + str(
-                                                                                        token[
-                                                                                            0]) + "&limit=13&offset=0",
-                                                                                    headers=solscan_header)
-                                                            holder_list = holder_result.json()
-                                                            five_or_above = 0  # number of holders that have 5%+
-                                                            total_supply_held = 0  # amount fo supply top 10 holders
-                                                            # hold
-                                                            amount_of_coins_for_five_percent = \
-                                                                int(float(token[10]) * float(0.05))
-                                                            # total supply * 0.05 then convert to int
-                                                            supply = token[10]
-                                                            total_held_string = ""
-                                                            five_above_string = ""
-                                                            if "total" in holder_list:
-                                                                if int(holder_list["total"]) > 12:
-                                                                    iterator = 0
-                                                                    for holder in holder_list["data"]:
-                                                                        if iterator > 12:
-                                                                            break
-                                                                        if str(holder[
-                                                                                   "owner"]) != "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1":  # raydium pool
-                                                                            if (int(float(holder["amount"]) / float(
-                                                                                    10 ** token[11])) >=
-                                                                                    amount_of_coins_for_five_percent):
-                                                                                five_or_above += 1
-                                                                            total_supply_held += int(
-                                                                                float(holder["amount"]) / float(
-                                                                                    10 ** token[11]))
-                                                                        iterator += 1
-                                                                if int(float(total_supply_held / supply) * float(
-                                                                        100)) < 20:  # safu
-                                                                    total_held_string = "Excellent : " + str(
-                                                                        int(float(total_supply_held / supply) * float(
-                                                                            100)))
-                                                                elif 40 > int(float(total_supply_held / supply) * float(
-                                                                        100)) > 20:  # moderate risk
-                                                                    total_held_string = "Moderate : " + str(
-                                                                        int(float(total_supply_held / supply) * float(
-                                                                            100)))
-                                                                else:  # high risk
-                                                                    total_held_string = "Poor : " + str(
-                                                                        int(float(total_supply_held / supply) * float(
-                                                                            100)))
-                                                                five_above_string = str(
-                                                                    five_or_above)
-                                                            if token[0] in special_token_queue:  # timed launch
-                                                                ping_queue.append(
-                                                                    [int(largest_holder), token[6],
-                                                                     int(math.floor(float(
-                                                                         meta_burn_tx["params"][
-                                                                             "amount"]) / float(
-                                                                         token[5]) * float(
-                                                                         100))), token[
-                                                                         8], total_held_string, five_above_string,
-                                                                     token[0],
-                                                                     token[3], token[11], True])
-                                                            else:
-                                                                ping_queue.append(
-                                                                    [int(largest_holder), token[6],
-                                                                     int(math.floor(float(
-                                                                         meta_burn_tx["params"][
-                                                                             "amount"]) / float(
-                                                                         token[5]) * float(
-                                                                         100))), token[
-                                                                         8], total_held_string, five_above_string,
-                                                                     token[0],
-                                                                     token[3], token[11], False])
-                                                            print(
-                                                                "sent token for further checks (pre ping - DO NOT "
-                                                                "BUY!): " + str(
-                                                                    token[0]))
-                                                            raise TokenError
-                                                        elif token_checked and not passed:
-                                                            print(
-                                                                "token was most likely sniped by dev: " + str(token[0]))
-                                                            token_remove_errors.append(
-                                                                ["token sniped by dev: ", token[0]])
-                                                            raise TokenError
+                            lp_token_transfers = request('GET',
+                                                         "https://pro-api.solscan.io/v1.0/token/transfer?tokenAddress=" + str(
+                                                             token[4]) + "&limit=10&offset=0",
+                                                         headers=solscan_header)
+                            lp_token_transfers_list_json = lp_token_transfers.json()  # fix later
+                            for lp_token_transfer in lp_token_transfers_list_json["items"]:
+                                if str(lp_token_transfer['commonType']) == "burn":
+                                    burn_amount = lp_token_transfer["amount"]
+                                    if int(math.floor(float(burn_amount) / float(token[5]) * float(100))) > 95:
+                                        passed = False
+                                        token_checked = True
+                                        largest_holder = 0
+                                        found = False
+                                        for item in large_holder_check_queue:
+                                            # [[token_address,checked=true/false,passed=true or false,supply,
+                                            # checked on time?]]
+                                            if item[0] == token[0]:
+                                                found = True  # this is simply used for special tokens
+                                                if not item[1]:  # if not checked
+                                                    item[4] = "False"  # true default
+                                                    token_checked = False
+                                                else:
+                                                    if not item[2]:
+                                                        passed = False  # just for clarity(token failed test)
                                                     else:
-                                                        print(
-                                                            "low amount of liquidty burned..removing token ,amount the jeet"
-                                                            "burned was : " + str(
-                                                                float(meta_burn_tx["params"]["amount"]) /
-                                                                float(token[5])) + " " + str(token[0]))
-                                                        token_remove_errors.append(
-                                                            ["low amount of liquidty burned..removing token ",
-                                                             token[0]])
+                                                        largest_holder = item[5]
                                                         temp = 0
-                                                        for item in large_holder_check_queue:
-                                                            if item[0] == token[0]:
+                                                        for item2 in large_holder_check_queue:  # remove as done
+                                                            if item2[0] == token[0]:
                                                                 large_holder_check_queue.pop(temp)
                                                                 break
                                                             temp += 1
-                                                        token_queue.pop(index)
-                                                        continue
-                                                else:
-                                                    print(
-                                                        "error fetching burn tx...most likely removed liquidty ,token : " + str(
-                                                            token[0]))
-                                                    token_remove_errors.append(
-                                                        ["error fetching burn tx...most likely removed liquidty ",
-                                                         token[0]])
-                                                    raise TokenError
-                            else:
-                                token_remove_errors.append(
-                                    ["liquidty removed", token[0]])
-                                print("liquidty removed...." + str(token[0]))
-                                temp = 0
-                                for item in large_holder_check_queue:
-                                    if item[0] == token[0]:
-                                        large_holder_check_queue.pop(temp)
-                                        break
-                                    temp += 1
-                                token_queue.pop(index)
-                                continue
+                                                        passed = True
+                                        if not found:
+                                            print("re-checking sniper status for token: " + str(token[0]))
+                                            special_token_queue.append(token[0])
+                                            token_checked = False  # token was not checked yet
+                                            large_holder_check_queue.append(
+                                                [token[0], False, False, token[10], "True", 0])
+                                            print(large_holder_check_queue)
+                                        if passed and token_checked:
+                                            result = query_token.main_query(token[0])
+                                            if token[0] in special_token_queue:
+                                                ping_queue.append(
+                                                    [int(largest_holder), token[6],
+                                                     int(math.floor(float(burn_amount) / float(token[5]) * float(100))), token[
+                                                         8], result[1], result[2],
+                                                     token[0],
+                                                     token[3], token[11], True])
+                                            else:
+                                                ping_queue.append(
+                                                    [int(largest_holder), token[6],
+                                                     int(math.floor(float(burn_amount) / float(token[5]) * float(100))), token[
+                                                         8], result[1], result[2],
+                                                     token[0],
+                                                     token[3], token[11], False])
+                                            print(
+                                                "sent token for further checks (pre ping - DO NOT "
+                                                "BUY!): " + str(
+                                                    token[0]))
+                                            raise TokenError
+                                        elif token_checked and not passed:
+                                            print("token was most likely sniped by dev: " + str(token[0]))
+                                            token_remove_errors.append(["token sniped by dev: ", token[0]])
+                                            raise TokenError
+                                    else:
+                                        print("low amount of liquidty burned: " + str(token[0]))
+                                        token_remove_errors.append(
+                                            ["low amount of liquidty burned..removing token ",
+                                             token[0]])
+                                        raise TokenError
                         except TokenError:
                             print("token removed fom queue :" + str(token[0]))
                             temp = 0

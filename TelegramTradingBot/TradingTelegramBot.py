@@ -100,7 +100,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             else:
                 past_tokens_string = " *None 😇*"
             advnaced_rug = check_advanced_rug.check(token_ca)  # add this to the refresh (query token code)
-            if advnaced_rug == "High" or advnaced_rug == "Extremely High":  # make cusomisable pings for this option and set it to filter extremely high mayeb but for now it wills et thigh
+            if advnaced_rug == "High" or advnaced_rug == "Extremely High":
                 print("Removed token due to a high risk of advanced rug.")
                 new_bot.ping_queue.pop(0)  # won't even ping the token due to the risk
                 continue
@@ -113,7 +113,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                 continue
             print("passed rug 2.0 checks!")
             rug_two = str(rug_two).replace(".", ",")
-            '''temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
+            temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
             past_token_list = temp_dev_info[0]
             deployer = temp_dev_info[1]
             # deployer info :
@@ -134,7 +134,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                     temp_string = "https://dexscreener.com/solana/" + str(token)
                     past_tokens_string += f"📈 [Previous Project]({temp_string})\n"
             else:
-                past_tokens_string = " *None 😇*"'''
+                past_tokens_string = " *None 😇*"
             # dev selling report:
             result = dev_sold_so_far.check_dev(txn_hash, token_ca)
             if int(result[0]) > 2:  # dev selling early is bearish
