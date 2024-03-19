@@ -22,6 +22,7 @@ def check_activity(dev_wallets):
         )
         transaction = json.loads(str(recent_tx.to_json()))["result"]
         parsed_transaction = transactions_api.get_parsed_transactions(transactions=[transaction[0]["signature"]])
+        print(parsed_transaction)
         description = parsed_transaction[0]["description"]
         timestamp = parsed_transaction[0]["timestamp"]
         if timestamp < temp_time_stamp:

@@ -814,7 +814,23 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                             for lp_token_transfer in lp_token_transfers_list_json["items"]:
                                 if str(lp_token_transfer['commonType']) == "burn":
                                     burn_amount = lp_token_transfer["amount"]
+                                    burn_hash = lp_token_transfer["txHash"]
+                                    lp_burn_hash = request('GET',
+                                                           "https://pro-api.solscan.io/v1.0/transaction/" + str(
+                                                               burn_hash),
+                                                           headers=solscan_header)
+                                    lp_burn_hash_json = lp_burn_hash.json()  # fix later
+                                    if "solTransfers" in lp_burn_hash_json:
+                                        if len(lp_burn_hash_json["solTransfers"]) > 0:
+                                            if lp_burn_hash_json["solTransfers"][0][
+                                                "destination"] != "burn68h9dS2tvZwtCFMt79SyaEgvqtcZZWJphizQxgt":
+                                                raise TokenError
+                                        else:
+                                            raise TokenError
+                                    else:
+                                        raise TokenError
                                     if int(math.floor(float(burn_amount) / float(token[5]) * float(100))) > 95:
+                                        print("token", token[0], "passed lp burn", burn_amount, token[5])
                                         passed = False
                                         token_checked = True
                                         largest_holder = 0
@@ -851,14 +867,16 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                             if token[0] in special_token_queue:
                                                 ping_queue.append(
                                                     [int(largest_holder), token[6],
-                                                     int(math.floor(float(burn_amount) / float(token[5]) * float(100))), token[
+                                                     int(math.floor(float(burn_amount) / float(token[5]) * float(100))),
+                                                     token[
                                                          8], result[1], result[2],
                                                      token[0],
                                                      token[3], token[11], True])
                                             else:
                                                 ping_queue.append(
                                                     [int(largest_holder), token[6],
-                                                     int(math.floor(float(burn_amount) / float(token[5]) * float(100))), token[
+                                                     int(math.floor(float(burn_amount) / float(token[5]) * float(100))),
+                                                     token[
                                                          8], result[1], result[2],
                                                      token[0],
                                                      token[3], token[11], False])
