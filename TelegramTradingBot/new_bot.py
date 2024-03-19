@@ -630,7 +630,6 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
     decimals = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}  # a list of allowable decimal amount
     rpc_url = "https://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
     spl_executable = r'C:\\Users\MEMEdev\.local\share\solana\install\active_release\bin\spl-token.exe'  # for
-    # checking mint
     minimum_initial_liquidty = 5  # most good coins have 10
     while True:  # infinite loop to keep checking
         index = 0
@@ -690,7 +689,6 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                 temp += 1
                             token_queue.pop(index)
                             continue
-
                         alchemy_url = "https://solana-mainnet.g.alchemy.com/v2/bzkveugN6acIccgGUJTetb95Sz0yo8W_"
                         payload = {
                             "id": 1,
@@ -839,7 +837,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                             headers=solscan_header)
                         tx_list = tx_result.json()#fix later
                         try:
-                            if "data" in tx_list:
+                            if "data" in tx_list:#change this to rpc not solscan
                                 for user_tx in tx_list["data"]:
                                     if str(user_tx['changeType']) == "closedAccount":
                                         # check the tx hash
