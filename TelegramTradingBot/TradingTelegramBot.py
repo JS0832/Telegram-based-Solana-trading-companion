@@ -225,7 +225,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                                                     f"Rug : *{advnaced_rug}*\n📎 Associated Wallets in percent : *{rug_two}*\n🩸 Risk"
                                                     f"Level : *{risk_level}*\n🍬 Minted : *{get_mint_epoch}*\n\n📈 [Token Chart]("
                                                     f"https://dexscreener.com/solana/{token_ca})"
-                                                    f"\n\n🎭 Creator:{creator}\n{telegram}{website}{twitter}\n💧 [Funding Wallet]("
+                                                    f"\n\n🎭 Creator : *{creator}*\n{telegram}{website}{twitter}\n💧 [Funding Wallet]("
                                                     f"https://solscan.io/account/{funding_wallet_info})*"
                                                     f"\n{fund_wallet}\n*👝 [Deployer]("
                                                     f"https://solscan.io/account/{deployer})\n*{deployer_balances}*\n📚"

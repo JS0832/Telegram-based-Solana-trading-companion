@@ -44,7 +44,7 @@ def get_telegram(token_ca):
 def get_name_ticker(token_ca):
     name = ""
     ticker = ""
-    creator_name = "UNKNOWN"
+    creator_name = "UNKNOWN ⚠️"
     metadata = request('GET',
                        "https://pro-api.solscan.io/v1.0/account/" + str(
                            token_ca),
@@ -60,6 +60,3 @@ def get_name_ticker(token_ca):
                     creator_name = creator["name"]
             return info["name"], info["symbol"], creator_name
     return "Error", "Error"
-
-
-print(get_name_ticker("DT6tZPeknNEqcAkjUxoTRRLEQW6JS9p19rukCznAdxHv"))
