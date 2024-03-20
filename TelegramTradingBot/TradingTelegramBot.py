@@ -14,13 +14,13 @@ import dev_sold_so_far
 import calcualte_risk_level
 import DevWalletDatabase
 import Ratings_database
-import get_token_name_ticker
 import check_dev_wallet_recent_tx
 import check_first_layer_sol_transfers
 import check_mint_time
 import advanced_rug_two_checker
 import get_telegram
 import requests
+import poll_dev_activity
 
 TOKEN = "6769248171:AAERXN-athfaM8JtK7kTYfNO6IpfJav7Iug"
 bot = AsyncTeleBot(token=TOKEN)
@@ -30,6 +30,7 @@ wb = DevWalletDatabase.DevWalletDataBase()
 rd = Ratings_database.TokenRateDataBase()
 buy_queue = []  # will feed the buy engine so each user purchases a token (each user who selected auto buy
 
+active_polling = {}
 
 # add user scam reports
 
@@ -186,9 +187,12 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             share = types.InlineKeyboardButton("Share PNL", callback_data="pnl")
             rate = types.InlineKeyboardButton("Rate This Ping", callback_data="rate " + str(data[6]))
             check_dev_activity = types.InlineKeyboardButton("Check activity", callback_data="check_dev " + str(data[6]))
+            dev_polling = types.InlineKeyboardButton("Enable dev Polling",
+                                                     callback_data="enable_disable_dev " + str(data[6]))
             markup.row(t_settings, buy, sell)
             markup.row(refresh, check_dev_activity, positions)
             markup.row(share, info, rate)
+            markup.row(dev_polling)
             print(timed_launch, token_ca, token_name, token_ticker, largest_holder, percent_amount,
                   number_of_dev_wallets, inital_liq, liq_burned, tokens_to_lp_percent, decentralisation,
                   whale_holders, advnaced_rug, risk_level)  # for debug and refinement
@@ -1269,6 +1273,19 @@ async def help_func_callback(callback_query: types.CallbackQuery):
                                     f"Time ago : *{time_ago}*\n📚"
                                     f"Description : *{desc}*\n📎 Associated Wallets : *{rug_two} Percent*",
                                parse_mode='MarkdownV2', reply_markup=hide)
+    elif response_value.split()[0] == "enable_disable_dev":
+        if user_id in active_polling:
+            if active_polling[user_id] + 602 > time.time():
+                active_polling[user_id] = time.time()
+            else:
+                await bot.send_message(user_id, "Please wait when the polling session expires")
+                return
+        else:
+            active_polling[user_id] = time.time()
+        wallet_list = wb.return_dev_wallets(token_ca).split(",")
+        threading.Thread(target=lambda: poll_dev_activity.poll_activity(dev_wallets=wallet_list,
+                                                                        user_id=user_id)).start()
+
 
 
 def subscription():
