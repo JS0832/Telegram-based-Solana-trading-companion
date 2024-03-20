@@ -26,22 +26,21 @@ def check_previous_project(txn_hash,
                                     txn_hash),
                                 headers=solscan_header)
     liquidity_tx_info_json = liquidity_tx_info.json()
-    tx_hash_list_tokens = []#list to store all tokens associated with the txns hash to difirenciate between other projects and the crent project
-    for tx_hash_tokens in liquidity_tx_info_json["tokenBalanes"]:#should be balances so they made a typo
+    tx_hash_list_tokens = []  # list to store all tokens associated with the txns hash to difirenciate between other
+    # projects and the crent project
+    for tx_hash_tokens in liquidity_tx_info_json["tokenBalanes"]:  # should be balances so they made a typo
         tx_hash_list_tokens.append(tx_hash_tokens["token"]["tokenAddress"])
     # check for signer
     dev_wallet = str(liquidity_tx_info_json["signer"][0])
-    res = solana_client.get_signatures_for_address(
-        Pubkey.from_string(dev_wallet),
-        limit=50  # Specify how much last transactions to fetch
-    )
     spl_transfers = request('GET',
                             "https://pro-api.solscan.io/v1.0/account/splTransfers?account=" + str(
-                                dev_wallet) + "&limit=50&offset=0",
+                                dev_wallet) + "&limit=25&offset=0",
                             headers=solscan_header).json()
     token_list = []
     for spl_transfer in spl_transfers["data"]:
-        if spl_transfer["changeType"] == "inc" and spl_transfer["tokenAddress"] != token_pinged and spl_transfer["tokenAddress"] not in tx_hash_list_tokens:
-            if spl_transfer["tokenAddress"] != "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB" and spl_transfer["tokenAddress"] != "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": #stables
+        if spl_transfer["changeType"] == "inc" and spl_transfer["tokenAddress"] != token_pinged and spl_transfer[
+            "tokenAddress"] not in tx_hash_list_tokens:
+            if spl_transfer["tokenAddress"] != "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB" and spl_transfer[
+                "tokenAddress"] != "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v":  # stables
                 token_list.append(spl_transfer["tokenAddress"])
     return token_list, dev_wallet

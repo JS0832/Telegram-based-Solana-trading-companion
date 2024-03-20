@@ -830,7 +830,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                     else:
                                         raise TokenError
                                     if int(math.floor(float(burn_amount) / float(token[5]) * float(100))) > 95:
-                                        print("token", token[0], "passed lp burn", burn_amount, token[5])
+                                        print("token", token[0], "passed lp burn checks!")
                                         passed = False
                                         token_checked = True
                                         largest_holder = 0
@@ -896,7 +896,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                                              token[0]])
                                         raise TokenError
                         except TokenError:
-                            print("token removed fom queue :" + str(token[0]))
+                            print("token removed fom queue : " + str(token[0]))
                             temp = 0
                             for item in large_holder_check_queue:
                                 if item[0] == token[0]:
