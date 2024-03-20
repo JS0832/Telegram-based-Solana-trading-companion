@@ -193,7 +193,7 @@ def append_to_queue(tokens: Tuple[Pubkey, Pubkey, Pubkey], tx_sig) -> None:
             token_queue.append(
                 [str(tokens[0]), int(time.time()),
                  False, tx_sig, '', 0,
-                 0, '', 0, False, 0, 0])
+                 0, False, 0, False, 0, 0])
             print(token_queue)
 
 
@@ -806,95 +806,105 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
                             print("Command Error....will retry :", result.stderr)
                     if token[9]:  # if mint disabled
                         try:
-                            lp_token_transfers = request('GET',
-                                                         "https://pro-api.solscan.io/v1.0/token/transfer?tokenAddress=" + str(
-                                                             token[4]) + "&limit=10&offset=0",
-                                                         headers=solscan_header)
-                            lp_token_transfers_list_json = lp_token_transfers.json()  # fix later
-                            for lp_token_transfer in lp_token_transfers_list_json["items"]:
-                                if str(lp_token_transfer['commonType']) == "burn":
-                                    burn_amount = lp_token_transfer["amount"]
-                                    burn_hash = lp_token_transfer["txHash"]
-                                    lp_burn_hash = request('GET',
-                                                           "https://pro-api.solscan.io/v1.0/transaction/" + str(
-                                                               burn_hash),
-                                                           headers=solscan_header)
-                                    lp_burn_hash_json = lp_burn_hash.json()  # fix later
-                                    if "solTransfers" in lp_burn_hash_json:
-                                        if len(lp_burn_hash_json["solTransfers"]) > 0:
-                                            if lp_burn_hash_json["solTransfers"][0][
-                                                "destination"] != "burn68h9dS2tvZwtCFMt79SyaEgvqtcZZWJphizQxgt":
+                            lp_found = False
+                            burn_amount = 0
+                            if not token[7]:
+                                lp_token_transfers = request('GET',
+                                                             "https://pro-api.solscan.io/v1.0/token/transfer?tokenAddress=" + str(
+                                                                 token[4]) + "&limit=10&offset=0",
+                                                             headers=solscan_header)
+                                lp_token_transfers_list_json = lp_token_transfers.json()  # fix later
+                                for lp_token_transfer in lp_token_transfers_list_json["items"]:
+                                    if str(lp_token_transfer['commonType']) == "burn":
+                                        burn_amount = lp_token_transfer["amount"]
+                                        burn_hash = lp_token_transfer["txHash"]
+                                        lp_burn_hash = request('GET',
+                                                               "https://pro-api.solscan.io/v1.0/transaction/" + str(
+                                                                   burn_hash),
+                                                               headers=solscan_header)
+                                        lp_burn_hash_json = lp_burn_hash.json()  # fix later
+                                        if "solTransfers" in lp_burn_hash_json:
+                                            if len(lp_burn_hash_json["solTransfers"]) > 0:
+                                                if lp_burn_hash_json["solTransfers"][0][
+                                                    "destination"] != "burn68h9dS2tvZwtCFMt79SyaEgvqtcZZWJphizQxgt":
+                                                    raise TokenError
+                                                else:
+                                                    if int(math.floor(
+                                                            float(burn_amount) / float(token[5]) * float(100))) > 95:
+                                                        lp_found = True
+                                                    else:
+                                                        print("low amount of liquidty burned: " + str(token[0]))
+                                                        token_remove_errors.append(
+                                                            ["low amount of liquidty burned..removing token ",
+                                                             token[0]])
+                                                        raise TokenError  # not enough burned
+                                                    break
+                                            else:
                                                 raise TokenError
                                         else:
                                             raise TokenError
-                                    else:
-                                        raise TokenError
-                                    if int(math.floor(float(burn_amount) / float(token[5]) * float(100))) > 95:
-                                        print("token", token[0], "passed lp burn checks!")
-                                        passed = False
-                                        token_checked = True
-                                        largest_holder = 0
-                                        found = False
-                                        for item in large_holder_check_queue:
-                                            # [[token_address,checked=true/false,passed=true or false,supply,
-                                            # checked on time?]]
-                                            if item[0] == token[0]:
-                                                found = True  # this is simply used for special tokens
-                                                if not item[1]:  # if not checked
-                                                    item[4] = "False"  # true default
-                                                    token_checked = False
-                                                else:
-                                                    if not item[2]:
-                                                        passed = False  # just for clarity(token failed test)
-                                                    else:
-                                                        largest_holder = item[5]
-                                                        temp = 0
-                                                        for item2 in large_holder_check_queue:  # remove as done
-                                                            if item2[0] == token[0]:
-                                                                large_holder_check_queue.pop(temp)
-                                                                break
-                                                            temp += 1
-                                                        passed = True
-                                        if not found:
-                                            print("re-checking sniper status for token: " + str(token[0]))
-                                            special_token_queue.append(token[0])
-                                            token_checked = False  # token was not checked yet
-                                            large_holder_check_queue.append(
-                                                [token[0], False, False, token[10], "True", 0])
-                                            print(large_holder_check_queue)
-                                        if passed and token_checked:
-                                            result = query_token.main_query(token[0])
-                                            if token[0] in special_token_queue:
-                                                ping_queue.append(
-                                                    [int(largest_holder), token[6],
-                                                     int(math.floor(float(burn_amount) / float(token[5]) * float(100))),
-                                                     token[
-                                                         8], result[1], result[2],
-                                                     token[0],
-                                                     token[3], token[11], True])
+                            if lp_found or token[7]:
+                                token[7] = True
+                                print("token", token[0],
+                                      "passed lp burn checks! waiting for sniper status confirmation")
+                                passed = False
+                                token_checked = True
+                                largest_holder = 0
+                                found = False
+                                for item in large_holder_check_queue:
+                                    # [[token_address,checked=true/false,passed=true or false,supply,
+                                    # checked on time?]]
+                                    if item[0] == token[0]:
+                                        found = True  # this is simply used for special tokens
+                                        if not item[1]:  # if not checked
+                                            item[4] = "False"  # true default
+                                            token_checked = False
+                                        else:
+                                            if not item[2]:
+                                                passed = False  # just for clarity(token failed test)
                                             else:
-                                                ping_queue.append(
-                                                    [int(largest_holder), token[6],
-                                                     int(math.floor(float(burn_amount) / float(token[5]) * float(100))),
-                                                     token[
-                                                         8], result[1], result[2],
-                                                     token[0],
-                                                     token[3], token[11], False])
-                                            print(
-                                                "sent token for further checks (pre ping - DO NOT "
-                                                "BUY!): " + str(
-                                                    token[0]))
-                                            raise TokenError
-                                        elif token_checked and not passed:
-                                            print("token was most likely sniped by dev: " + str(token[0]))
-                                            token_remove_errors.append(["token sniped by dev: ", token[0]])
-                                            raise TokenError
+                                                largest_holder = item[5]
+                                                temp = 0
+                                                for item2 in large_holder_check_queue:  # remove as done
+                                                    if item2[0] == token[0]:
+                                                        large_holder_check_queue.pop(temp)
+                                                        break
+                                                    temp += 1
+                                                passed = True
+                                if not found:
+                                    print("re-checking sniper status for token: " + str(token[0]))
+                                    special_token_queue.append(token[0])
+                                    token_checked = False  # token was not checked yet
+                                    large_holder_check_queue.append(
+                                        [token[0], False, False, token[10], "True", 0])
+                                    print(large_holder_check_queue)
+                                if passed and token_checked:
+                                    result = query_token.main_query(token[0])
+                                    if token[0] in special_token_queue:
+                                        ping_queue.append(
+                                            [int(largest_holder), token[6],
+                                             int(math.floor(float(burn_amount) / float(token[5]) * float(100))),
+                                             token[
+                                                 8], result[1], result[2],
+                                             token[0],
+                                             token[3], token[11], True])
                                     else:
-                                        print("low amount of liquidty burned: " + str(token[0]))
-                                        token_remove_errors.append(
-                                            ["low amount of liquidty burned..removing token ",
-                                             token[0]])
-                                        raise TokenError
+                                        ping_queue.append(
+                                            [int(largest_holder), token[6],
+                                             int(math.floor(float(burn_amount) / float(token[5]) * float(100))),
+                                             token[
+                                                 8], result[1], result[2],
+                                             token[0],
+                                             token[3], token[11], False])
+                                    print(
+                                        "sent token for further checks (pre ping - DO NOT "
+                                        "BUY!): " + str(
+                                            token[0]))
+                                    raise TokenError
+                                elif token_checked and not passed:
+                                    print("token was most likely sniped by dev: " + str(token[0]))
+                                    token_remove_errors.append(["token sniped by dev: ", token[0]])
+                                    raise TokenError
                         except TokenError:
                             print("token removed fom queue : " + str(token[0]))
                             temp = 0
