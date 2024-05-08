@@ -32,6 +32,7 @@ buy_queue = []  # will feed the buy engine so each user purchases a token (each 
 
 active_polling = {}
 
+
 # add user scam reports
 
 # [token_ca,amount,slippage,e_private_key,user_id]
@@ -78,11 +79,8 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
             decentralisation = str(data[4])
             whale_holders = str(data[5])
             token_ca = str(data[6])
-            temp_dev_info = dev_previous_projects.check_previous_project(txn_hash, token_ca)
-            past_token_list = temp_dev_info[0]
-            deployer = temp_dev_info[1]
             # deployer info :
-            deployer_balances = query_user_wallet.return_token_balances(deployer)  # balance in the deployer
+            '''deployer_balances = query_user_wallet.return_token_balances(deployer)  # balance in the deployer
             # here make a function to return the funding wallet and plug that into the query user wallet
             funding_wallet_info = check_first_layer_sol_transfers.get_funding_wallet(deployer, inital_liq)
             if funding_wallet_info != "":
@@ -99,7 +97,7 @@ async def ping_all_subscribers():  # when a token is abot to get pinged generate
                     temp_string = "https://dexscreener.com/solana/" + str(token)
                     past_tokens_string += f"📈 [Previous Project]({temp_string})\n"
             else:
-                past_tokens_string = " *None 😇*"
+                past_tokens_string = " *None 😇*"'''
             advnaced_rug = check_advanced_rug.check(token_ca)  # add this to the refresh (query token code)
             if advnaced_rug == "High" or advnaced_rug == "Extremely High":
                 print("Removed token due to a high risk of advanced rug.")
@@ -1285,7 +1283,6 @@ async def help_func_callback(callback_query: types.CallbackQuery):
         wallet_list = wb.return_dev_wallets(token_ca).split(",")
         threading.Thread(target=lambda: poll_dev_activity.poll_activity(dev_wallets=wallet_list,
                                                                         user_id=user_id)).start()
-
 
 
 def subscription():

@@ -28,7 +28,7 @@ def check_previous_project(txn_hash,
     liquidity_tx_info_json = liquidity_tx_info.json()
     tx_hash_list_tokens = []  # list to store all tokens associated with the txns hash to difirenciate between other
     # projects and the crent project
-    for tx_hash_tokens in liquidity_tx_info_json["tokenBalanes"]:  # should be balances so they made a typo
+    for tx_hash_tokens in liquidity_tx_info_json["tokenBalances"]:  # should be balances so they made a typo
         tx_hash_list_tokens.append(tx_hash_tokens["token"]["tokenAddress"])
     # check for signer
     dev_wallet = str(liquidity_tx_info_json["signer"][0])

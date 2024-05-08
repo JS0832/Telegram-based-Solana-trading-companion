@@ -635,7 +635,7 @@ async def verify_token():  # figure out how to make this async (needs to be asyn
     minimum_token_sent_to_lp_percent = 70
     decimals = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}  # a list of allowable decimal amount
     rpc_url = "https://mainnet.helius-rpc.com/?api-key=" + str(helius_key)
-    spl_executable = r'C:\\Users\MEMEdev\.local\share\solana\install\active_release\bin\spl-token.exe'  # for
+    spl_executable = r'C:\Users\jakub\.local\share\solana\install\active_release\bin\spl-token.exe'  # for
     minimum_initial_liquidty = 5  # most good coins have 10
     while True:  # infinite loop to keep checking
         index = 0
